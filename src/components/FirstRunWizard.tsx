@@ -58,10 +58,14 @@ const STEPS: WizardStep[] = [
   },
 ];
 
-export const FirstRunWizard: React.FC = () => {
+export const FirstRunWizard: React.FC<{
+  manual?: boolean;
+  onClose?: () => void;
+}> = ({ manual = false, onClose }) => {
   const navigate = useNavigate();
   const { milestones, stage, unlock } = useFirstRun();
   const [visible, setVisible] = useState(() => {
+    if (manual) return true;
     try {
       return localStorage.getItem(WIZARD_SEEN_KEY) !== "true";
     } catch {
@@ -76,10 +80,11 @@ export const FirstRunWizard: React.FC = () => {
       // ignore
     }
     setVisible(false);
+    onClose?.();
   };
 
   // Don't show if user has completed everything or already dismissed
-  if (!visible || stage === "complete") return null;
+  if (!visible || (!manual && stage === "complete")) return null;
 
   // Determine which step to highlight based on stage
   const activeStepIndex =

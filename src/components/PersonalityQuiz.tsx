@@ -256,7 +256,10 @@ const computeProfile = (answers: ("C" | "D" | "neutral")[]): TrustProfile => {
   return maxProfile;
 };
 
-export const PersonalityQuiz: React.FC = () => {
+export const PersonalityQuiz: React.FC<{
+  manual?: boolean;
+  onClose?: () => void;
+}> = ({ manual = false, onClose }) => {
   const navigate = useNavigate();
   const { unlock } = useFirstRun();
   const [audioManager] = useState(() => AudioManager.getInstance());
@@ -265,6 +268,7 @@ export const PersonalityQuiz: React.FC = () => {
   const [showResult, setShowResult] = useState(false);
   const [profile, setProfile] = useState<TrustProfile | null>(null);
   const [visible, setVisible] = useState(() => {
+    if (manual) return true;
     try {
       return localStorage.getItem("tf_quiz_seen") !== "true";
     } catch {
@@ -292,6 +296,7 @@ export const PersonalityQuiz: React.FC = () => {
       // ignore
     }
     setVisible(false);
+    onClose?.();
   };
 
   const handleAnswer = (value: "C" | "D" | "neutral") => {

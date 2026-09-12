@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useLocation } from "react-router-dom";
 import ConnectAccount from "./ConnectAccount.tsx";
 import { TopographicBackground } from "./visual/TopographicBackground";
 import { CustomCursor } from "./ui/CustomCursor";
@@ -28,17 +28,18 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const AppShell: React.FC = () => {
-  const navigate = useNavigate();
+  const isHome = useLocation().pathname === "/";
   const [audioManager] = useState(() => AudioManager.getInstance());
   const [audioOpen, setAudioOpen] = useState(false);
 
   return (
     <>
-      <CustomCursor />
-      <TopographicBackground />
+      {!isHome && <CustomCursor />}
+      {!isHome && <TopographicBackground />}
 
       {/* Top navigation */}
       <header
+        className="shell-header"
         style={{
           position: "fixed",
           top: 0,
@@ -80,6 +81,7 @@ const AppShell: React.FC = () => {
 
         {/* Center nav */}
         <nav
+          className="shell-nav"
           style={{
             display: "flex",
             gap: "4px",
@@ -90,149 +92,155 @@ const AppShell: React.FC = () => {
             <NavLink
               key={item.to}
               to={item.to}
-              style={{ textDecoration: "none" }}
+              className="shell-nav-link"
+              style={({ isActive }) => ({
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 16px",
+                borderRadius: "var(--radius-sm)",
+                border: "none",
+                background: isActive
+                  ? "rgba(102, 126, 234, 0.2)"
+                  : "transparent",
+                color: isActive
+                  ? "var(--text-primary)"
+                  : "var(--text-secondary)",
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--text-sm)",
+                fontWeight: isActive ? 600 : 400,
+                textDecoration: "none",
+                transition: "all var(--duration-fast) var(--ease-out)",
+              })}
             >
-              {({ isActive }) => (
-                <button
-                  type="button"
-                  onClick={() => void navigate(item.to)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 16px",
-                    borderRadius: "var(--radius-sm)",
-                    border: "none",
-                    background: isActive
-                      ? "rgba(102, 126, 234, 0.2)"
-                      : "transparent",
-                    color: isActive
-                      ? "var(--text-primary)"
-                      : "var(--text-secondary)",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-sm)",
-                    fontWeight: isActive ? 600 : 400,
-                    cursor: "pointer",
-                    transition: "all var(--duration-fast) var(--ease-out)",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background =
-                        "rgba(255, 255, 255, 0.06)";
-                      e.currentTarget.style.color = "var(--text-primary)";
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) {
-                      e.currentTarget.style.background = "transparent";
-                      e.currentTarget.style.color = "var(--text-secondary)";
-                    }
-                  }}
-                >
-                  <span style={{ fontSize: "1rem" }}>{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              )}
+              <span style={{ fontSize: "1rem" }}>{item.icon}</span>
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </nav>
 
         {/* Right: audio + wallet */}
         <div
+          className="shell-actions"
           style={{
             display: "flex",
             alignItems: "center",
             gap: "12px",
           }}
         >
-          {/* Audio toggle */}
-          <div style={{ position: "relative" }}>
-            <button
-              type="button"
-              onClick={() => setAudioOpen(!audioOpen)}
+          {isHome ? (
+            <NavLink
+              to="/play"
+              className="shell-nav-link"
               style={{
-                width: "36px",
-                height: "36px",
-                borderRadius: "50%",
-                border: "1px solid var(--border-glass)",
-                background: "var(--bg-glass-light)",
-                color: "var(--text-secondary)",
-                cursor: "pointer",
-                fontSize: "14px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                transition: "all var(--duration-fast) var(--ease-out)",
+                gap: "6px",
+                padding: "8px 16px",
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid var(--border-glass)",
+                color: "var(--text-secondary)",
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--text-sm)",
+                textDecoration: "none",
+                whiteSpace: "nowrap",
               }}
-              title="Audio settings"
             >
-              {audioManager.isMusicEnabled ? "🎵" : "🔇"}
-            </button>
-            {audioOpen && (
-              <div
-                className="glass-panel"
-                style={{
-                  position: "absolute",
-                  top: "44px",
-                  right: 0,
-                  padding: "12px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  minWidth: "160px",
-                  zIndex: 200,
-                }}
-              >
+              ZK multiplayer
+            </NavLink>
+          ) : (
+            <>
+              {/* Audio toggle */}
+              <div style={{ position: "relative" }}>
                 <button
                   type="button"
-                  onClick={() => audioManager.toggleMusic()}
+                  onClick={() => setAudioOpen(!audioOpen)}
                   style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    border: "1px solid var(--border-glass)",
+                    background: "var(--bg-glass-light)",
+                    color: "var(--text-secondary)",
+                    cursor: "pointer",
+                    fontSize: "14px",
                     display: "flex",
                     alignItems: "center",
-                    gap: "8px",
-                    padding: "6px 10px",
-                    borderRadius: "var(--radius-sm)",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-sm)",
-                    cursor: "pointer",
-                    textAlign: "left",
+                    justifyContent: "center",
+                    transition: "all var(--duration-fast) var(--ease-out)",
                   }}
+                  title="Audio settings"
                 >
-                  {audioManager.isMusicEnabled ? "🎵" : "🔇"} Music
+                  {audioManager.isMusicEnabled ? "🎵" : "🔇"}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => audioManager.toggleSFX()}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "6px 10px",
-                    borderRadius: "var(--radius-sm)",
-                    border: "none",
-                    background: "transparent",
-                    color: "var(--text-primary)",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-sm)",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  {audioManager.isSFXEnabled ? "🔊" : "🔈"} Sound Effects
-                </button>
+                {audioOpen && (
+                  <div
+                    className="glass-panel"
+                    style={{
+                      position: "absolute",
+                      top: "44px",
+                      right: 0,
+                      padding: "12px",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "8px",
+                      minWidth: "160px",
+                      zIndex: 200,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => audioManager.toggleMusic()}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "6px 10px",
+                        borderRadius: "var(--radius-sm)",
+                        border: "none",
+                        background: "transparent",
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                        fontSize: "var(--text-sm)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      {audioManager.isMusicEnabled ? "🎵" : "🔇"} Music
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => audioManager.toggleSFX()}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        padding: "6px 10px",
+                        borderRadius: "var(--radius-sm)",
+                        border: "none",
+                        background: "transparent",
+                        color: "var(--text-primary)",
+                        fontFamily: "var(--font-body)",
+                        fontSize: "var(--text-sm)",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      {audioManager.isSFXEnabled ? "🔊" : "🔈"} Sound Effects
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <ConnectAccount />
+              <ConnectAccount />
+            </>
+          )}
         </div>
       </header>
 
       {/* Page content */}
       <main
+        className="shell-content"
         style={{
           paddingTop: "64px",
           minHeight: "100vh",
