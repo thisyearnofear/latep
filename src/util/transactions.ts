@@ -1,7 +1,4 @@
-import type {
-  Transaction,
-  FeeBumpTransaction,
-} from "@stellar/stellar-sdk";
+import type { Transaction, FeeBumpTransaction } from "@stellar/stellar-sdk";
 import { Account } from "@stellar/stellar-sdk";
 
 const horizonUrl = "https://horizon-testnet.stellar.org";
@@ -16,7 +13,7 @@ export interface TransactionOptions {
  * Fetch account details from Horizon for transaction building
  */
 export const getAccountSequence = async (
-  publicKey: string
+  publicKey: string,
 ): Promise<Account> => {
   const response = await fetch(`${horizonUrl}/accounts/${publicKey}`);
   if (!response.ok) {
@@ -30,7 +27,7 @@ export const getAccountSequence = async (
  * Submit a signed transaction to Horizon
  */
 export const submitTransaction = async (
-  transaction: Transaction | FeeBumpTransaction
+  transaction: Transaction | FeeBumpTransaction,
 ): Promise<{ id: string; hash: string }> => {
   const response = await fetch(`${horizonUrl}/transactions`, {
     method: "POST",
@@ -42,7 +39,7 @@ export const submitTransaction = async (
   if (!response.ok) {
     const error = (await response.json()) as { title: string; detail: string };
     throw new Error(
-      `Transaction submission failed: ${error.title} - ${error.detail}`
+      `Transaction submission failed: ${error.title} - ${error.detail}`,
     );
   }
 
@@ -65,12 +62,12 @@ interface TransactionResponse {
 export const waitForTransaction = async (
   transactionHash: string,
   maxAttempts: number = 30,
-  delayMs: number = 1000
+  delayMs: number = 1000,
 ): Promise<TransactionResponse> => {
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const response = await fetch(
-        `${horizonUrl}/transactions/${transactionHash}`
+        `${horizonUrl}/transactions/${transactionHash}`,
       );
       if (response.ok) {
         return (await response.json()) as TransactionResponse;
@@ -92,7 +89,7 @@ export const waitForTransaction = async (
  */
 export const getStellarExpertLink = (
   txHash: string,
-  network: "testnet" | "public" = "testnet"
+  network: "testnet" | "public" = "testnet",
 ): string => {
   const baseUrl = `https://stellar.expert/explorer/${network}`;
   return `${baseUrl}/tx/${txHash}`;
@@ -103,7 +100,7 @@ export const getStellarExpertLink = (
  */
 export const getContractLink = (
   contractId: string,
-  network: "testnet" | "public" = "testnet"
+  network: "testnet" | "public" = "testnet",
 ): string => {
   const baseUrl = `https://stellar.expert/explorer/${network}`;
   return `${baseUrl}/contract/${contractId}`;

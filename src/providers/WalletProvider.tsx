@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -36,28 +37,29 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     useState<Omit<WalletContextType, "isPending">>(initialState);
   const [isPending, startTransition] = useTransition();
   const popupLock = useRef(false);
-  const signTransaction = wallet.signTransaction.bind(wallet);
+  const updateState = useCallback(
+    (newState: Omit<WalletContextType, "isPending">) => {
+      setState((prev: Omit<WalletContextType, "isPending">) => {
+        if (
+          prev.address !== newState.address ||
+          prev.network !== newState.network ||
+          prev.networkPassphrase !== newState.networkPassphrase
+        ) {
+          return newState;
+        }
+        return prev;
+      });
+    },
+    [],
+  );
 
-  const nullify = () => {
+  const nullify = useCallback(() => {
     updateState(initialState);
     storage.setItem("walletId", "");
     storage.setItem("walletAddress", "");
     storage.setItem("walletNetwork", "");
     storage.setItem("networkPassphrase", "");
-  };
-
-  const updateState = (newState: Omit<WalletContextType, "isPending">) => {
-    setState((prev: Omit<WalletContextType, "isPending">) => {
-      if (
-        prev.address !== newState.address ||
-        prev.network !== newState.network ||
-        prev.networkPassphrase !== newState.networkPassphrase
-      ) {
-        return newState;
-      }
-      return prev;
-    });
-  };
+  }, [updateState]);
 
   const updateCurrentWalletState = async () => {
     // There is no way, with StellarWalletsKit, to check if the wallet is
@@ -158,7 +160,13 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally run once on mount
   }, []);
 
-  const connect = () => {
+  const signTransaction = useCallback(
+    (...args: Parameters<typeof wallet.signTransaction>) =>
+      wallet.signTransaction(...args),
+    [],
+  );
+
+  const connect = useCallback(() => {
     startTransition(async () => {
       try {
         const result = await connectWallet();
@@ -177,14 +185,14 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
         nullify();
       }
     });
-  };
+  }, [nullify, updateState]);
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     startTransition(() => {
       disconnectWallet();
       nullify();
     });
-  };
+  }, [nullify]);
 
   const contextValue = useMemo(
     () => ({
@@ -194,7 +202,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       connect,
       disconnect,
     }),
-    [state, isPending, signTransaction],
+    [state, isPending, signTransaction, connect, disconnect],
   );
 
   return <WalletContext value={contextValue}>{children}</WalletContext>;

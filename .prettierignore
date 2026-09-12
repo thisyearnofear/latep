@@ -1,0 +1,15 @@
+dist
+dist-ssr
+node_modules
+target
+.soroban
+.config
+coverage
+test_snapshots
+public/assets
+circuits
+contracts
+demo-video
+packages
+*.local.*
+*.wasm
