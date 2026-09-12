@@ -18,6 +18,11 @@ export default defineConfig(() => {
     ],
     build: {
       target: "esnext",
+      modulePreload: {
+        // No inline polyfill script — keeps CSP script-src 'self' clean.
+        // modulepreload is supported by all modern browsers.
+        polyfill: false,
+      },
       rollupOptions: {
         output: {
           manualChunks: {
