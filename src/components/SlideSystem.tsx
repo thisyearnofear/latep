@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import gsap from "gsap";
-import AudioManager from "./AudioManager";
+import { useAudioSettings } from "../hooks/useAudioSettings";
 import { useSlideAnimation } from "../hooks/useSlideAnimation";
 import JourneyProgress from "./visual/JourneyProgress";
-import { ShimmerButton } from "./ui/ShimmerButton";
-import { ElectricButton } from "./ui/ElectricButton";
 import "../styles/slides.css";
+import "../styles/learning.css";
 
 // SINGLE SOURCE OF TRUTH for slide configuration
 export interface SlideConfig {
@@ -37,7 +36,7 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slideData] = useState<Record<string, unknown>>({});
-  const [audioManager] = useState(() => AudioManager.getInstance());
+  const audioManager = useAudioSettings();
   const directionRef = useRef<"forward" | "backward">("forward");
   const slideContentRef = useRef<HTMLDivElement>(null);
   const prevSlideRef = useRef(0);
@@ -45,24 +44,25 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
   // Initialize audio on first load
   useEffect(() => {
     audioManager.preloadSounds();
-
-    const firstSlideMusic = slides[0]?.music;
-    if (firstSlideMusic) {
-      audioManager.playBackgroundMusic(firstSlideMusic);
-    }
-  }, [audioManager, slides]);
+    return () => audioManager.stopBackgroundMusic();
+  }, [audioManager]);
 
   // Handle slide changes with audio
   useEffect(() => {
-    const currentSlideConfig = slides[currentSlide];
-    if (currentSlideConfig?.music) {
-      audioManager.playBackgroundMusic(currentSlideConfig.music);
+    const music = slides
+      .slice(0, currentSlide + 1)
+      .reverse()
+      .find((slide) => slide.music)?.music;
+    if (music) {
+      audioManager.playBackgroundMusic(music);
     }
+  }, [currentSlide, slides, audioManager]);
 
+  useEffect(() => {
     if (currentSlide > 0) {
       audioManager.playSound("click");
     }
-  }, [currentSlide, slides, audioManager]);
+  }, [currentSlide, audioManager]);
 
   const handleNext = useCallback(() => {
     directionRef.current = "forward";
@@ -93,8 +93,15 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
     const handleKey = (e: KeyboardEvent) => {
       // Don't interfere with typing in inputs
       if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
+        e.defaultPrevented ||
+        e.altKey ||
+        e.ctrlKey ||
+        e.metaKey ||
+        e.shiftKey ||
+        (e.target instanceof HTMLElement &&
+          e.target.closest(
+            'input, textarea, select, button, a, summary, [role="button"], [tabindex], [contenteditable="true"]',
+          ))
       )
         return;
       if (e.key === "ArrowRight" || e.key === " ") {
@@ -123,38 +130,44 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
     const dir = directionRef.current;
     const xOffset = dir === "forward" ? 60 : -60;
 
-    const ctx = gsap.context(() => {
-      // Slide out old content (instant, since React already swapped)
-      // Animate new content sliding in from the direction
-      gsap.fromTo(
-        el,
-        {
-          x: xOffset,
-          opacity: 0,
-        },
-        {
-          x: 0,
-          opacity: 1,
-          duration: 0.5,
-          ease: "power3.out",
-        },
-      );
+    el.scrollIntoView({ block: "start", behavior: "auto" });
 
-      // Parallax on data-animate children — they stagger in
-      const animatables = gsap.utils.toArray("[data-animate]", el);
-      if (animatables.length > 0) {
-        gsap.from(animatables, {
-          opacity: 0,
-          x: xOffset * 0.5,
-          duration: 0.6,
-          ease: "power3.out",
-          stagger: 0.06,
-        });
-      }
-    }, el);
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const ctx = gsap.context(() => {
+        // Slide out old content (instant, since React already swapped)
+        // Animate new content sliding in from the direction
+        gsap.fromTo(
+          el,
+          {
+            x: xOffset,
+            opacity: 0,
+          },
+          {
+            x: 0,
+            opacity: 1,
+            duration: 0.5,
+            ease: "power3.out",
+          },
+        );
+
+        // Parallax on data-animate children — they stagger in
+        const animatables = gsap.utils.toArray("[data-animate]", el);
+        if (animatables.length > 0) {
+          gsap.from(animatables, {
+            opacity: 0,
+            x: xOffset * 0.5,
+            duration: 0.6,
+            ease: "power3.out",
+            stagger: 0.06,
+          });
+        }
+      }, el);
+      return () => ctx.revert();
+    });
 
     prevSlideRef.current = currentSlide;
-    return () => ctx.revert();
+    return () => mm.revert();
   }, [currentSlide]);
 
   const currentSlideConfig = slides[currentSlide];
@@ -169,21 +182,25 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
   }));
 
   return (
-    <div className="slide-container" ref={slideRef}>
+    <div className="slide-container learning-journey" ref={slideRef}>
       {/* Audio controls */}
       <div className="audio-controls">
         <button
           type="button"
-          className={`audio-button ${!audioManager.isMusicEnabled ? "disabled" : ""}`}
+          className={`learning-button audio-button ${!audioManager.isMusicEnabled ? "disabled" : ""}`}
           onClick={() => audioManager.toggleMusic()}
+          aria-label="Toggle journey music"
+          aria-pressed={audioManager.isMusicEnabled}
           title="Toggle Music"
         >
           {audioManager.isMusicEnabled ? "🎵" : "🔇"}
         </button>
         <button
           type="button"
-          className={`audio-button ${!audioManager.isSFXEnabled ? "disabled" : ""}`}
+          className={`learning-button audio-button ${!audioManager.isSFXEnabled ? "disabled" : ""}`}
           onClick={() => audioManager.toggleSFX()}
+          aria-label="Toggle journey sound effects"
+          aria-pressed={audioManager.isSFXEnabled}
           title="Toggle Sound Effects"
         >
           {audioManager.isSFXEnabled ? "🔊" : "🔈"}
@@ -192,39 +209,33 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
 
       {/* Journey progress — replaces the old dots */}
       {slides.length > 1 && (
-        <div
-          style={{
-            position: "fixed",
-            top: "70px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 10,
-            maxWidth: "90vw",
-          }}
-        >
-          <JourneyProgress
-            steps={journeySteps}
-            currentStep={currentSlide}
-            onStepClick={handleSlideJump}
-          />
+        <div className="learning-progress">
+          <div className="learning-progress-desktop">
+            <JourneyProgress
+              steps={journeySteps}
+              currentStep={currentSlide}
+              onStepClick={handleSlideJump}
+            />
+          </div>
+          <label className="learning-mobile-progress">
+            Chapter
+            <select
+              aria-label="Choose chapter"
+              value={currentSlide}
+              onChange={(e) => handleSlideJump(Number(e.target.value))}
+            >
+              {slides.map((slide, i) => (
+                <option key={slide.id} value={i}>
+                  {i + 1}. {slide.title || slide.id}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       )}
 
       {/* Slide content */}
-      <div
-        ref={slideContentRef}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "calc(100vh - 120px)",
-          padding: "40px 20px 100px",
-          textAlign: "center",
-          maxWidth: "900px",
-          margin: "0 auto",
-        }}
-      >
+      <div ref={slideContentRef} className="learning-slide-content">
         <SlideComponent
           key={currentSlide}
           onNext={handleNext}
@@ -234,28 +245,23 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
       </div>
 
       {/* Navigation */}
-      <div
-        style={{
-          position: "fixed",
-          bottom: "24px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          display: "flex",
-          gap: "12px",
-          zIndex: 10,
-        }}
-      >
-        <ShimmerButton
+      <div className="learning-nav">
+        <button
+          type="button"
+          className="learning-button"
           onClick={handlePrev}
-          size="sm"
           disabled={currentSlide === 0}
         >
-          ← Previous
-        </ShimmerButton>
+          Previous
+        </button>
 
-        <ElectricButton onClick={handleNext} color="violet" size="sm">
-          {currentSlide === slides.length - 1 ? "Complete" : "Next →"}
-        </ElectricButton>
+        <button
+          type="button"
+          className="learning-button learning-button-primary"
+          onClick={handleNext}
+        >
+          {currentSlide === slides.length - 1 ? "Complete" : "Next"}
+        </button>
       </div>
     </div>
   );

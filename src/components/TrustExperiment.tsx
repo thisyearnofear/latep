@@ -1,8 +1,7 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import gsap from "gsap";
 import { Howl } from "howler";
-import { TrustFallCharacter, type CharacterState } from "./TrustFallCharacter";
+import { TrustStage, type TrustStageState } from "./visual/TrustStage";
 import { calculatePayoff, NC_DEFAULT, type GameMove } from "../util/strategies";
 import "../styles/trust-experiment.css";
 
@@ -12,6 +11,7 @@ type RoundState = {
   round: number;
   move: GameMove | null;
   opponent: GameMove;
+  trustAltitude: number;
 };
 type RoundAction =
   | { type: "choose"; move: GameMove }
@@ -23,6 +23,7 @@ const initialState: RoundState = {
   round: 1,
   move: null,
   opponent: "C",
+  trustAltitude: 0,
 };
 function roundReducer(state: RoundState, action: RoundAction): RoundState {
   switch (action.type) {
@@ -36,7 +37,14 @@ function roundReducer(state: RoundState, action: RoundAction): RoundState {
         : state;
     case "finish":
       return state.phase === "revealing"
-        ? { ...state, phase: "outcome" }
+        ? {
+            ...state,
+            phase: "outcome",
+            trustAltitude:
+              state.move === "C" && state.opponent === "C"
+                ? state.trustAltitude + 1
+                : 0,
+          }
         : state;
     case "again":
       return state.phase === "outcome"
@@ -45,6 +53,7 @@ function roundReducer(state: RoundState, action: RoundAction): RoundState {
             round: state.round + 1,
             move: null,
             opponent: state.move ?? "C",
+            trustAltitude: state.trustAltitude,
           }
         : state;
   }
@@ -69,20 +78,9 @@ const points = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-function outcomeActorState(
-  own: GameMove,
-  other: GameMove,
-): { state: CharacterState; drop: number } {
-  if (own === "C" && other === "C") return { state: "caught", drop: 20 };
-  if (own === "C" && other === "D") return { state: "impact", drop: 65 };
-  if (own === "D" && other === "C") return { state: "celebrating", drop: 0 };
-  return { state: "standing", drop: 0 };
-}
-
 export function TrustExperiment() {
   const [state, dispatch] = useReducer(roundReducer, initialState);
   const [soundOn, setSoundOn] = useState(false);
-  const rootRef = useRef<HTMLElement>(null);
   const outcomeRef = useRef<HTMLHeadingElement>(null);
   const cooperateRef = useRef<HTMLButtonElement>(null);
   const revealRef = useRef<HTMLButtonElement>(null);
@@ -93,7 +91,6 @@ export function TrustExperiment() {
   } | null>(null);
   const prevPhaseRef = useRef<Phase>("choose");
 
-  const revealed = state.phase === "revealing" || state.phase === "outcome";
   const resultKey =
     state.move && state.opponent ? `${state.move}${state.opponent}` : null;
   const payoff =
@@ -112,14 +109,14 @@ export function TrustExperiment() {
             ? RESULT_TITLE[resultKey]
             : "";
 
-  const youPose =
-    state.phase === "outcome" && state.move
-      ? outcomeActorState(state.move, state.opponent)
-      : { state: "standing" as CharacterState, drop: 0 };
-  const partnerPose =
-    state.phase === "outcome" && state.move
-      ? outcomeActorState(state.opponent, state.move)
-      : { state: "standing" as CharacterState, drop: 0 };
+  const stageState: TrustStageState =
+    state.move && (state.phase === "revealing" || state.phase === "outcome")
+      ? {
+          phase: state.phase,
+          playerMove: state.move,
+          opponentMove: state.opponent,
+        }
+      : { phase: state.phase === "sealed" ? "sealed" : "choose" };
 
   useEffect(() => {
     if (state.phase !== "revealing") return;
@@ -129,70 +126,6 @@ export function TrustExperiment() {
     const timer = window.setTimeout(() => dispatch({ type: "finish" }), delay);
     return () => window.clearTimeout(timer);
   }, [state.phase]);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let ctx = gsap.context(() => {});
-    const play = () => {
-      ctx.revert();
-      ctx = gsap.context(() => {
-        const actors = gsap.utils.toArray<HTMLElement>(".trust-actor-inner");
-        const seals = gsap.utils.toArray<HTMLElement>(".trust-seal");
-        const reset = () => {
-          gsap.set(actors, { clearProps: "transform" });
-          gsap.set(seals, { clearProps: "transform" });
-        };
-        if (media.matches) {
-          reset();
-          return;
-        }
-        if (state.phase === "choose") {
-          reset();
-          gsap.from(actors, { y: -8, duration: 0.35, ease: "power2.out" });
-        } else if (state.phase === "sealed") {
-          gsap.set(actors, { clearProps: "transform" });
-          gsap.fromTo(
-            seals,
-            { scale: 0.94 },
-            { scale: 1, duration: 0.24, ease: "power2.out" },
-          );
-        } else if (state.phase === "revealing") {
-          const tl = gsap.timeline();
-          tl.to(actors[0], { rotation: 12, duration: 0.22 }, 0)
-            .to(actors[1], { rotation: -12, duration: 0.22 }, 0)
-            .to(actors[0], { y: 45, rotation: 35, duration: 0.6 }, 0.22)
-            .to(actors[1], { y: 45, rotation: -35, duration: 0.6 }, 0.22);
-        } else if (state.phase === "outcome" && state.move) {
-          gsap.set(actors, { clearProps: "transform" });
-          const you = outcomeActorState(state.move, state.opponent);
-          const partner = outcomeActorState(state.opponent, state.move);
-          if (you.drop) {
-            gsap.to(actors[0], {
-              y: you.drop,
-              duration: 0.5,
-              ease: "bounce.out",
-            });
-          }
-          if (partner.drop) {
-            gsap.to(actors[1], {
-              y: partner.drop,
-              duration: 0.5,
-              ease: "bounce.out",
-            });
-          }
-        }
-      }, root);
-    };
-    play();
-    const onChange = () => play();
-    media.addEventListener("change", onChange);
-    return () => {
-      media.removeEventListener("change", onChange);
-      ctx.revert();
-    };
-  }, [state.phase, state.move, state.opponent]);
 
   useEffect(() => {
     if (state.phase === "outcome") {
@@ -266,7 +199,6 @@ export function TrustExperiment() {
       className="trust-experiment"
       aria-label="Practice trust round"
       data-phase={state.phase}
-      ref={rootRef}
     >
       <div className="trust-topbar">
         <span className="trust-chip">Practice round {state.round}</span>
@@ -290,144 +222,13 @@ export function TrustExperiment() {
         Illustration only — not a ZK proof or transaction.
       </p>
 
-      <div className="trust-stage" aria-hidden="true">
-        <div className="trust-scene">
-          <svg
-            className="trust-landscape"
-            viewBox="0 0 800 340"
-            preserveAspectRatio="xMidYMid meet"
-          >
-            <path
-              className="tl-hill tl-hill-far"
-              d="M-40 245 Q140 85 340 230 T840 160"
-            />
-            <path
-              className="tl-contour"
-              d="M-40 232 Q140 72 340 217 T840 147"
-            />
-            <path
-              className="tl-contour"
-              d="M-40 258 Q140 98 340 243 T840 173"
-            />
-            <path
-              className="tl-hill tl-hill-near"
-              d="M-40 290 Q210 120 460 265 T840 210"
-            />
-            <path
-              className="tl-contour"
-              d="M-40 277 Q210 107 460 252 T840 197"
-            />
-            <path
-              className="tl-contour"
-              d="M-40 303 Q210 133 460 278 T840 223"
-            />
-            <g className="tl-stars">
-              <circle cx="90" cy="60" r="1.6" />
-              <circle cx="200" cy="38" r="1.2" />
-              <circle cx="330" cy="70" r="1.4" />
-              <circle cx="470" cy="45" r="1.2" />
-              <circle cx="620" cy="66" r="1.6" />
-              <circle cx="730" cy="40" r="1.2" />
-              <circle cx="520" cy="100" r="1.1" />
-              <circle cx="150" cy="120" r="1.1" />
-            </g>
-            <path
-              className="tl-rock"
-              d="M144 245 L190 312 L278 322 L336 245 Z"
-            />
-            <path
-              className="tl-rock"
-              d="M656 245 L610 312 L522 322 L464 245 Z"
-            />
-            <ellipse
-              className="tl-platform"
-              cx="240"
-              cy="245"
-              rx="96"
-              ry="15"
-            />
-            <ellipse
-              className="tl-platform"
-              cx="560"
-              cy="245"
-              rx="96"
-              ry="15"
-            />
-          </svg>
-
-          <div className="trust-seal trust-seal-you">
-            {revealed ? (
-              <span className="trust-seal-doc">
-                <svg viewBox="0 0 20 24" className="trust-seal-icon">
-                  <rect x="2" y="1" width="16" height="22" rx="2" />
-                  <line x1="5" y1="7" x2="15" y2="7" />
-                  <line x1="5" y1="11" x2="15" y2="11" />
-                  <line x1="5" y1="15" x2="12" y2="15" />
-                </svg>
-                {state.move === "C" ? "Cooperate" : "Defect"}
-              </span>
-            ) : state.phase === "choose" ? (
-              <span className="trust-seal-doc">
-                <svg viewBox="0 0 20 24" className="trust-seal-icon">
-                  <rect x="2" y="1" width="16" height="22" rx="2" />
-                  <line x1="5" y1="7" x2="15" y2="7" />
-                  <line x1="5" y1="11" x2="15" y2="11" />
-                  <line x1="5" y1="15" x2="12" y2="15" />
-                </svg>
-                Choose a move
-              </span>
-            ) : (
-              <span className="trust-seal-doc">
-                <svg viewBox="0 0 20 24" className="trust-seal-icon">
-                  <rect x="3" y="10" width="14" height="12" rx="2" />
-                  <path d="M6 10 V7 a4 4 0 0 1 8 0 v3" />
-                </svg>
-                Your choice is sealed
-              </span>
-            )}
-          </div>
-          <div className="trust-seal trust-seal-partner">
-            {revealed ? (
-              <span className="trust-seal-doc">
-                <svg viewBox="0 0 20 24" className="trust-seal-icon">
-                  <rect x="2" y="1" width="16" height="22" rx="2" />
-                  <line x1="5" y1="7" x2="15" y2="7" />
-                  <line x1="5" y1="11" x2="15" y2="11" />
-                  <line x1="5" y1="15" x2="12" y2="15" />
-                </svg>
-                {state.opponent === "C" ? "Cooperate" : "Defect"}
-              </span>
-            ) : (
-              <span className="trust-seal-doc">
-                <svg viewBox="0 0 20 24" className="trust-seal-icon">
-                  <rect x="3" y="10" width="14" height="12" rx="2" />
-                  <path d="M6 10 V7 a4 4 0 0 1 8 0 v3" />
-                </svg>
-                Choice sealed
-              </span>
-            )}
-          </div>
-
-          <div className="trust-actor trust-actor-you">
-            <div className="trust-actor-inner">
-              <TrustFallCharacter state={youPose.state} color="you" size="xl" />
-            </div>
-          </div>
-          <div className="trust-actor trust-actor-partner">
-            <div className="trust-actor-inner">
-              <TrustFallCharacter
-                state={partnerPose.state}
-                color="opponent"
-                size="xl"
-              />
-            </div>
-          </div>
-        </div>
-        <span className="trust-actor-label trust-actor-label-you">You</span>
-        <span className="trust-actor-label trust-actor-label-partner">
-          Practice partner
-        </span>
-      </div>
+      <TrustStage
+        state={stageState}
+        roundKey={state.round}
+        commitmentIllustration
+        announce={false}
+        trustAltitude={state.trustAltitude}
+      />
 
       <div className="trust-tray">
         {state.phase !== "outcome" ? (

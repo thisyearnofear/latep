@@ -20,6 +20,24 @@ The home page centers a wallet-free practice round: choose → locally seal → 
 
 This is a simulation: sealing does not generate a cryptographic proof or submit a transaction. The interface must state that plainly. In a later multiplayer integration, proof generation, submission, on-chain verification, reveal, and settlement must remain distinct; never infer success from animation completion or expose a hidden opponent move through appearance or markup.
 
+### Learning integration slice
+
+The home practice round, tutorial sandbox, and the guided Choice and Repeat chapters share a presentational TrustStage. Each caller supplies only the state it is allowed to show: hidden phases do not accept move values, and completed rounds supply the effective moves. The stage does not select strategies, calculate payoffs, generate proofs, or control game progress.
+
+The tutorial keeps its existing immediate local round loop, nine strategies, configurable payoff matrix, noise, history, and session summary. Choices and results sit beside the scene; detailed experiment settings are progressively disclosed. Scores are labelled as practice points. Choice and Repeat retain their lesson rules and achievement hooks; Repeat now records the opponent's own move and the player's move in the correct order for Tit-for-Tat.
+
+The learning integration was extended by the environment and narrative slice below. Tournament population redesign, real multiplayer state integration, and a possible Three.js diorama remain follow-on work.
+
+### Environment and narrative continuity
+
+Trust height is the count of consecutive rounds in which both effective moves cooperate. The stage shows the exact count while capping the decorative terrain displacement at five levels. Reset and non-mutual outcomes return the height to zero. The renderer consumes supplied height; it does not calculate game outcomes.
+
+Configured wind risk is shown separately from observed noise. Only recorded tutorial flip events trigger a gust, with text naming which move changed. The Noise chapter reuses the final round of its existing 50-round simulation; it does not invent additional rounds or infer unrecorded flips.
+
+Intro, Edge, Opponents, Noise, and the multiplayer explainer now use the shared scene vocabulary. The Tournament chapter retains its real population chart within the same surfaces and control style. The final chapter labels its commitment illustration and explains contract escrow without implying a proof or transaction happened on that page.
+
+Shared journey audio starts muted, loads existing assets on opt-in, synchronizes its controls, and stops background music when the journey unmounts. The home practice-round sound toggle remains independently opt-in.
+
 ### Follow-on slices
 
 1. Carry the stage and character vocabulary into the tutorial and guided learning journey.

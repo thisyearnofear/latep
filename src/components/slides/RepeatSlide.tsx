@@ -6,12 +6,10 @@
  * Shows running score and a simple round history.
  */
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { SlideProps } from "../SlideSystem";
 import { unlockAchievement } from "../ui/AchievementBadge";
-import { ElectricButton } from "../ui/ElectricButton";
-import { StaggerButton } from "../ui/StaggerButton";
-import { ShimmerButton } from "../ui/ShimmerButton";
+import { TrustStage, type TrustStageState } from "../visual/TrustStage";
 import {
   createStrategy,
   calculatePayoff,
@@ -35,9 +33,23 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [playerMove, setPlayerMove] = useState<GameMove | null>(null);
   const [lastOutcome, setLastOutcome] = useState<string>("");
   const strategyRef = useRef<IteratedStrategy>(createStrategy("tft"));
+  const resultRef = useRef<HTMLParagraphElement>(null);
+  const cooperateRef = useRef<HTMLButtonElement>(null);
+  const previousMoveRef = useRef<GameMove | null>(null);
+
+  useEffect(() => {
+    if (playerMove) resultRef.current?.focus({ preventScroll: true });
+    else if (previousMoveRef.current)
+      cooperateRef.current?.focus({ preventScroll: true });
+    previousMoveRef.current = playerMove;
+  }, [playerMove]);
 
   const playerTotal = rounds.reduce((sum, r) => sum + r.playerPayout, 0);
   const aiTotal = rounds.reduce((sum, r) => sum + r.aiPayout, 0);
+  const trustAltitude = rounds.reduce(
+    (height, r) => (r.player === "C" && r.ai === "C" ? height + 1 : 0),
+    0,
+  );
   const roundNum = rounds.length + 1;
   const isComplete = rounds.length >= MAX_ROUNDS;
 
@@ -45,7 +57,7 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
     if (isComplete || playerMove) return;
     const aiMove = strategyRef.current.play();
     const result = calculatePayoff(move, aiMove, 1, NC_DEFAULT);
-    strategyRef.current.remember(move, aiMove);
+    strategyRef.current.remember(aiMove, move);
 
     const round: Round = {
       num: roundNum,
@@ -89,8 +101,21 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
     setLastOutcome("");
   };
 
+  const latestRound = rounds[rounds.length - 1];
+  const stageState: TrustStageState =
+    playerMove && latestRound
+      ? {
+          phase: "outcome",
+          playerMove: latestRound.player,
+          opponentMove: latestRound.ai,
+        }
+      : { phase: "choose" };
+
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
+    <div
+      className="learning-round"
+      style={{ margin: "0 auto", textAlign: "center" }}
+    >
       <h2
         data-animate
         style={{
@@ -185,8 +210,10 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
               margin: 0,
             }}
           >
-            {Math.min(rounds.length + (isComplete ? 0 : 1), MAX_ROUNDS)}/
-            {MAX_ROUNDS}
+            {playerMove
+              ? rounds.length
+              : Math.min(rounds.length + 1, MAX_ROUNDS)}
+            /{MAX_ROUNDS}
           </p>
         </div>
         <div>
@@ -216,74 +243,89 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
         </div>
       </div>
 
+      <TrustStage
+        state={stageState}
+        opponentLabel="Tit-for-Tat"
+        roundKey={rounds.length}
+        trustAltitude={trustAltitude}
+      />
+
       {/* Round history */}
       {rounds.length > 0 && (
-        <div
-          data-animate
-          className="glass-panel"
+        <details
+          className="learning-details"
           style={{
-            padding: "16px",
-            marginBottom: "24px",
             maxWidth: "400px",
             margin: "0 auto 24px",
+            textAlign: "left",
           }}
         >
-          {rounds.map((r) => (
-            <div
-              key={r.num}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "6px 0",
-                borderBottom:
-                  r.num < rounds.length
-                    ? "1px solid var(--border-glass)"
-                    : "none",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              <span style={{ color: "var(--text-muted)" }}>R{r.num}</span>
-              <span style={{ color: "var(--text-primary)" }}>
-                {r.player === "C" ? "🤝" : "⚔️"} vs {r.ai === "C" ? "🤝" : "⚔️"}
-              </span>
-              <span
+          <summary>Round history</summary>
+          <div
+            data-animate
+            className="glass-panel"
+            style={{
+              padding: "16px",
+              marginBottom: "24px",
+              maxWidth: "400px",
+              margin: "0 auto 24px",
+            }}
+          >
+            {rounds.map((r) => (
+              <div
+                key={r.num}
                 style={{
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text-secondary)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "6px 0",
+                  borderBottom:
+                    r.num < rounds.length
+                      ? "1px solid var(--border-glass)"
+                      : "none",
+                  fontSize: "var(--text-sm)",
                 }}
               >
-                {r.playerPayout > 0 ? "+" : ""}
-                {r.playerPayout} / {r.aiPayout > 0 ? "+" : ""}
-                {r.aiPayout}
-              </span>
-            </div>
-          ))}
-        </div>
+                <span style={{ color: "var(--text-muted)" }}>R{r.num}</span>
+                <span style={{ color: "var(--text-primary)" }}>
+                  {r.player === "C" ? "🤝" : "⚔️"} vs{" "}
+                  {r.ai === "C" ? "🤝" : "⚔️"}
+                </span>
+                <span
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  {r.playerPayout > 0 ? "+" : ""}
+                  {r.playerPayout} / {r.aiPayout > 0 ? "+" : ""}
+                  {r.aiPayout}
+                </span>
+              </div>
+            ))}
+          </div>
+        </details>
       )}
 
       {/* Choice or outcome */}
       {!isComplete && !playerMove && (
         <div data-animate>
-          <div
-            style={{ display: "flex", gap: "16px", justifyContent: "center" }}
-          >
-            <StaggerButton
+          <div className="learning-actions" style={{ marginTop: "16px" }}>
+            <button
+              type="button"
+              ref={cooperateRef}
+              className="learning-button learning-button-primary"
               onClick={() => playRound("C")}
-              color="cooperate"
-              size="md"
-              triggerOn="active"
             >
-              🤝 Cooperate
-            </StaggerButton>
-            <StaggerButton
+              Cooperate
+            </button>
+            <button
+              type="button"
+              className="learning-button"
               onClick={() => playRound("D")}
-              color="defect"
-              size="md"
-              triggerOn="active"
             >
-              ⚔️ Defect
-            </StaggerButton>
+              Defect
+            </button>
           </div>
         </div>
       )}
@@ -291,6 +333,9 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
       {playerMove && !isComplete && (
         <div data-animate>
           <p
+            ref={resultRef}
+            tabIndex={-1}
+            role="status"
             style={{
               fontFamily: "var(--font-display)",
               fontSize: "var(--text-lg)",
@@ -300,9 +345,13 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
           >
             {lastOutcome}
           </p>
-          <ElectricButton onClick={nextRound} color="violet" size="sm">
-            Next round →
-          </ElectricButton>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={nextRound}
+          >
+            Next round
+          </button>
         </div>
       )}
 
@@ -313,6 +362,8 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
             style={{ padding: "24px", marginBottom: "24px" }}
           >
             <p
+              ref={resultRef}
+              tabIndex={-1}
               style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "var(--text-xl)",
@@ -339,15 +390,17 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
                 : "When you'll meet again, betrayal has consequences. Tit-for-Tat punishes defection — and rewards cooperation."}
             </p>
           </div>
-          <div
-            style={{ display: "flex", gap: "12px", justifyContent: "center" }}
-          >
-            <ShimmerButton onClick={reset} size="sm">
-              ↺ Play again
-            </ShimmerButton>
-            <ElectricButton onClick={onNext} color="violet" size="sm">
-              Meet the strategies →
-            </ElectricButton>
+          <div className="learning-actions">
+            <button type="button" className="learning-button" onClick={reset}>
+              Play again
+            </button>
+            <button
+              type="button"
+              className="learning-button learning-button-primary"
+              onClick={onNext}
+            >
+              Meet the strategies
+            </button>
           </div>
         </div>
       )}

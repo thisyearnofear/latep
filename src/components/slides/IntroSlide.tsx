@@ -7,21 +7,14 @@
 
 import React from "react";
 import { SlideProps } from "../SlideSystem";
+import { TrustStage } from "../visual/TrustStage";
 
 export const IntroSlide: React.FC<SlideProps> = () => {
   return (
-    <div style={{ textAlign: "center", padding: "40px 20px" }}>
-      <div
-        data-animate
-        style={{
-          fontSize: "56px",
-          marginBottom: "24px",
-          filter: "drop-shadow(0 0 24px rgba(102, 126, 234, 0.4))",
-        }}
-      >
-        🪂
-      </div>
-
+    <div
+      className="learning-round narrative-intro"
+      style={{ textAlign: "center", padding: "40px 20px" }}
+    >
       <h1
         data-animate
         style={{
@@ -47,9 +40,17 @@ export const IntroSlide: React.FC<SlideProps> = () => {
       >
         An interactive guide to why we trust — and why trust{" "}
         <em style={{ color: "var(--accent-warm)" }}>evolves</em>. Play the
-        Prisoner's Dilemma, watch strategies compete, then put real stakes on
-        the line with zero-knowledge proofs.
+        Prisoner's Dilemma, watch strategies compete, then explore how
+        zero-knowledge proofs support on-chain play.
       </p>
+
+      <div data-animate style={{ marginBottom: "32px" }}>
+        <TrustStage
+          state={{ phase: "idle" }}
+          showChoices={false}
+          announce={false}
+        />
+      </div>
 
       {/* Journey preview */}
       <div

@@ -11,8 +11,6 @@ import { SlideProps } from "../SlideSystem";
 import TournamentViz from "../visual/TournamentViz";
 import { ShareableResult } from "../ui/ShareableResult";
 import { unlockAchievement } from "../ui/AchievementBadge";
-import { ElectricButton } from "../ui/ElectricButton";
-import { ShimmerButton } from "../ui/ShimmerButton";
 import {
   getStrategyInfo,
   playRepeatedGame,
@@ -173,7 +171,10 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
   }, [isComplete]);
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
+    <div
+      className="learning-round narrative-tournament"
+      style={{ margin: "0 auto", textAlign: "center" }}
+    >
       <h2
         data-animate
         style={{
@@ -199,7 +200,11 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
       </p>
 
       {/* Tournament visualization */}
-      <div data-animate style={{ marginBottom: "24px" }}>
+      <div
+        data-animate
+        className="narrative-panel"
+        style={{ marginBottom: "24px" }}
+      >
         <TournamentViz population={population} generation={generation} />
       </div>
 
@@ -207,11 +212,13 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
       {!isComplete && (
         <div data-animate>
           {stage === "rest" && (
-            <ElectricButton onClick={runGeneration} color="violet" size="md">
-              {generation === 0
-                ? "Start tournament →"
-                : "Run next generation →"}
-            </ElectricButton>
+            <button
+              type="button"
+              className="learning-button learning-button-primary"
+              onClick={runGeneration}
+            >
+              {generation === 0 ? "Start tournament" : "Run next generation"}
+            </button>
           )}
           {stage === "playing" && (
             <p
@@ -277,8 +284,9 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
                 color: "var(--text-secondary)",
               }}
             >
-              Trust evolves. Nice strategies that fight back — and forgive — win
-              in the long run.
+              This is one simulated population under these payoffs. Change the
+              conditions in the tournament sandbox to explore different
+              outcomes.
             </p>
           </div>
           <div style={{ marginBottom: "24px" }}>
@@ -288,15 +296,17 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
               rounds={generation}
             />
           </div>
-          <div
-            style={{ display: "flex", gap: "12px", justifyContent: "center" }}
-          >
-            <ShimmerButton onClick={reset} size="sm">
-              ↺ Reset
-            </ShimmerButton>
-            <ElectricButton onClick={onNext} color="violet" size="sm">
-              What about noise? →
-            </ElectricButton>
+          <div className="learning-actions">
+            <button type="button" className="learning-button" onClick={reset}>
+              Reset
+            </button>
+            <button
+              type="button"
+              className="learning-button learning-button-primary"
+              onClick={onNext}
+            >
+              What about noise?
+            </button>
           </div>
         </div>
       )}

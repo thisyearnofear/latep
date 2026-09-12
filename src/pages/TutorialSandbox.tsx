@@ -11,15 +11,16 @@
  */
 
 import React, { useMemo, useRef, useState } from "react";
-import { Character, CharacterEmotion } from "../components/Character";
 import {
   VeniceAIService,
   type GameContext,
 } from "../components/ai/VeniceAIService";
 import { AI_PERSONAS } from "../components/ai/AIPersonas";
 import AudioManager from "../components/AudioManager";
-import { ShimmerButton } from "../components/ui/ShimmerButton";
-import { StaggerButton } from "../components/ui/StaggerButton";
+import {
+  TrustStage,
+  type TrustStageState,
+} from "../components/visual/TrustStage";
 import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
 import {
@@ -35,6 +36,7 @@ import {
 } from "../util/strategies";
 import { PayoffMatrixEditor } from "../components/slides/PayoffMatrixEditor";
 import { StrategyInspector } from "../components/slides/StrategyInspector";
+import "../styles/learning.css";
 
 interface RoundRecord {
   round: number;
@@ -43,6 +45,7 @@ interface RoundRecord {
   playerPayout: number;
   aiPayout: number;
   outcome: "caught" | "betrayed" | "exploited" | "mutual-destruction";
+  noiseEvent: { player: boolean; opponent: boolean };
 }
 
 interface AIPersona {
@@ -60,10 +63,6 @@ export const TutorialSandbox: React.FC = () => {
   const [aiStrategyId, setAiStrategyId] = useState<StrategyId>("tft");
   const [result, setResult] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [playerEmotion, setPlayerEmotion] =
-    useState<CharacterEmotion>("neutral");
-  const [aiEmotion, setAiEmotion] = useState<CharacterEmotion>("neutral");
-  const [showCharacters, setShowCharacters] = useState(false);
   const [showTutor, setShowTutor] = useState(false);
   const [txError, setTxError] = useState<string>("");
   const [rounds, setRounds] = useState<RoundRecord[]>([]);
@@ -213,9 +212,6 @@ export const TutorialSandbox: React.FC = () => {
       setRounds([]);
       setResult("");
       setMove("");
-      setPlayerEmotion("neutral");
-      setAiEmotion("neutral");
-      setShowCharacters(false);
       setAiMessage("");
       audioManager.playSound("click");
     }
@@ -224,21 +220,21 @@ export const TutorialSandbox: React.FC = () => {
   const playRound = () => {
     if (!move) return;
     setLoading(true);
-    setShowCharacters(true);
     setTxError("");
     try {
       let playerMove: GameMove = move === "cooperate" ? "C" : "D";
       const stakeAmount = parseFloat(stake) || 1;
       let aiMove = strategyRef.current.play();
-      let noiseFlipped = false;
+      const noiseEvent = { player: false, opponent: false };
       if (Math.random() < noise) {
         playerMove = playerMove === "C" ? "D" : "C";
-        noiseFlipped = true;
+        noiseEvent.player = true;
       }
       if (Math.random() < noise) {
         aiMove = aiMove === "C" ? "D" : "C";
-        noiseFlipped = true;
+        noiseEvent.opponent = true;
       }
+      const noiseFlipped = noiseEvent.player || noiseEvent.opponent;
       const { playerPayout, aiPayout } = calculatePayoff(
         playerMove,
         aiMove,
@@ -262,26 +258,19 @@ export const TutorialSandbox: React.FC = () => {
         playerPayout,
         aiPayout,
         outcome,
+        noiseEvent,
       };
       setRounds([...rounds, record]);
       if (outcome === "exploited") {
-        setPlayerEmotion("happy");
-        setAiEmotion("sad");
         audioManager.playSound("win");
         mascotReact("betrayed_opponent");
       } else if (outcome === "betrayed") {
-        setPlayerEmotion("sad");
-        setAiEmotion("happy");
         audioManager.playSound("lose");
         mascotReact("betrayed_by_opponent");
       } else if (outcome === "caught") {
-        setPlayerEmotion("happy");
-        setAiEmotion("happy");
         audioManager.playSound("coin");
         mascotReact("mutual_cooperation");
       } else {
-        setPlayerEmotion("neutral");
-        setAiEmotion("neutral");
         audioManager.playSound("defect");
         mascotReact("mutual_defection");
       }
@@ -299,7 +288,7 @@ export const TutorialSandbox: React.FC = () => {
       }[outcome];
       const newAltitude = outcome === "caught" ? trustAltitude + 1 : 0;
       setResult(
-        `Round ${roundNum}: You ${playerMoveText} | ${strategyRef.current.name} ${aiMoveText}${noiseFlipped ? "\n💨 The wind caught someone — a move was flipped by noise!" : ""}\n${outcomeLabel}\nThis round: You ${playerPayout} XLM | AI ${aiPayout} XLM\nTotal: You ${newCumulativePlayer} XLM | AI ${newCumulativeAI} XLM${newAltitude > 0 ? `\n🏔️ Trust altitude: ${newAltitude}` : ""}`,
+        `Round ${roundNum}: You ${playerMoveText} | ${strategyRef.current.name} ${aiMoveText}${noiseFlipped ? "\n💨 The wind caught someone — a move was flipped by noise!" : ""}\n${outcomeLabel}\nThis round: You ${playerPayout} points | AI ${aiPayout} points\nTotal: You ${newCumulativePlayer} points | AI ${newCumulativeAI} points${newAltitude > 0 ? `\n🏔️ Trust altitude: ${newAltitude}` : ""}`,
       );
       void generateAIFeedback(record);
       const wasFirstTutorial = !milestones.played_tutorial;
@@ -311,8 +300,6 @@ export const TutorialSandbox: React.FC = () => {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
       setTxError(`Error: ${errorMessage}`);
-      setPlayerEmotion("sad");
-      setAiEmotion("neutral");
       audioManager.playSound("error");
     } finally {
       setLoading(false);
@@ -324,24 +311,23 @@ export const TutorialSandbox: React.FC = () => {
     setRounds([]);
     setResult("");
     setMove("");
-    setPlayerEmotion("neutral");
-    setAiEmotion("neutral");
-    setShowCharacters(false);
     setAiMessage("");
     audioManager.playSound("click");
   };
 
   const strategyInfo = getStrategyInfo(aiStrategyId);
-  const altitudeHeight = Math.min(trustAltitude, 10) * 10;
+  const latestRound = rounds[rounds.length - 1];
+  const stageState: TrustStageState =
+    result && latestRound
+      ? {
+          phase: "outcome",
+          playerMove: latestRound.playerMove,
+          opponentMove: latestRound.aiMove,
+        }
+      : { phase: "choose" };
 
   return (
-    <div
-      style={{
-        maxWidth: "640px",
-        margin: "0 auto",
-        padding: "40px 20px 80px",
-      }}
-    >
+    <div className="tutorial-workbench">
       {/* Header */}
       <div style={{ marginBottom: "32px", textAlign: "center" }}>
         <h2
@@ -351,7 +337,7 @@ export const TutorialSandbox: React.FC = () => {
             marginBottom: "8px",
           }}
         >
-          🤝 Tutorial — vs AI
+          See how trust changes.
         </h2>
         <p
           style={{
@@ -362,23 +348,25 @@ export const TutorialSandbox: React.FC = () => {
             margin: "0 auto",
           }}
         >
-          Play the iterated Prisoner's Dilemma against 9 stateful strategies. No
-          wallet needed — pure learning.
+          Play the iterated Prisoner's Dilemma against 9 stateful strategies.
+          Local simulation. Scores are practice points; no wallet or funds.
         </p>
       </div>
 
       {/* Tutor toggle */}
       <div
         style={{
-          position: "fixed",
-          top: "80px",
-          right: "24px",
-          zIndex: 40,
+          position: "static",
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "12px",
         }}
       >
         <button
           type="button"
           onClick={() => setShowTutor(!showTutor)}
+          aria-label="Toggle AI tutor"
+          aria-expanded={showTutor}
           style={{
             width: "40px",
             height: "40px",
@@ -396,175 +384,22 @@ export const TutorialSandbox: React.FC = () => {
         </button>
       </div>
 
-      {/* Trust Altitude Visual */}
-      {rounds.length > 0 && (
-        <div
-          className="glass-panel"
-          style={{ padding: "16px", marginBottom: "20px" }}
-        >
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-muted)",
-              margin: "0 0 10px 0",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            🏔️ Trust Altitude
-          </p>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-end",
-              gap: "10px",
-              height: "50px",
-            }}
-          >
-            <div
-              className="tf-height-track"
-              style={{
-                flex: 1,
-                height: "40px",
-                display: "flex",
-                alignItems: "flex-end",
-              }}
-            >
-              <div
-                className="tf-height-bar"
-                style={{
-                  width: "100%",
-                  height: `${altitudeHeight}%`,
-                  background:
-                    trustAltitude > 0
-                      ? "linear-gradient(180deg, #ffb050 0%, #ff8c3c 100%)"
-                      : "linear-gradient(180deg, #667eea 0%, #764ba2 100%)",
-                }}
-              />
-            </div>
-            <div style={{ fontSize: "20px", lineHeight: "40px" }}>
-              {trustAltitude > 0 ? "🧍⬆️" : "🧍"}
-            </div>
-          </div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-muted)",
-              margin: "6px 0 0 0",
-              fontSize: "var(--text-xs)",
-            }}
-          >
-            {trustAltitude === 0
-              ? rounds.length > 0 &&
-                rounds[rounds.length - 1].outcome === "caught"
-                ? "Ground level"
-                : "On the ground — someone stumbled"
-              : trustAltitude < 3
-                ? `Height ${trustAltitude} — getting somewhere`
-                : trustAltitude < 6
-                  ? `Height ${trustAltitude} — the fall would hurt`
-                  : trustAltitude < 10
-                    ? `Height ${trustAltitude} — a long way down`
-                    : `Height ${trustAltitude} — the abyss stares back`}
-          </p>
-        </div>
-      )}
-
-      {/* Character display */}
-      {showCharacters && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "40px",
-            marginBottom: "20px",
-          }}
-        >
-          <div style={{ textAlign: "center" }}>
-            <Character
-              type="cooperator"
-              emotion={playerEmotion}
-              size="large"
-              animate={result !== ""}
-            />
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "var(--text-secondary)",
-                fontSize: "var(--text-sm)",
-                marginTop: "5px",
-              }}
-            >
-              You
-            </p>
-          </div>
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-muted)",
-              fontSize: "var(--text-xl)",
-            }}
-          >
-            VS
-          </span>
-          <div style={{ textAlign: "center" }}>
-            <Character
-              type="defector"
-              emotion={aiEmotion}
-              size="large"
-              animate={result !== ""}
-            />
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                color: strategyInfo.color,
-                fontSize: "var(--text-sm)",
-                marginTop: "5px",
-              }}
-            >
-              {strategyInfo.emoji} {strategyInfo.name}
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Payoff Matrix */}
-      <div
-        className="payoff-matrix"
-        style={{ fontSize: "12px", margin: "20px auto" }}
-      >
-        <div className="payoff-cell payoff-header"></div>
-        <div className="payoff-cell payoff-header">AI Cooperates</div>
-        <div className="payoff-cell payoff-header">AI Defects</div>
-        <div className="payoff-cell payoff-header">You Cooperate</div>
-        <div className="payoff-cell payoff-cooperate">
-          Both get {payoffMatrix.R}×
-        </div>
-        <div className="payoff-cell payoff-mixed">
-          You: {payoffMatrix.S}×, AI: {payoffMatrix.T}×
-        </div>
-        <div className="payoff-cell payoff-header">You Defect</div>
-        <div className="payoff-cell payoff-mixed">
-          You: {payoffMatrix.T}×, AI: {payoffMatrix.S}×
-        </div>
-        <div className="payoff-cell payoff-defect">
-          Both get {payoffMatrix.P}×
-        </div>
-      </div>
-
       {/* Strategy selector */}
       <div style={{ marginBottom: "20px" }}>
-        <p
+        <label
+          htmlFor="tutorial-strategy"
           style={{
+            display: "block",
             fontFamily: "var(--font-body)",
             color: "var(--text-muted)",
             margin: "0 0 8px 0",
             fontSize: "var(--text-sm)",
           }}
         >
-          Choose your opponent:
-        </p>
+          Choose your opponent
+        </label>
         <select
+          id="tutorial-strategy"
           value={aiStrategyId}
           onChange={(e) => handleStrategyChange(e.target.value as StrategyId)}
           disabled={loading}
@@ -601,257 +436,315 @@ export const TutorialSandbox: React.FC = () => {
         </p>
       </div>
 
-      {/* Stake input */}
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          value={stake}
-          onChange={(e) => setStake(e.target.value || "1")}
-          placeholder="Stake (XLM)"
-          type="number"
-          min="0.1"
-          step="0.1"
-          disabled={loading}
-          style={{
-            fontFamily: "var(--font-body)",
-            padding: "10px",
-            width: "100%",
-            textAlign: "center",
-            background: "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-sm)",
-          }}
-        />
-      </div>
-
-      {/* Noise slider */}
-      <div
-        className="glass-panel"
-        style={{ padding: "12px", marginBottom: "20px" }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "4px",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-secondary)",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            💨 Noise — "the wind caught you"
+      {/* Character display */}
+      <section className="tutorial-round-panel" aria-label="Tutorial round">
+        <div className="tutorial-round-meta">
+          <span>
+            Round{" "}
+            {result && latestRound ? latestRound.round : rounds.length + 1}
           </span>
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              color:
-                noise > 0.1 ? "var(--accent-warm)" : "var(--text-secondary)",
-              fontSize: "var(--text-sm)",
-              fontWeight: "bold",
-            }}
-          >
-            {(noise * 100).toFixed(0)}%
-          </span>
+          <span>{strategyInfo.name}</span>
         </div>
-        <input
-          type="range"
-          min="0"
-          max="0.5"
-          step="0.01"
-          value={noise}
-          onChange={(e) => setNoise(parseFloat(e.target.value))}
-          disabled={loading}
-          style={{ width: "100%", accentColor: "var(--accent-violet)" }}
+        {/* Trust Altitude Visual */}
+        <TrustStage
+          state={stageState}
+          opponentLabel={strategyInfo.name}
+          roundKey={rounds.length}
+          trustAltitude={trustAltitude}
+          noise={noise}
+          noiseEvent={
+            result && latestRound ? latestRound.noiseEvent : undefined
+          }
         />
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-muted)",
-            margin: "4px 0 0 0",
-            fontSize: "var(--text-xs)",
-            textAlign: "left",
-          }}
-        >
-          {noise === 0
-            ? "No mistakes — your move is your move"
-            : noise < 0.05
-              ? "Rare slips — sometimes your hand slips"
-              : noise < 0.15
-                ? "Frequent mistakes — trust is harder to build"
-                : "Chaos — noise drowns out intention"}
-        </p>
-      </div>
 
-      {/* Payoff matrix editor toggle */}
-      <div style={{ marginBottom: "20px" }}>
-        <button
-          type="button"
-          onClick={() => setShowPayoffEditor(!showPayoffEditor)}
-          style={{
-            fontFamily: "var(--font-body)",
-            width: "100%",
-            padding: "10px",
-            borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--border-glass)",
-            background: showPayoffEditor
-              ? "rgba(102, 126, 234, 0.15)"
-              : "var(--bg-glass-light)",
-            color: "var(--text-secondary)",
-            cursor: "pointer",
-          }}
+        {/* Move buttons */}
+        <div
+          className="trust-choices"
+          style={{ maxWidth: "460px", margin: "16px auto 20px" }}
         >
-          🎛️ {showPayoffEditor ? "Hide" : "Edit"} Payoff Matrix
-        </button>
-        {showPayoffEditor && (
-          <div style={{ marginTop: "10px" }}>
-            <PayoffMatrixEditor
-              payoffs={payoffMatrix}
-              onChange={setPayoffMatrix}
-              compact
-            />
+          <button
+            type="button"
+            className="trust-btn trust-btn-primary"
+            aria-pressed={move === "cooperate"}
+            disabled={loading}
+            onClick={() => {
+              setMove("cooperate");
+              setResult("");
+              audioManager.playSound("click");
+            }}
+          >
+            Cooperate
+          </button>
+          <button
+            type="button"
+            className="trust-btn trust-btn-secondary"
+            aria-pressed={move === "defect"}
+            disabled={loading}
+            onClick={() => {
+              setMove("defect");
+              setResult("");
+              audioManager.playSound("click");
+            }}
+          >
+            Defect
+          </button>
+        </div>
+        <p className="tutorial-selection" aria-live="polite">
+          {move
+            ? `Selected: ${move === "cooperate" ? "Cooperate" : "Defect"}`
+            : "Select a move, then play the round."}
+        </p>
+
+        {/* Action buttons */}
+        <div className="learning-actions" style={{ marginBottom: "20px" }}>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={() => void playRound()}
+            disabled={!move || loading}
+          >
+            {loading
+              ? "Playing..."
+              : rounds.length === 0
+                ? "Play Round"
+                : "Play Next Round"}
+          </button>
+          {rounds.length > 0 && (
+            <>
+              <button
+                type="button"
+                className="learning-button"
+                onClick={() => {
+                  setMove("");
+                  setResult("");
+                  audioManager.playSound("click");
+                }}
+              >
+                Clear Move
+              </button>
+              <button
+                type="button"
+                className="learning-button"
+                onClick={newOpponent}
+              >
+                🔄 New Opponent
+              </button>
+              <button
+                type="button"
+                className="learning-button"
+                onClick={() => setShowSummary(!showSummary)}
+              >
+                📊 Summary
+              </button>
+            </>
+          )}
+        </div>
+
+        {txError && (
+          <div
+            className="glass-panel"
+            style={{
+              padding: "12px",
+              marginBottom: "10px",
+              borderColor: "var(--accent-defect)",
+              color: "var(--accent-defect)",
+              fontSize: "var(--text-sm)",
+            }}
+          >
+            ⚠️ {txError}
           </div>
         )}
-      </div>
 
-      {/* Strategy inspector toggle */}
-      <div style={{ marginBottom: "20px" }}>
-        <button
-          type="button"
-          onClick={() =>
-            setInspectedStrategy(inspectedStrategy ? null : aiStrategyId)
-          }
-          style={{
-            fontFamily: "var(--font-body)",
-            width: "100%",
-            padding: "10px",
-            borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--border-glass)",
-            background: inspectedStrategy
-              ? "rgba(102, 126, 234, 0.15)"
-              : "var(--bg-glass-light)",
-            color: "var(--text-secondary)",
-            cursor: "pointer",
-          }}
-        >
-          🔍 {inspectedStrategy ? "Hide" : "Inspect"} {strategyInfo.name}
-        </button>
-        {inspectedStrategy && (
-          <StrategyInspector strategyId={inspectedStrategy} />
+        {/* Latest round result */}
+        {result && (
+          <div
+            className="glass-panel"
+            style={{
+              padding: "15px",
+              whiteSpace: "pre-line",
+              fontSize: "var(--text-sm)",
+              color: "var(--text-primary)",
+              textAlign: "left",
+              lineHeight: 1.6,
+            }}
+          >
+            {result}
+          </div>
         )}
-      </div>
+      </section>
 
-      {/* Move buttons */}
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          justifyContent: "center",
-          marginBottom: "20px",
-        }}
-      >
-        <StaggerButton
-          onClick={() => {
-            setMove("cooperate");
-            audioManager.playSound("click");
-          }}
-          color="cooperate"
-          size="md"
-          disabled={loading}
-        >
-          🤝 Cooperate
-        </StaggerButton>
-        <StaggerButton
-          onClick={() => {
-            setMove("defect");
-            audioManager.playSound("click");
-          }}
-          color="defect"
-          size="md"
-          disabled={loading}
-        >
-          💀 Defect
-        </StaggerButton>
-      </div>
+      <details className="tutorial-settings">
+        <summary>Experiment settings</summary>
 
-      {/* Action buttons */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          justifyContent: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-        }}
-      >
-        <ShimmerButton
-          onClick={() => void playRound()}
-          disabled={!move || loading}
-          size="md"
+        {/* Payoff Matrix */}
+        <div
+          className="payoff-matrix"
+          style={{ fontSize: "12px", margin: "20px auto" }}
         >
-          {loading
-            ? "Playing..."
-            : rounds.length === 0
-              ? "Play Round"
-              : "Play Next Round"}
-        </ShimmerButton>
-        {rounds.length > 0 && (
-          <>
-            <ShimmerButton
-              onClick={() => {
-                setMove("");
-                setResult("");
-                audioManager.playSound("click");
+          <div className="payoff-cell payoff-header"></div>
+          <div className="payoff-cell payoff-header">AI Cooperates</div>
+          <div className="payoff-cell payoff-header">AI Defects</div>
+          <div className="payoff-cell payoff-header">You Cooperate</div>
+          <div className="payoff-cell payoff-cooperate">
+            Both get {payoffMatrix.R}×
+          </div>
+          <div className="payoff-cell payoff-mixed">
+            You: {payoffMatrix.S}×, AI: {payoffMatrix.T}×
+          </div>
+          <div className="payoff-cell payoff-header">You Defect</div>
+          <div className="payoff-cell payoff-mixed">
+            You: {payoffMatrix.T}×, AI: {payoffMatrix.S}×
+          </div>
+          <div className="payoff-cell payoff-defect">
+            Both get {payoffMatrix.P}×
+          </div>
+        </div>
+
+        {/* Stake input */}
+        <div style={{ marginBottom: "20px", marginTop: "16px" }}>
+          <input
+            value={stake}
+            onChange={(e) => setStake(e.target.value || "1")}
+            aria-label="Practice stake"
+            placeholder="Practice stake (points)"
+            type="number"
+            min="0.1"
+            step="0.1"
+            disabled={loading}
+            style={{
+              fontFamily: "var(--font-body)",
+              padding: "10px",
+              width: "100%",
+              textAlign: "center",
+              background: "var(--bg-glass-light)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--border-glass)",
+              borderRadius: "var(--radius-sm)",
+            }}
+          />
+        </div>
+
+        {/* Noise slider */}
+        <div
+          className="glass-panel"
+          style={{ padding: "12px", marginBottom: "20px" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              marginBottom: "4px",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
               }}
-              size="md"
             >
-              Clear Move
-            </ShimmerButton>
-            <ShimmerButton onClick={newOpponent} size="md">
-              🔄 New Opponent
-            </ShimmerButton>
-            <ShimmerButton
-              onClick={() => setShowSummary(!showSummary)}
-              size="md"
+              💨 Noise — "the wind caught you"
+            </span>
+            <span
+              style={{
+                fontFamily: "var(--font-body)",
+                color:
+                  noise > 0.1 ? "var(--accent-warm)" : "var(--text-secondary)",
+                fontSize: "var(--text-sm)",
+                fontWeight: "bold",
+              }}
             >
-              📊 Summary
-            </ShimmerButton>
-          </>
-        )}
-      </div>
-
-      {txError && (
-        <div
-          className="glass-panel"
-          style={{
-            padding: "12px",
-            marginBottom: "10px",
-            borderColor: "var(--accent-defect)",
-            color: "var(--accent-defect)",
-            fontSize: "var(--text-sm)",
-          }}
-        >
-          ⚠️ {txError}
+              {(noise * 100).toFixed(0)}%
+            </span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="0.5"
+            step="0.01"
+            value={noise}
+            aria-label="Noise level"
+            onChange={(e) => setNoise(parseFloat(e.target.value))}
+            disabled={loading}
+            style={{ width: "100%", accentColor: "var(--accent-violet)" }}
+          />
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              color: "var(--text-muted)",
+              margin: "4px 0 0 0",
+              fontSize: "var(--text-xs)",
+              textAlign: "left",
+            }}
+          >
+            {noise === 0
+              ? "No mistakes — your move is your move"
+              : noise < 0.05
+                ? "Rare slips — sometimes your hand slips"
+                : noise < 0.15
+                  ? "Frequent mistakes — trust is harder to build"
+                  : "Chaos — noise drowns out intention"}
+          </p>
         </div>
-      )}
 
-      {/* Latest round result */}
-      {result && (
-        <div
-          className="glass-panel"
-          style={{
-            padding: "15px",
-            whiteSpace: "pre-line",
-            fontSize: "var(--text-sm)",
-            color: "var(--text-primary)",
-          }}
-        >
-          {result}
+        {/* Payoff matrix editor toggle */}
+        <div style={{ marginBottom: "20px" }}>
+          <button
+            type="button"
+            onClick={() => setShowPayoffEditor(!showPayoffEditor)}
+            style={{
+              fontFamily: "var(--font-body)",
+              width: "100%",
+              padding: "10px",
+              borderRadius: "var(--radius-sm)",
+              border: "1px solid var(--border-glass)",
+              background: showPayoffEditor
+                ? "rgba(102, 126, 234, 0.15)"
+                : "var(--bg-glass-light)",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            🎛️ {showPayoffEditor ? "Hide" : "Edit"} Payoff Matrix
+          </button>
+          {showPayoffEditor && (
+            <div style={{ marginTop: "10px" }}>
+              <PayoffMatrixEditor
+                payoffs={payoffMatrix}
+                onChange={setPayoffMatrix}
+                compact
+              />
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Strategy inspector toggle */}
+        <div style={{ marginBottom: "20px" }}>
+          <button
+            type="button"
+            onClick={() =>
+              setInspectedStrategy(inspectedStrategy ? null : aiStrategyId)
+            }
+            style={{
+              fontFamily: "var(--font-body)",
+              width: "100%",
+              padding: "10px",
+              borderRadius: "var(--radius-sm)",
+              border: "1px solid var(--border-glass)",
+              background: inspectedStrategy
+                ? "rgba(102, 126, 234, 0.15)"
+                : "var(--bg-glass-light)",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+            }}
+          >
+            🔍 {inspectedStrategy ? "Hide" : "Inspect"} {strategyInfo.name}
+          </button>
+          {inspectedStrategy && (
+            <StrategyInspector strategyId={inspectedStrategy} />
+          )}
+        </div>
+      </details>
 
       {/* Move History Table */}
       {rounds.length > 0 && (
@@ -862,6 +755,7 @@ export const TutorialSandbox: React.FC = () => {
             marginTop: "20px",
             maxHeight: "300px",
             overflowY: "auto",
+            overflowX: "auto",
           }}
         >
           <h4
@@ -877,6 +771,7 @@ export const TutorialSandbox: React.FC = () => {
             {rounds.length > 1 ? "s" : ""}
           </h4>
           <table
+            aria-label="Tutorial move history"
             style={{
               width: "100%",
               borderCollapse: "collapse",
@@ -886,9 +781,16 @@ export const TutorialSandbox: React.FC = () => {
           >
             <thead>
               <tr style={{ borderBottom: "1px solid var(--border-glass)" }}>
-                {["#", "You", "AI", "You", "AI", "Outcome"].map((h) => (
+                {[
+                  ["round", "#"],
+                  ["you-move", "You"],
+                  ["ai-move", "AI"],
+                  ["you-points", "You"],
+                  ["ai-points", "AI"],
+                  ["outcome", "Outcome"],
+                ].map(([key, h]) => (
                   <th
-                    key={h}
+                    key={key}
                     style={{
                       padding: "6px 4px",
                       color: "var(--text-secondary)",
@@ -913,10 +815,16 @@ export const TutorialSandbox: React.FC = () => {
                     >
                       {r.round}
                     </td>
-                    <td style={{ padding: "6px 4px" }}>
+                    <td
+                      style={{ padding: "6px 4px" }}
+                      aria-label={r.playerMove === "C" ? "Cooperate" : "Defect"}
+                    >
                       {r.playerMove === "C" ? "🤝" : "⚔️"}
                     </td>
-                    <td style={{ padding: "6px 4px" }}>
+                    <td
+                      style={{ padding: "6px 4px" }}
+                      aria-label={r.aiMove === "C" ? "Cooperate" : "Defect"}
+                    >
                       {r.aiMove === "C" ? "🤝" : "⚔️"}
                     </td>
                     <td
@@ -983,7 +891,7 @@ export const TutorialSandbox: React.FC = () => {
                       : "var(--text-primary)",
                 }}
               >
-                {cumulativePlayer} XLM
+                {cumulativePlayer} points
               </p>
             </div>
             <div>
@@ -1006,7 +914,7 @@ export const TutorialSandbox: React.FC = () => {
                       : "var(--text-primary)",
                 }}
               >
-                {cumulativeAI} XLM
+                {cumulativeAI} points
               </p>
             </div>
           </div>
@@ -1151,7 +1059,7 @@ export const TutorialSandbox: React.FC = () => {
                   fontSize: "var(--text-sm)",
                 }}
               >
-                Total XLM
+                Total points
               </p>
               <p
                 style={{
@@ -1160,7 +1068,7 @@ export const TutorialSandbox: React.FC = () => {
                   fontWeight: "bold",
                 }}
               >
-                {cumulativePlayer} XLM
+                {cumulativePlayer} points
               </p>
             </div>
           </div>

@@ -10,7 +10,9 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - [x] Welcome wizard and personality quiz are optional actions, not auto-opened overlays
 - [x] Local-sealing disclaimer shown in the interface; no proof or transaction implied
 - [x] Responsive layout (320–1440) and reduced-motion support; sound is opt-in
-- [ ] Carry the stage vocabulary into the tutorial and guided journey
+- [x] Share the stage across the tutorial and guided Choice/Repeat chapters
+- [x] Unify remaining narrative scenes and shared altitude/wind choreography
+- [x] Opt-in shared journey audio with synchronized controls and unmount cleanup
 - [ ] Extend the vocabulary to tournament populations
 - [ ] Integrate the sealed-choice object with real on-chain multiplayer states
 - [ ] Optional stylized Three.js diorama after the 2.5D interaction is reviewed

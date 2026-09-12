@@ -12,7 +12,7 @@ import { Outlet, NavLink, useLocation } from "react-router-dom";
 import ConnectAccount from "./ConnectAccount.tsx";
 import { TopographicBackground } from "./visual/TopographicBackground";
 import { CustomCursor } from "./ui/CustomCursor";
-import AudioManager from "./AudioManager";
+import { useAudioSettings } from "../hooks/useAudioSettings";
 import { TrustFallCharacter } from "./TrustFallCharacter";
 
 interface NavItem {
@@ -28,14 +28,16 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const AppShell: React.FC = () => {
-  const isHome = useLocation().pathname === "/";
-  const [audioManager] = useState(() => AudioManager.getInstance());
+  const pathname = useLocation().pathname;
+  const isHome = pathname === "/";
+  const isLearning = pathname === "/learn" || pathname === "/learn/play";
+  const audioManager = useAudioSettings();
   const [audioOpen, setAudioOpen] = useState(false);
 
   return (
     <>
-      {!isHome && <CustomCursor />}
-      {!isHome && <TopographicBackground />}
+      {!isHome && !isLearning && <CustomCursor />}
+      {!isHome && !isLearning && <TopographicBackground />}
 
       {/* Top navigation */}
       <header
@@ -191,6 +193,7 @@ const AppShell: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => audioManager.toggleMusic()}
+                      aria-pressed={audioManager.isMusicEnabled}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -211,6 +214,7 @@ const AppShell: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => audioManager.toggleSFX()}
+                      aria-pressed={audioManager.isSFXEnabled}
                       style={{
                         display: "flex",
                         alignItems: "center",

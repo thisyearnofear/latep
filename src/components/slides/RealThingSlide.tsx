@@ -11,14 +11,17 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { SlideProps } from "../SlideSystem";
 import { useWallet } from "../../hooks/useWallet";
-import { ElectricButton } from "../ui/ElectricButton";
+import { TrustStage } from "../visual/TrustStage";
 
 export const RealThingSlide: React.FC<SlideProps> = () => {
   const navigate = useNavigate();
   const { address } = useWallet();
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
+    <div
+      className="learning-round"
+      style={{ margin: "0 auto", textAlign: "center" }}
+    >
       <h2
         data-animate
         style={{
@@ -40,9 +43,22 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
           lineHeight: 1.6,
         }}
       >
-        You understand how trust evolves. Now play for real — with XLM at stake,
-        against a human opponent, where neither of you can cheat.
+        On-chain play adds XLM escrow and hidden commitments. A proof checks a
+        valid move, not whether someone will cooperate. Review the network and
+        stakes in the lobby.
       </p>
+
+      <div data-animate style={{ marginBottom: "24px" }}>
+        <TrustStage
+          state={{ phase: "sealed" }}
+          commitmentIllustration
+          announce={false}
+        />
+        <p className="narrative-disclaimer">
+          Illustration only — no proof is generated and no transaction is
+          submitted here.
+        </p>
+      </div>
 
       {/* How it works */}
       <div
@@ -103,9 +119,9 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
                   margin: 0,
                 }}
               >
-                You lock in your move with a zero-knowledge proof. Your opponent
-                can't see what you chose — but they can verify you can't change
-                it.
+                A zero-knowledge proof verifies that the hidden commitment
+                contains a valid move for this game. It does not reveal which
+                move you chose.
               </p>
             </div>
           </div>
@@ -149,8 +165,8 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
                   margin: 0,
                 }}
               >
-                Once both players have committed, you reveal. The proof
-                guarantees the revealed move matches the commitment.
+                After both players commit, reveal your move and nonce. The
+                contract checks their hash against your stored commitment.
               </p>
             </div>
           </div>
@@ -194,8 +210,9 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
                   margin: 0,
                 }}
               >
-                The smart contract on Stellar pays out automatically. No
-                intermediary, no escrow — just math and the blockchain.
+                A resolution transaction applies the game rules and transfers
+                XLM from contract escrow. Timeout and recovery paths handle
+                unfinished games.
               </p>
             </div>
           </div>
@@ -231,20 +248,20 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
               color: "var(--text-muted)",
             }}
           >
-            You'll need to connect a Stellar wallet to play for real stakes.
+            Connect a Stellar wallet in the lobby when you are ready.
           </p>
         )}
       </div>
 
       {/* CTA */}
       <div data-animate>
-        <ElectricButton
+        <button
+          type="button"
+          className="learning-button learning-button-primary"
           onClick={() => void navigate("/play")}
-          color="violet"
-          size="lg"
         >
-          Play for real →
-        </ElectricButton>
+          Enter ZK lobby
+        </button>
       </div>
 
       <p
@@ -256,8 +273,8 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
           marginTop: "24px",
         }}
       >
-        Testnet only — no real money at risk. Powered by Noir ZK proofs on
-        Stellar Soroban.
+        Local lessons use practice points. The lobby shows the network and stake
+        before on-chain play.
       </p>
     </div>
   );
