@@ -121,7 +121,7 @@ Play against other humans with zero-knowledge commitment. Real XLM escrow. Singl
 - Contract events for off-chain indexing
 - 19/19 Rust tests passing
 
-**Deployed on testnet:** `CA6PHYHU6OCKSW2KMSWQNBZ4DNUKUWGWNQDFJIHNS22WOT45F6WQTMG5` (deployed 2026-07-03)
+**Deployed on testnet:** `CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P` (deployed 2026-07-03, includes on-chain accreditation VK + Merkle root)
 
 ### Contract Functions
 

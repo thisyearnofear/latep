@@ -63,7 +63,7 @@ async function primeStorage(
       if (flags.skipWizard) localStorage.setItem("tf_wizard_seen", "true");
       if (flags.skipQuiz) localStorage.setItem("tf_quiz_seen", "true");
       if (flags.skipZKOnboarding)
-        localStorage.setItem("zk_onboarding_seen", "1");
+        localStorage.setItem("zk_onboarding_seen", "true");
     } catch {
       // storage locked before origin loads — ignored
     }
@@ -184,20 +184,24 @@ test.describe("Trustfall demo capture", () => {
     // We scope every click to the modal by anchoring on the "Q N of N"
     // progress indicator — this stops us from hitting the "Start learning →"
     // button behind the modal in the Home entry cards.
+    // Cast a wide net across all 15 known option labels (5 questions × 3
+    // options each from PersonalityQuiz.tsx). Any of them is a valid click.
+    const allOptionsRe =
+      /of course|maybe.*vibe|step aside|forgive|tit for tat|never trust|excited|cautious|nervous|always cooperate|start nice|mix it up|be more forgiving|account for it|assume the worst/i;
     for (let step = 0; step < 6; step++) {
       const progress = page.getByText(/Q\d+ of \d+/);
       const inQuestion = await progress.isVisible().catch(() => false);
       if (!inQuestion) break;
 
-      // Find the quiz modal container by ancestry from the progress text,
-      // then click the first non-"Skip" answer button inside it.
-      const quizModal = page.locator("div").filter({ has: progress }).last();
-      const answer = quizModal
-        .getByRole("button")
-        .filter({ hasNotText: /skip/i })
-        .first();
+      const progressText = (await progress.textContent()) ?? "?";
+      const answer = page.getByRole("button", { name: allOptionsRe }).first();
+      const count = await page
+        .getByRole("button", { name: allOptionsRe })
+        .count();
+      // eslint-disable-next-line no-console
+      console.log(`[quiz] step=${step} ${progressText} matches=${count}`);
       await answer.click();
-      await cinePause(page, 1200);
+      await cinePause(page, 1500);
     }
 
     // Result screen: mascot + archetype name. Hold — don't click
@@ -323,17 +327,15 @@ test.describe("Trustfall demo capture", () => {
     await suppressChrome(page);
     await cinePause(page, SLOW);
 
+    // The lobby CTA is "➕ Start a Trustfall" (not "Create Game"). Match
+    // that first, fall back to any create-like text.
     const create = page
-      .getByRole("button", { name: /create.*(single|game|round)/i })
+      .getByRole("button", {
+        name: /start a trustfall|create.*(game|round|single)/i,
+      })
       .first();
-    if (await create.isVisible().catch(() => false)) {
-      await create.click();
-    } else {
-      await page
-        .getByRole("button", { name: /create/i })
-        .first()
-        .click();
-    }
+    await create.waitFor({ state: "visible", timeout: 15_000 });
+    await create.click();
     await cinePause(page, READ);
 
     // Pick Cooperate — the "moral" choice is stronger demo footage.
