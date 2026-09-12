@@ -1,7 +1,7 @@
 /**
  * TrustFallFigure — Animated SVG scene depicting the trust fall metaphor.
  *
- * The CENTRAL visual element of the Trustfall project. A stick figure stands
+ * The CENTRAL visual element of the Latep project. A stick figure stands
  * on a cliff edge while a second figure waits below to catch. State transitions
  * are driven by GSAP; the "standing" sway is a CSS keyframe animation.
  *

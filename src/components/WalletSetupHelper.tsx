@@ -251,7 +251,7 @@ export const WalletSetupHelper: React.FC = () => {
             status={step2Status}
             icon="🔗"
             title="Connect Your Wallet"
-            body="Link your Freighter wallet to Trustfall so you can sign transactions."
+            body="Link your Freighter wallet to Latep so you can sign transactions."
           />
         )}
 

@@ -1,5 +1,5 @@
 /**
- * IntroSlide — Welcome to Trustfall
+ * IntroSlide — Welcome to Latep
  *
  * Sets up the journey. The user sees what they'll learn and why it matters.
  * This is the narrative hook before the interactive experience begins.

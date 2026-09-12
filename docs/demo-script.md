@@ -1,8 +1,8 @@
-# Demo Video Script — Trustfall (2-3 min)
+# Demo Video Script — Latep (2-3 min)
 
 ## Pre-Demo Setup
 
-- Browser open to trustfall.xyz
+- Browser open to latep.trustfall.xyz
 - Wallet connected to Stellar testnet with funded XLM
 - Terminal open to show test output (optional, for credibility)
 
@@ -12,11 +12,11 @@
 
 ### [0:00-0:20] Hook — "Two ZK patterns, one demo"
 
-**Show:** trustfall.xyz landing page
+**Show:** latep.trustfall.xyz landing page
 
 **Say:**
 
-> "This is Trustfall — two real-world zero-knowledge proof patterns
+> "This is Latep — two real-world zero-knowledge proof patterns
 > verified on-chain in a Stellar smart contract. The first pattern is
 > private accreditation: prove you're on an allowlist without revealing
 > which credential is yours. The second is commitment binding: prove a
@@ -100,7 +100,7 @@ game, generate proof, submit. Both reveal.
 **Say:**
 
 > "Two ZK patterns, both load-bearing, both verified on-chain. 19
-> contract tests passing. Live on Stellar testnet at trustfall.xyz.
+> contract tests passing. Live on Stellar testnet at latep.trustfall.xyz.
 > Thanks for watching."
 
 ---

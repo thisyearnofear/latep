@@ -1,4 +1,4 @@
-// ZK Allowlist Membership Circuit for Trustfall
+// ZK Allowlist Membership Circuit for Latep
 //
 // Proves that a player holds a credential whose hash is a leaf in a Merkle tree
 // with a publicly known root -- WITHOUT revealing which leaf is theirs.

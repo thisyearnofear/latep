@@ -148,7 +148,7 @@ export const FirstRunWizard: React.FC = () => {
               color: "var(--text-primary)",
             }}
           >
-            Welcome to Trustfall
+            Welcome to Latep
           </h2>
           <p
             style={{

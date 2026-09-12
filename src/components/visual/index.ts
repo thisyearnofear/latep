@@ -1,5 +1,5 @@
 /**
- * Visual storytelling components for the Trustfall project.
+ * Visual storytelling components for the Latep project.
  * Original SVG/CSS animated components that bring the "trust fall" metaphor
  * to life.
  */

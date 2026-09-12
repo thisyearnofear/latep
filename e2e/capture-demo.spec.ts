@@ -1,7 +1,7 @@
 import { test, expect, Page } from "@playwright/test";
 
 /**
- * Trustfall hackathon demo capture.
+ * Latep hackathon demo capture.
  *
  * Records seven segments as WebM. Each segment becomes a clip HyperFrames
  * composites into the final 2:30 video. Segments are ordered to lead with
@@ -101,7 +101,7 @@ async function seedMockWallet(
   }, address);
 }
 
-test.describe("Trustfall demo capture", () => {
+test.describe("Latep demo capture", () => {
   test.beforeEach(async ({ page }) => {
     await page.context().clearCookies();
     await page.addInitScript(() => {
@@ -128,7 +128,7 @@ test.describe("Trustfall demo capture", () => {
     await primeStorage(page, { skipQuiz: true });
     await page.goto("/");
     await suppressChrome(page);
-    await cinePause(page, HERO); // hold on mascot + "Welcome to Trustfall"
+    await cinePause(page, HERO); // hold on mascot + "Welcome to Latep"
 
     // Slow read-beat over the three steps
     await cinePause(page, READ);

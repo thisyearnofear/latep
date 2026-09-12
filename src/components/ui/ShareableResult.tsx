@@ -29,7 +29,7 @@ export const ShareableResult: React.FC<ShareableResultProps> = ({
   const [copied, setCopied] = useState(false);
 
   const buildShareText = () => {
-    let text = `🪂 Trustfall — ${title}\n`;
+    let text = `🪂 Latep — ${title}\n`;
     if (score !== undefined && opponentScore !== undefined) {
       text += `Score: ${score > 0 ? "+" : ""}${score} vs ${opponentScore > 0 ? "+" : ""}${opponentScore}`;
       if (outcome === "win") text += " — Won!";
@@ -41,7 +41,7 @@ export const ShareableResult: React.FC<ShareableResultProps> = ({
     if (rounds) text += `Rounds: ${rounds}\n`;
     if (cooperationRate !== undefined)
       text += `Cooperation: ${cooperationRate}%\n`;
-    text += "Play: https://trustfall.xyz";
+    text += "Play: https://latep.trustfall.xyz";
     return text;
   };
 
@@ -57,7 +57,7 @@ export const ShareableResult: React.FC<ShareableResultProps> = ({
   const shareNative = () => {
     if (navigator.share) {
       navigator
-        .share({ text: shareText, url: "https://trustfall.xyz" })
+        .share({ text: shareText, url: "https://latep.trustfall.xyz" })
         .catch(() => {});
     } else {
       copyToClipboard();

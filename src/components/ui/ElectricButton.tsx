@@ -3,7 +3,7 @@
  *
  * Inspired by codrops Electric button. Uses SVG filters (feTurbulence +
  * feDisplacementMap) for the jagged lightning effect, and GSAP for the
- * stroke animation. Adapted to Trustfall's violet/cyan palette.
+ * stroke animation. Adapted to Latep's violet/cyan palette.
  *
  * The drawSVG plugin is premium, so we use strokeDasharray/strokeDashoffset
  * for the stroke drawing animation instead.

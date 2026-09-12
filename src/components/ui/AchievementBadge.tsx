@@ -1,7 +1,7 @@
 /**
  * AchievementBadge — displays an unlocked achievement.
  *
- * Achievements are earned for milestones throughout the Trustfall experience:
+ * Achievements are earned for milestones throughout the Latep experience:
  * - First cooperation
  * - First betrayal
  * - 5-round streak of mutual cooperation
@@ -150,7 +150,7 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
 /** Track unlocked achievements in localStorage */
 export function unlockAchievement(id: string): boolean {
   try {
-    const key = "trustfall_achievements";
+    const key = "latep_achievements";
     const raw = localStorage.getItem(key);
     const existing: string[] = raw ? (JSON.parse(raw) as string[]) : [];
     if (existing.includes(id)) return false; // Already unlocked
@@ -164,7 +164,7 @@ export function unlockAchievement(id: string): boolean {
 
 export function getUnlockedAchievements(): string[] {
   try {
-    const raw = localStorage.getItem("trustfall_achievements");
+    const raw = localStorage.getItem("latep_achievements");
     if (!raw) return [];
     const data = JSON.parse(raw) as string[];
     return Array.isArray(data) ? data : [];
