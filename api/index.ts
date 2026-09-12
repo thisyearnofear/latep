@@ -92,7 +92,7 @@ async function handleGamesRoute(
 ): Promise<Response> {
   // GET /api/games — list open games (cached)
   if (url.pathname === "/api/games" && request.method === "GET") {
-    const cached = await env.GAME_CACHE.get("open_games");
+    const cached = await cacheGet(env, "open_games");
     if (cached) {
       return new Response(cached, {
         headers: {
@@ -105,9 +105,7 @@ async function handleGamesRoute(
 
     const games = await fetchOpenGames(env);
     const json = JSON.stringify({ games, fetched_at: Date.now() });
-    await env.GAME_CACHE.put("open_games", json, {
-      expirationTtl: CACHE_TTL,
-    });
+    await cachePut(env, "open_games", json);
     return new Response(json, {
       headers: {
         "Content-Type": "application/json",
@@ -121,7 +119,7 @@ async function handleGamesRoute(
   const gameMatch = url.pathname.match(/^\/api\/games\/(\d+)$/);
   if (gameMatch && request.method === "GET") {
     const gameId = parseInt(gameMatch[1]);
-    const cached = await env.GAME_CACHE.get(`game_${gameId}`);
+    const cached = await cacheGet(env, `game_${gameId}`);
     if (cached) {
       return new Response(cached, {
         headers: {
@@ -141,9 +139,7 @@ async function handleGamesRoute(
   if (url.pathname === "/api/games/refresh" && request.method === "POST") {
     const games = await fetchOpenGames(env);
     const json = JSON.stringify({ games, fetched_at: Date.now() });
-    await env.GAME_CACHE.put("open_games", json, {
-      expirationTtl: CACHE_TTL,
-    });
+    await cachePut(env, "open_games", json);
     return new Response(json, {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
@@ -153,6 +149,25 @@ async function handleGamesRoute(
     status: 404,
     headers: { "Content-Type": "application/json", ...corsHeaders },
   });
+}
+
+// KV access can throw (unbound namespace, deleted namespace, quota) —
+// never let caching take down the endpoint; the frontend falls back to
+// direct contract polling anyway.
+async function cacheGet(env: Env, key: string): Promise<string | null> {
+  try {
+    return await env.GAME_CACHE.get(key);
+  } catch {
+    return null;
+  }
+}
+
+async function cachePut(env: Env, key: string, value: string): Promise<void> {
+  try {
+    await env.GAME_CACHE.put(key, value, { expirationTtl: CACHE_TTL });
+  } catch {
+    // caching is best-effort
+  }
 }
 
 /**
