@@ -35,7 +35,7 @@ const LearnJourney: React.FC = () => {
       id: "intro",
       title: "The Evolution of Trust",
       component: IntroSlide,
-      music: "/assets/sounds/background.mp3",
+      music: "/assets/sounds/bg_music.mp3",
     },
     {
       id: "edge",

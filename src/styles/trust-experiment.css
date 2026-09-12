@@ -1,4 +1,5 @@
-.trust-experiment {
+.trust-experiment,
+.trust-stage-surface {
   --tl-hill-far: color-mix(in srgb, var(--accent-violet) 26%, transparent);
   --tl-hill-near: color-mix(in srgb, var(--accent-cool) 34%, transparent);
   --tl-contour: color-mix(in srgb, var(--text-muted) 45%, transparent);
@@ -13,7 +14,61 @@
   --tl-rock-edge: var(--border-glass);
   --tl-seal-bg: var(--bg-glass);
   --tl-seal-border: var(--border-glass);
+}
 
+.trust-stage-surface {
+  container-type: inline-size;
+  min-width: 0;
+  width: 100%;
+}
+
+.trust-stage-caption {
+  margin: 12px 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.trust-environment {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 12px;
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.trust-height-gauge line {
+  stroke: var(--tl-contour);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.trust-height-gauge .trust-height-tick-lit {
+  stroke: var(--accent-warm);
+}
+
+.trust-wind,
+.trust-gust {
+  fill: none;
+  stroke: var(--text-secondary);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.trust-wind {
+  transition: opacity 0.3s var(--ease-out);
+}
+
+.trust-actor[data-wind-affected] .trust-actor-inner {
+  filter: drop-shadow(0 0 10px rgba(240, 160, 32, 0.45));
+}
+
+.trust-experiment {
   box-sizing: border-box;
   max-width: 1000px;
   width: 100%;
@@ -29,7 +84,11 @@
 .trust-experiment .tf-sway,
 .trust-experiment .tf-falling,
 .trust-experiment .tf-impact,
-.trust-experiment .tf-catch {
+.trust-experiment .tf-catch,
+.trust-stage-surface .tf-sway,
+.trust-stage-surface .tf-falling,
+.trust-stage-surface .tf-impact,
+.trust-stage-surface .tf-catch {
   animation: none;
 }
 
@@ -83,6 +142,10 @@
   width: 100%;
   height: clamp(240px, 32vw, 340px);
   border-radius: var(--radius-lg);
+}
+
+.trust-stage-surface .trust-stage {
+  height: clamp(240px, 42.5cqw, 340px);
 }
 
 .trust-scene {
@@ -406,7 +469,7 @@
   line-height: 1.5;
 }
 
-@media (max-width: 700px) {
+@container (max-width: 700px) {
   .trust-actor {
     bottom: 30%;
     transform: translateX(-50%) scale(0.72);
@@ -435,7 +498,7 @@
   }
 }
 
-@media (min-width: 421px) and (max-width: 700px) {
+@container (min-width: 421px) and (max-width: 700px) {
   .trust-seal {
     top: 4px;
   }
@@ -445,15 +508,28 @@
   .trust-choices {
     grid-template-columns: minmax(0, 1fr);
   }
+}
 
+@container (min-width: 361px) and (max-width: 420px) {
   .trust-seal {
-    top: -40px;
+    top: -20px;
+    padding: 4px 6px;
+  }
+
+  .trust-seal-doc {
+    font-size: 10px;
+    gap: 4px;
+  }
+
+  .trust-seal-icon {
+    width: 12px;
+    height: 15px;
   }
 }
 
-@media (max-width: 360px) {
+@container (max-width: 360px) {
   .trust-seal {
-    top: -46px;
+    top: -40px;
     padding: 4px 6px;
   }
 
@@ -471,7 +547,10 @@
 @media (prefers-reduced-motion: reduce) {
   .trust-experiment *,
   .trust-experiment *::before,
-  .trust-experiment *::after {
+  .trust-experiment *::after,
+  .trust-stage-surface *,
+  .trust-stage-surface *::before,
+  .trust-stage-surface *::after {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }

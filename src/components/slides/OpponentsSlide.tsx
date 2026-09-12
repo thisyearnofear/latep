@@ -9,9 +9,7 @@
 import React, { useState, useRef } from "react";
 import { SlideProps } from "../SlideSystem";
 import StrategyCard from "../visual/StrategyCard";
-import { ElectricButton } from "../ui/ElectricButton";
-import { StaggerButton } from "../ui/StaggerButton";
-import { ShimmerButton } from "../ui/ShimmerButton";
+import { TrustStage } from "../visual/TrustStage";
 import {
   createStrategy,
   calculatePayoff,
@@ -29,6 +27,11 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [playerScore, setPlayerScore] = useState(0);
   const [aiScore, setAiScore] = useState(0);
   const [lastResult, setLastResult] = useState<string>("");
+  const [lastMoves, setLastMoves] = useState<{
+    player: GameMove;
+    opponent: GameMove;
+  } | null>(null);
+  const [trustAltitude, setTrustAltitude] = useState(0);
   const strategyRef = useRef<IteratedStrategy | null>(null);
 
   const startMatch = (id: StrategyId) => {
@@ -38,19 +41,23 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
     setPlayerScore(0);
     setAiScore(0);
     setLastResult("");
+    setLastMoves(null);
+    setTrustAltitude(0);
   };
 
   const playMove = (move: GameMove) => {
     if (!strategyRef.current || matchRound >= 3) return;
     const aiMove = strategyRef.current.play();
     const result = calculatePayoff(move, aiMove, 1, NC_DEFAULT);
-    strategyRef.current.remember(move, aiMove);
+    strategyRef.current.remember(aiMove, move);
 
     const newPlayer = playerScore + result.playerPayout;
     const newAi = aiScore + result.aiPayout;
     setPlayerScore(newPlayer);
     setAiScore(newAi);
     setMatchRound(matchRound + 1);
+    setLastMoves({ player: move, opponent: aiMove });
+    setTrustAltitude((h) => (move === "C" && aiMove === "C" ? h + 1 : 0));
 
     if (move === "C" && aiMove === "C") setLastResult("🤝 Mutual trust");
     else if (move === "C" && aiMove === "D")
@@ -63,7 +70,10 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
   const matchComplete = matchRound >= 3;
 
   return (
-    <div style={{ maxWidth: "720px", margin: "0 auto", textAlign: "center" }}>
+    <div
+      className="learning-round"
+      style={{ margin: "0 auto", textAlign: "center" }}
+    >
       <h2
         data-animate
         style={{
@@ -92,12 +102,8 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
       {!selected && (
         <div
           data-animate
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "12px",
-            marginBottom: "32px",
-          }}
+          className="narrative-strategies"
+          style={{ marginBottom: "32px" }}
         >
           {ALL_STRATEGY_IDS.map((id) => {
             const info = getStrategyInfo(id);
@@ -127,9 +133,12 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
             <div
               style={{
                 display: "flex",
+                flexWrap: "wrap",
                 justifyContent: "space-between",
                 alignItems: "center",
+                gap: "8px",
                 marginBottom: "16px",
+                minWidth: 0,
               }}
             >
               <div>
@@ -166,7 +175,7 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
                     margin: 0,
                   }}
                 >
-                  Round {Math.min(matchRound + (matchComplete ? 0 : 1), 3)}/3
+                  Round {matchRound || 1}/3
                 </p>
                 <p
                   style={{
@@ -207,6 +216,21 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
               </div>
             </div>
 
+            <TrustStage
+              state={
+                lastMoves
+                  ? {
+                      phase: "outcome",
+                      playerMove: lastMoves.player,
+                      opponentMove: lastMoves.opponent,
+                    }
+                  : { phase: "choose" }
+              }
+              opponentLabel={getStrategyInfo(selected).name}
+              roundKey={matchRound}
+              trustAltitude={trustAltitude}
+            />
+
             {lastResult && !matchComplete && (
               <p
                 style={{
@@ -220,30 +244,34 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
               </p>
             )}
 
-            {!matchComplete ? (
-              <div
+            {!matchComplete && (
+              <p
                 style={{
-                  display: "flex",
-                  gap: "12px",
-                  justifyContent: "center",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-muted)",
+                  marginBottom: "12px",
                 }}
               >
-                <StaggerButton
+                Choose your next move
+              </p>
+            )}
+            {!matchComplete ? (
+              <div className="learning-actions">
+                <button
+                  type="button"
+                  className="learning-button learning-button-primary"
                   onClick={() => playMove("C")}
-                  color="cooperate"
-                  size="sm"
-                  triggerOn="active"
                 >
-                  🤝 Cooperate
-                </StaggerButton>
-                <StaggerButton
+                  Cooperate
+                </button>
+                <button
+                  type="button"
+                  className="learning-button"
                   onClick={() => playMove("D")}
-                  color="defect"
-                  size="sm"
-                  triggerOn="active"
                 >
-                  ⚔️ Defect
-                </StaggerButton>
+                  Defect
+                </button>
               </div>
             ) : (
               <div>
@@ -266,19 +294,21 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
                       ? "A tie."
                       : `${getStrategyInfo(selected).name} won this match.`}
                 </p>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "12px",
-                    justifyContent: "center",
-                  }}
-                >
-                  <ShimmerButton onClick={() => setSelected(null)} size="sm">
-                    ← Try another
-                  </ShimmerButton>
-                  <ElectricButton onClick={onNext} color="violet" size="sm">
-                    Watch them compete →
-                  </ElectricButton>
+                <div className="learning-actions">
+                  <button
+                    type="button"
+                    className="learning-button"
+                    onClick={() => setSelected(null)}
+                  >
+                    Try another
+                  </button>
+                  <button
+                    type="button"
+                    className="learning-button learning-button-primary"
+                    onClick={onNext}
+                  >
+                    Watch them compete
+                  </button>
                 </div>
               </div>
             )}
@@ -324,7 +354,7 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
               marginBottom: "8px",
             }}
           >
-            🏆 The champion: Tit-for-Tat
+            🏆 A strategy to start with: Tit-for-Tat
           </p>
           <p
             style={{
@@ -333,8 +363,9 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
               color: "var(--text-secondary)",
             }}
           >
-            Simple, nice, provocable, forgiving, and clear. It won Robert
-            Axelrod's famous 1980 tournament — and it still wins today.
+            It starts by cooperating, then mirrors your last move. Its
+            performance depends on the other strategies, the payoffs, and the
+            noise level.
           </p>
         </div>
       )}
