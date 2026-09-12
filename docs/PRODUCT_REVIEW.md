@@ -4,7 +4,7 @@ Comprehensive review of product design, UI/UX, system architecture, reliability/
 
 ## Product direction — September 2026
 
-The next demo iteration is an interactive world about trust, not a dashboard with more effects. The initial design assumes a newcomer audience: let visitors feel one dilemma before asking them to understand strategies, wallets, or cryptography. The tone is a playful, crafted experiment with restrained controls and expressive characters.
+The next demo iteration is an interactive world about trust, not a dashboard with more effects.
 
 ### Agreed primitives
 
@@ -55,7 +55,7 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 **What's not working:**
 
 - **Demo tree is pre-computed** — 3 credentials with hardcoded Merkle paths. Production system would build tree off-chain and distribute paths privately. This is documented honestly in the README.
-- **Nullifiers only for game_id=0** — frontend needs JS Poseidon for other game_ids. The ZK proof itself works for any game_id; only the client-side nullifier pre-computation is limited. Documented honestly.
+- **Nullifiers computed client-side** — via `poseidon-lite` for any game_id (matches `noir-lang/poseidon` BN254 params).
 
 ### Pattern 2: Move Commitment Binding
 
@@ -259,14 +259,14 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 ### Fixed if time permits (high value) ✅
 
-| #   | Issue                              | Impact              | Status            |
-| --- | ---------------------------------- | ------------------- | ----------------- |
-| 4   | Add `cancel_game` for stuck escrow | Locked funds        | ✅ Fixed + tested |
-| 5   | Add proof generation timeout       | Silent hang         | ⬜ Not done       |
-| 6   | Hide debug info behind toggle      | Polish              | ⬜ Not done       |
-| 7   | Add onboarding overlay             | Judge comprehension | ✅ Done           |
-| 8   | Fix `claim_forfeit` error message  | Misleading error    | ✅ Fixed          |
-| 9   | Add responsive breakpoints         | Mobile judging      | ✅ Done           |
+| #   | Issue                              | Impact              | Status                                     |
+| --- | ---------------------------------- | ------------------- | ------------------------------------------ |
+| 4   | Add `cancel_game` for stuck escrow | Locked funds        | ✅ Fixed + tested                          |
+| 5   | Add proof generation timeout       | Silent hang         | ✅ Fixed (`src/util/withTimeout.ts`, 120s) |
+| 6   | Hide debug info behind toggle      | Polish              | ⬜ Not done                                |
+| 7   | Add onboarding overlay             | Judge comprehension | ✅ Done                                    |
+| 8   | Fix `claim_forfeit` error message  | Misleading error    | ✅ Fixed                                   |
+| 9   | Add responsive breakpoints         | Mobile judging      | ✅ Done                                    |
 
 ### Previously acknowledged, now fixed ✅
 
@@ -292,7 +292,6 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 | #   | Issue                                       | Impact                                                  |
 | --- | ------------------------------------------- | ------------------------------------------------------- |
-| 14  | Reputation proofs not built                 | Future work                                             |
-| 15  | No proof generation timeout                 | Silent hang risk                                        |
-| 16  | Inefficient polling (no batching/websocket) | Scalability                                             |
+| 14  | Reputation proofs not built                 | Future work — see `HACKMERIDIAN.md`                     |
+| 15  | Inefficient polling (no batching/websocket) | Scalability                                             |
 | 17  | ~~Contract redeployment needed~~            | ✅ Redeployed 2026-07-03 with multi-round match support |

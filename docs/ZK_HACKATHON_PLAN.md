@@ -113,8 +113,8 @@ Proofs are generated off-chain in the browser using Noir + bb.js (WASM, lazy-loa
 1. **Reputation proofs** — original plan included ZK reputation proofs ("I've cooperated in N% of games"). Not implemented. Future work.
 2. **End-to-end browser test** — cryptographic path (bb.js → on-chain verifier) is cross-verified in Rust tests, but full two-wallet browser session not tested.
 3. **Accreditation demo tree is pre-computed** — 3 credentials with hardcoded Merkle paths. Production system would build tree off-chain and distribute paths privately.
-4. **Nullifiers only for game_id=0** — frontend needs JS Poseidon for other game_ids. Circuit handles any game_id.
-5. **No proof generation timeout** — if bb.js WASM fails to load, UI hangs.
+4. **Nullifiers computed client-side** — via `poseidon-lite` for any game_id. Circuit handles any game_id.
+5. **Proof generation has a 120s timeout** — (`src/util/withTimeout.ts`) surfaces an error instead of hanging; a page reload is still the recovery path.
 6. **Polling, not websockets** — frontend polls every 5 seconds. No event subscription or batching.
 
 ---
@@ -130,7 +130,7 @@ Proofs are generated off-chain in the browser using Noir + bb.js (WASM, lazy-loa
 
 ### Contract
 
-- `soroban-sdk` 26.x with `alloc` feature
+- `soroban-sdk` 27.x with `alloc` feature (verifier on upstream `chore/protocol27` branch until NethermindEth/rs-soroban-ultrahonk PR #42 merges)
 - BN254 host functions (Protocol 25/26)
 - Poseidon host functions (Protocol 25)
 - `env.crypto().keccak256()` host function
