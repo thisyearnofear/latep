@@ -1,0 +1,287 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+        .bg {
+          background: #0a0e1a;
+        }
+
+        .heading {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 120px;
+          text-align: center;
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 64px;
+          color: rgba(255, 255, 255, 0.94);
+          opacity: 0;
+        }
+
+        .flow-wrap {
+          position: absolute;
+          left: 80px;
+          right: 80px;
+          top: 340px;
+          height: 140px;
+        }
+        .flow-line {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 70px;
+          height: 1px;
+          background: #f0a020;
+          transform-origin: left center;
+          transform: scaleX(0);
+        }
+        .node {
+          position: absolute;
+          top: 22px;
+          padding: 14px 22px;
+          background: rgba(10, 14, 26, 0.94);
+          border: 1px solid rgba(240, 160, 32, 0.55);
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 20px;
+          color: rgba(255, 255, 255, 0.94);
+          opacity: 0;
+          transform: translate(-50%, 0);
+        }
+        .node .sub {
+          display: block;
+          font-family: "Inconsolata", monospace;
+          font-weight: 400;
+          font-size: 14px;
+          color: rgba(255, 255, 255, 0.6);
+          margin-top: 4px;
+          letter-spacing: 0.04em;
+        }
+        .n1 {
+          left: 10%;
+        }
+        .n2 {
+          left: 35%;
+        }
+        .n3 {
+          left: 60%;
+        }
+        .n4 {
+          left: 88%;
+        }
+
+        .chip-row {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 580px;
+          display: flex;
+          gap: 20px;
+          justify-content: center;
+        }
+        .chip {
+          padding: 12px 20px;
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 18px;
+          letter-spacing: 0.04em;
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        .chip.gold {
+          background: rgba(240, 160, 32, 0.14);
+          border: 1px solid rgba(240, 160, 32, 0.55);
+          color: #f0a020;
+        }
+        .chip.violet {
+          background: rgba(102, 126, 234, 0.14);
+          border: 1px solid rgba(102, 126, 234, 0.55);
+          color: #667eea;
+        }
+
+        .contract {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 740px;
+          text-align: center;
+          font-family: "Inconsolata", monospace;
+          font-weight: 400;
+          font-size: 20px;
+          letter-spacing: 0.02em;
+          color: rgba(255, 255, 255, 0.86);
+          overflow: hidden;
+          clip-path: inset(0 100% 0 0);
+        }
+        .contract .id {
+          color: rgba(255, 255, 255, 0.94);
+        }
+        .contract .testnet {
+          display: inline-block;
+          margin-left: 12px;
+          padding: 4px 12px;
+          background: rgba(102, 126, 234, 0.14);
+          border: 1px solid rgba(102, 126, 234, 0.55);
+          border-radius: 999px;
+          font-size: 14px;
+          color: #667eea;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="09-stack"
+        data-width="1920"
+        data-height="1080"
+        data-duration="14.037"
+      >
+        <div
+          class="bg clip"
+          data-start="0"
+          data-duration="14.037"
+          data-track-index="0"
+        ></div>
+
+        <div
+          class="heading clip"
+          id="st-heading"
+          data-start="0.2"
+          data-duration="13.8"
+          data-track-index="1"
+        >
+          Under the hood
+        </div>
+
+        <div
+          class="flow-wrap clip"
+          data-start="0.4"
+          data-duration="13.6"
+          data-track-index="2"
+        >
+          <div class="flow-line" id="st-line"></div>
+          <div class="node n1" id="st-node-1">
+            Noir circuits<span class="sub"
+              >allowlist_membership · move_commitment</span
+            >
+          </div>
+          <div class="node n2" id="st-node-2">
+            bb.js<span class="sub">browser · lazy-loaded</span>
+          </div>
+          <div class="node n3" id="st-node-3">
+            UltraHonk proof<span class="sub">generated client-side</span>
+          </div>
+          <div class="node n4" id="st-node-4">
+            Soroban contract<span class="sub">on-chain verifier</span>
+          </div>
+        </div>
+
+        <div
+          class="chip-row clip"
+          data-start="9.0"
+          data-duration="5.037"
+          data-track-index="3"
+        >
+          <div class="chip gold" id="st-chip-25">
+            Protocol 25 · Poseidon host fn
+          </div>
+          <div class="chip violet" id="st-chip-26">
+            Protocol 26 · BN254 host fns
+          </div>
+        </div>
+
+        <div
+          class="contract clip"
+          id="st-contract"
+          data-start="11.5"
+          data-duration="2.537"
+          data-track-index="4"
+        >
+          <span class="id"
+            >CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P</span
+          >
+          <span class="testnet">on testnet</span>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo(
+          "#st-heading",
+          { opacity: 0, y: 6 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+          0.3,
+        );
+
+        // Flow line draws in over 2.5s
+        tl.to(
+          "#st-line",
+          { scaleX: 1, duration: 2.4, ease: "power3.out" },
+          0.5,
+        );
+
+        // Nodes spring-pop staggered to VO (~3s between each pair)
+        tl.fromTo(
+          "#st-node-1",
+          { opacity: 0, y: 10, scale: 0.92 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" },
+          1.0,
+        );
+        tl.fromTo(
+          "#st-node-2",
+          { opacity: 0, y: 10, scale: 0.92 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" },
+          3.4,
+        );
+        tl.fromTo(
+          "#st-node-3",
+          { opacity: 0, y: 10, scale: 0.92 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" },
+          5.8,
+        );
+        tl.fromTo(
+          "#st-node-4",
+          { opacity: 0, y: 10, scale: 0.92 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.55, ease: "power3.out" },
+          7.6,
+        );
+
+        // Protocol chips
+        tl.fromTo(
+          "#st-chip-25",
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+          9.2,
+        );
+        tl.fromTo(
+          "#st-chip-26",
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+          9.5,
+        );
+
+        // Contract ID types in
+        tl.to(
+          "#st-contract",
+          { clipPath: "inset(0 0% 0 0)", duration: 2.0, ease: "power3.out" },
+          11.5,
+        );
+
+        window.__timelines["09-stack"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

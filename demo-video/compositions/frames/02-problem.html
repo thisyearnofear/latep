@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+        .bg {
+          background: #0a0e1a;
+        }
+
+        .stage {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-items: center;
+        }
+        .stack {
+          width: 1400px;
+          display: grid;
+          gap: 28px;
+          justify-items: center;
+          text-align: center;
+          transform: translateY(-40px);
+        }
+        .rail {
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 20px;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: #f0a020;
+          opacity: 0;
+        }
+        .display {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 168px;
+          line-height: 0.94;
+          letter-spacing: -0.01em;
+          opacity: 0;
+        }
+        .identity {
+          color: #f0a020;
+        }
+        .and-integ {
+          color: #667eea;
+        }
+        .disclaimer {
+          font-family: "Inter", sans-serif;
+          font-weight: 400;
+          font-size: 30px;
+          line-height: 1.5;
+          color: rgba(255, 255, 255, 0.72);
+          overflow: hidden;
+          clip-path: inset(0 100% 0 0);
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="02-problem"
+        data-width="1920"
+        data-height="1080"
+        data-duration="18"
+      >
+        <div
+          class="bg clip"
+          data-start="0"
+          data-duration="18"
+          data-track-index="0"
+        ></div>
+
+        <div
+          class="stage clip"
+          data-start="0"
+          data-duration="18"
+          data-track-index="1"
+        >
+          <div class="stack">
+            <div class="rail" id="pr-rail">Real trust needs</div>
+            <div class="display identity" id="pr-identity">IDENTITY</div>
+            <div class="display and-integ" id="pr-integrity">AND INTEGRITY</div>
+            <div class="disclaimer" id="pr-disclaimer">— without doxxing.</div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Scene 1 (0.0–2.0s): rail types in via clip-path + fade
+        tl.fromTo(
+          "#pr-rail",
+          { opacity: 0 },
+          { opacity: 1, duration: 0.4, ease: "power3.out" },
+          0.4,
+        );
+        tl.fromTo(
+          "#pr-rail",
+          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(0 0% 0 0)", duration: 0.9, ease: "power3.out" },
+          0.4,
+        );
+
+        // Scene 2 (2.0–6.5s): "IDENTITY" beat-slam
+        tl.fromTo(
+          "#pr-identity",
+          { opacity: 0, scale: 0.92, y: 12 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.75, ease: "power3.out" },
+          2.1,
+        );
+
+        // Scene 3 (6.5–11.0s): "AND INTEGRITY" beat-slam
+        tl.fromTo(
+          "#pr-integrity",
+          { opacity: 0, scale: 0.92, y: 12 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.75, ease: "power3.out" },
+          6.6,
+        );
+
+        // Scene 4 (11.0–14.5s): disclaimer types in via clip-path reveal
+        tl.fromTo(
+          "#pr-disclaimer",
+          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(0 0% 0 0)", duration: 2.0, ease: "power3.out" },
+          11.0,
+        );
+
+        // Scene 5 (14.5–18.0s): held read with subtle jitter on the stacked pair
+        tl.to(
+          "#pr-identity",
+          { y: 2, duration: 1.4, ease: "sine.inOut", repeat: 1, yoyo: true },
+          14.5,
+        );
+        tl.to(
+          "#pr-integrity",
+          { y: -2, duration: 1.4, ease: "sine.inOut", repeat: 1, yoyo: true },
+          14.5,
+        );
+
+        window.__timelines["02-problem"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

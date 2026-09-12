@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+
+        .cmt-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .callout {
+          position: absolute;
+          right: 48px;
+          padding: 14px 22px;
+          background: rgba(10, 14, 26, 0.94);
+          border-left: 2px solid #667eea;
+          font-family: "Inter", sans-serif;
+          font-weight: 400;
+          font-size: 22px;
+          line-height: 1.35;
+          color: rgba(255, 255, 255, 0.92);
+          max-width: 480px;
+          opacity: 0;
+        }
+        .callout .k {
+          display: block;
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 12px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: #667eea;
+          margin-bottom: 6px;
+        }
+        .callout.a {
+          top: 110px;
+        }
+        .callout.b {
+          top: 300px;
+        }
+
+        .formula-chip {
+          position: absolute;
+          left: 50%;
+          top: 720px;
+          transform: translate(-50%, 0);
+          padding: 16px 24px;
+          background: rgba(10, 14, 26, 0.94);
+          border: 1px solid rgba(240, 160, 32, 0.55);
+          font-family: "Inconsolata", monospace;
+          font-weight: 600;
+          font-size: 24px;
+          letter-spacing: 0.02em;
+          color: rgba(255, 255, 255, 0.94);
+          opacity: 0;
+          white-space: nowrap;
+        }
+        .formula-chip .eq {
+          color: #f0a020;
+        }
+
+        .signing-card {
+          position: absolute;
+          left: 50%;
+          top: 46%;
+          transform: translate(-50%, -50%);
+          width: 640px;
+          padding: 32px 40px;
+          background: rgba(10, 14, 26, 0.96);
+          border: 1px solid rgba(102, 126, 234, 0.55);
+          box-shadow: 0 24px 64px rgba(102, 126, 234, 0.18);
+          display: grid;
+          gap: 12px;
+          justify-items: center;
+          text-align: center;
+          opacity: 0;
+        }
+        .signing-card .k {
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 14px;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: #667eea;
+        }
+        .signing-card .title {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 44px;
+          color: rgba(255, 255, 255, 0.96);
+        }
+        .signing-card .tx {
+          font-family: "Inconsolata", monospace;
+          font-weight: 400;
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.72);
+          letter-spacing: 0.04em;
+        }
+
+        .verdict-chip {
+          position: absolute;
+          left: 50%;
+          top: 46%;
+          transform: translate(-50%, -50%) scale(0.9);
+          padding: 16px 32px;
+          background: rgba(74, 222, 128, 0.14);
+          border: 1px solid rgba(74, 222, 128, 0.55);
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 24px;
+          letter-spacing: 0.06em;
+          color: #4ade80;
+          opacity: 0;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="08-commit-live"
+        data-width="1920"
+        data-height="1080"
+        data-duration="12.459"
+      >
+        <!-- video hosted at index.html root -->
+
+        <div
+          class="callout a clip"
+          id="cmt-cta-a"
+          data-start="0.4"
+          data-duration="12"
+          data-track-index="1"
+        >
+          <span class="k">move ∈ {0, 1}</span>
+          binding at commit time — not just secret.
+        </div>
+
+        <div
+          class="callout b clip"
+          id="cmt-cta-b"
+          data-start="4.0"
+          data-duration="8"
+          data-track-index="2"
+        >
+          <span class="k">UltraHonk proof</span>
+          garbage commitments rejected before opponent locks stake.
+        </div>
+
+        <div
+          class="formula-chip clip"
+          id="cmt-formula"
+          data-start="6.8"
+          data-duration="3.5"
+          data-track-index="3"
+        >
+          keccak256(move ∥ nonce ∥ game_id)
+          <span class="eq">==</span> commitment
+        </div>
+
+        <div
+          class="signing-card clip"
+          id="cmt-sign"
+          data-start="10.0"
+          data-duration="1.4"
+          data-track-index="4"
+        >
+          <span class="k">Signing on Stellar</span>
+          <span class="title">create_game</span>
+          <span class="tx">tx · 9d8cc50b…</span>
+        </div>
+
+        <div
+          class="verdict-chip clip"
+          id="cmt-verdict"
+          data-start="11.3"
+          data-duration="1.159"
+          data-track-index="5"
+        >
+          ✓ Committed on-chain
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        tl.fromTo(
+          "#cmt-cta-a",
+          { opacity: 0, x: 12 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+          0.5,
+        );
+        tl.fromTo(
+          "#cmt-cta-b",
+          { opacity: 0, x: 12 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+          4.1,
+        );
+
+        tl.fromTo(
+          "#cmt-formula",
+          { opacity: 0, y: 12, scale: 0.94 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" },
+          6.9,
+        );
+
+        // Dim earlier as new arrives
+        tl.to(
+          "#cmt-cta-a",
+          { opacity: 0.4, duration: 0.4, ease: "power3.out" },
+          4.2,
+        );
+
+        // Signing → verdict swap
+        tl.fromTo(
+          "#cmt-sign",
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+          10.1,
+        );
+        tl.to(
+          "#cmt-sign",
+          { opacity: 0, duration: 0.25, ease: "power3.out" },
+          11.25,
+        );
+        tl.fromTo(
+          "#cmt-verdict",
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" },
+          11.3,
+        );
+
+        window.__timelines["08-commit-live"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

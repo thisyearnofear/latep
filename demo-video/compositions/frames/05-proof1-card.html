@@ -1,0 +1,139 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+        .bg {
+          background: #0a0e1a;
+        }
+
+        .stage {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-items: center;
+        }
+        .card {
+          position: relative;
+          width: 1300px;
+          display: grid;
+          gap: 22px;
+          justify-items: center;
+          text-align: center;
+          transform: translateY(-30px);
+        }
+        .hair {
+          width: 100%;
+          height: 1px;
+          background: #f0a020;
+          transform-origin: left center;
+          transform: scaleX(0);
+        }
+        .kicker {
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 22px;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: #f0a020;
+          order: -2;
+          opacity: 0;
+        }
+        .display {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 132px;
+          line-height: 1.02;
+          letter-spacing: -0.008em;
+          color: rgba(255, 255, 255, 0.96);
+          opacity: 0;
+        }
+        .sub {
+          font-family: "Inter", sans-serif;
+          font-weight: 400;
+          font-size: 28px;
+          line-height: 1.5;
+          color: rgba(255, 255, 255, 0.72);
+          overflow: hidden;
+          clip-path: inset(0 100% 0 0);
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="05-proof1-card"
+        data-width="1920"
+        data-height="1080"
+        data-duration="5"
+      >
+        <div
+          class="bg clip"
+          data-start="0"
+          data-duration="5"
+          data-track-index="0"
+        ></div>
+
+        <div
+          class="stage clip"
+          data-start="0"
+          data-duration="5"
+          data-track-index="1"
+        >
+          <div class="card">
+            <div class="kicker" id="p1-kicker">Proof #1</div>
+            <div class="hair" id="p1-hair"></div>
+            <div class="display" id="p1-display">Private Accreditation</div>
+            <div class="sub" id="p1-sub">
+              prove you're allowed to play — without saying who you are.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Scene 1 (0.0–1.5s): hairline draws in horizontally
+        tl.to(
+          "#p1-hair",
+          { scaleX: 1, duration: 1.3, ease: "power3.out" },
+          0.2,
+        );
+
+        // Scene 2 (1.5–3.5s): kicker above + display below reveal
+        tl.fromTo(
+          "#p1-kicker",
+          { opacity: 0, y: 6 },
+          { opacity: 1, y: 0, duration: 0.55, ease: "power3.out" },
+          1.5,
+        );
+        tl.fromTo(
+          "#p1-display",
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+          1.7,
+        );
+
+        // Scene 3 (3.5–5.0s): sub types in via clip-path reveal; held read
+        tl.to(
+          "#p1-sub",
+          { clipPath: "inset(0 0% 0 0)", duration: 1.2, ease: "power3.out" },
+          3.5,
+        );
+
+        window.__timelines["05-proof1-card"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

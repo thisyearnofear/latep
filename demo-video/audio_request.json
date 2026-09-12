@@ -1,0 +1,24 @@
+{
+  "provider": "auto",
+  "speed": 1,
+  "lines": [
+    {
+      "id": "06",
+      "text": "Prove you're on the allowlist — without revealing which credential is yours. A Poseidon Merkle root, plus a nullifier, verified on-chain by an UltraHonk verifier. No identity leaked."
+    },
+    {
+      "id": "08",
+      "text": "The proof makes the commit binding at commit time. Not just secret — provably a valid move, with a known preimage. Garbage commitments get rejected before your opponent locks their stake."
+    },
+    {
+      "id": "09",
+      "text": "Noir circuits. Browser-side proofs via bb dot js. UltraHonk, verified in a Soroban contract — using Stellar's native Poseidon and BN254 host functions."
+    }
+  ],
+  "bgm": {
+    "mode": "retrieve",
+    "query": "Trust is proven, not promised — two ZK primitives, working on Stellar.",
+    "blob": "Trust is proven, not promised — two ZK primitives, working on Stellar.",
+    "arc": "Hook → Problem → Product → Proof#1 → Proof#2 → Stack → CTA"
+  }
+}

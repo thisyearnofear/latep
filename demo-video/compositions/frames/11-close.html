@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+
+        .close-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.7;
+        }
+
+        .dim {
+          position: absolute;
+          inset: 0;
+          background: rgba(10, 14, 26, 0.35);
+        }
+
+        .lockup {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 200px;
+          text-align: center;
+        }
+        .wordmark {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 168px;
+          line-height: 1;
+          letter-spacing: -0.01em;
+          color: rgba(255, 255, 255, 0.98);
+        }
+        .wordmark .letter {
+          display: inline-block;
+          opacity: 0;
+        }
+
+        .url-pill {
+          margin-top: 34px;
+          display: inline-block;
+          padding: 16px 32px;
+          background: rgba(102, 126, 234, 0.14);
+          border: 1px solid rgba(102, 126, 234, 0.55);
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 30px;
+          letter-spacing: 0.02em;
+          color: #667eea;
+          position: relative;
+          opacity: 0;
+        }
+        .url-underline {
+          position: absolute;
+          left: 32px;
+          right: 32px;
+          bottom: 8px;
+          height: 1px;
+          background: #f0a020;
+          transform-origin: left center;
+          transform: scaleX(0);
+        }
+
+        .contract-id {
+          margin-top: 26px;
+          font-family: "Inconsolata", monospace;
+          font-weight: 400;
+          font-size: 18px;
+          letter-spacing: 0.04em;
+          color: rgba(255, 255, 255, 0.62);
+          opacity: 0;
+        }
+
+        .exit-fade {
+          position: absolute;
+          inset: 0;
+          background: #0a0e1a;
+          opacity: 0;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="11-close"
+        data-width="1920"
+        data-height="1080"
+        data-duration="10"
+      >
+        <!-- video hosted at index.html root -->
+
+        <div
+          class="dim clip"
+          data-start="0"
+          data-duration="10"
+          data-track-index="1"
+        ></div>
+
+        <div
+          class="lockup clip"
+          data-start="0"
+          data-duration="10"
+          data-track-index="2"
+        >
+          <div class="wordmark" id="cl-wordmark">
+            <!-- letters injected below -->
+          </div>
+          <div>
+            <div class="url-pill" id="cl-url">
+              latep.trustfall.xyz
+              <div class="url-underline" id="cl-under"></div>
+            </div>
+          </div>
+          <div class="contract-id" id="cl-contract">
+            CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P
+          </div>
+        </div>
+
+        <div
+          class="exit-fade clip"
+          id="cl-exit"
+          data-start="9.5"
+          data-duration="0.5"
+          data-track-index="3"
+        ></div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+
+        // Build wordmark letters as spans (deterministic — runs once at load)
+        (function () {
+          const el = document.getElementById("cl-wordmark");
+          if (!el) return;
+          const word = "Latep";
+          el.innerHTML = word
+            .split("")
+            .map((c) => `<span class="letter">${c}</span>`)
+            .join("");
+        })();
+
+        const tl = gsap.timeline({ paused: true });
+
+        // Scene 2 (4.0–7.0s): wordmark assembles letter-by-letter
+        tl.fromTo(
+          "#cl-wordmark .letter",
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power3.out",
+            stagger: 0.08,
+          },
+          4.0,
+        );
+
+        // Scene 3 (7.0–9.0s): URL pill + contract ID
+        tl.fromTo(
+          "#cl-url",
+          { opacity: 0, y: 10, scale: 0.96 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "power3.out" },
+          7.0,
+        );
+        tl.fromTo(
+          "#cl-contract",
+          { opacity: 0, y: 6 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          7.6,
+        );
+
+        // Scene 4 (9.0–10.0s): hairline underline draws, then fade to deep-navy (this is the final frame — exit tween allowed)
+        tl.to(
+          "#cl-under",
+          { scaleX: 1, duration: 0.7, ease: "power3.out" },
+          9.0,
+        );
+        tl.to(
+          "#cl-exit",
+          { opacity: 1, duration: 0.5, ease: "power3.out" },
+          9.5,
+        );
+
+        window.__timelines["11-close"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
