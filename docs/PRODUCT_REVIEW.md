@@ -2,6 +2,38 @@
 
 Comprehensive review of product design, UI/UX, system architecture, reliability/performance, and intuitiveness/cogency. Based on full codebase analysis (contract, circuit, frontend).
 
+## Product direction — September 2026
+
+The next demo iteration is an interactive world about trust, not a dashboard with more effects. The initial design assumes a newcomer audience: let visitors feel one dilemma before asking them to understand strategies, wallets, or cryptography. The tone is a playful, crafted experiment with restrained controls and expressive characters.
+
+### Agreed primitives
+
+- Keep accessible HTML controls and the existing typography, spacing, and player-color tokens as the foundation.
+- Start with a persistent illustrated stage using SVG and GSAP. Use the same character language for choice, commitment, reveal, and outcome.
+- Reserve Three.js for a future spatial diorama if depth and camera movement materially improve the story. WebGL is a rendering API, not a separate product-design strategy. Do not add a second animation engine now.
+- Make sound opt-in and event-driven. Navigation and controls stay quiet; game outcomes carry the expressive motion.
+- Drive choreography from explicit application states. Animations never establish proof validity, transaction confirmation, or settlement.
+
+### First implementation slice
+
+The home page centers a wallet-free practice round: choose → locally seal → reveal → understand the outcome → play again. Welcome guidance and the personality quiz become optional actions, and Learn, Tournament, and ZK multiplayer remain available below the stage. The local partner cooperates first, then copies the player's previous move. Practice scores use the tutorial's NC_DEFAULT matrix and are labelled as points, not XLM.
+
+This is a simulation: sealing does not generate a cryptographic proof or submit a transaction. The interface must state that plainly. In a later multiplayer integration, proof generation, submission, on-chain verification, reveal, and settlement must remain distinct; never infer success from animation completion or expose a hidden opponent move through appearance or markup.
+
+### Follow-on slices
+
+1. Carry the stage and character vocabulary into the tutorial and guided learning journey.
+2. Represent repeated cooperation, betrayal, and noise through shared height and wind metaphors without changing game rules.
+3. Extend the visual vocabulary to tournament populations while preserving truthful chart scales and accessible data.
+4. Integrate the sealed-choice object with real multiplayer states, including rejection, timeout, retry, and settlement.
+5. Evaluate a stylized Three.js diorama only after the complete 2.5D interaction has been reviewed.
+
+### Acceptance criteria
+
+A fresh visitor can play without a modal or wallet; all controls work by keyboard and touch; opponent choice is not exposed before reveal; replay cannot race pending timers; reduced motion preserves the full flow; sound starts off; the stage works without WebGL; layouts remain usable at 320, 375, 414, 768, and desktop widths. No contract or proof-service changes are required for this slice.
+
+The historical review below is retained as context; its implementation and deployment claims are not revalidated by this visual-design work.
+
 ---
 
 ## 0. Two ZK Patterns Overview
