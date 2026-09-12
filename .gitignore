@@ -65,6 +65,10 @@ packages/*
 # generated contract client imports
 src/contracts/*
 !src/contracts/util.ts
+!src/contracts/zk_dilemma
+!src/contracts/zk_dilemma/**
+src/contracts/zk_dilemma/dist/
+src/contracts/zk_dilemma/node_modules/
 
 # lock files (optional: ignore if using multiple managers)
 # yarn.lock

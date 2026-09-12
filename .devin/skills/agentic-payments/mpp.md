@@ -338,11 +338,9 @@ export function mppChargeMiddleware(amount, description) {
   return async (req, res, next) => {
     if (!chargeMppx) {
       res.setHeader("X-MPP-Warning", "MPP not configured on this server");
-      res
-        .status(503)
-        .json({
-          error: "MPP charge unavailable — payment middleware not initialized",
-        });
+      res.status(503).json({
+        error: "MPP charge unavailable — payment middleware not initialized",
+      });
       return;
     }
     // Delegate to the same per-route handler the standalone Charge server
@@ -503,11 +501,9 @@ export function mppSessionMiddleware(amount, description) {
         "X-MPP-Warning",
         "MPP Session not configured on this server",
       );
-      res
-        .status(503)
-        .json({
-          error: "MPP session unavailable — payment middleware not initialized",
-        });
+      res.status(503).json({
+        error: "MPP session unavailable — payment middleware not initialized",
+      });
       return;
     }
     // Same delegation as mppChargeMiddleware above, to the Channel
