@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /
-Allow: /play
+Allow: /play$
 Disallow: /debug
+Disallow: /play/
 
 Sitemap: https://latep.trustfall.xyz/sitemap.xml
