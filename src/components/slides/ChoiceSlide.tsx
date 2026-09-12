@@ -20,10 +20,8 @@ import {
   type GameMove,
 } from "../../util/strategies";
 import { unlockAchievement } from "../ui/AchievementBadge";
-import { StaggerButton } from "../ui/StaggerButton";
-import { ElectricButton } from "../ui/ElectricButton";
-import { ShimmerButton } from "../ui/ShimmerButton";
 import { TrustFallCharacter } from "../TrustFallCharacter";
+import { TrustStage, type TrustStageState } from "../visual/TrustStage";
 
 type Outcome = "caught" | "betrayed" | "exploited" | "mutual-destruction";
 
@@ -79,7 +77,7 @@ const MATRIX_CELLS: MatrixCellData[] = [
     payoff: "-1 / +3",
     sub: "you fell, they stepped aside",
     color: "var(--accent-defect)",
-    description: "💥 You fall, they step aside. You: 0, Them: +3",
+    description: "💥 You fall, they step aside. You: -1, Them: +3.",
   },
   {
     id: "dc",
@@ -87,7 +85,7 @@ const MATRIX_CELLS: MatrixCellData[] = [
     payoff: "+3 / -1",
     sub: "they fell, you stepped aside",
     color: "var(--accent-warm)",
-    description: "🏆 You step aside, they fall. You: +3, Them: 0",
+    description: "🏆 You step aside, they fall. You: +3, Them: -1.",
   },
   {
     id: "dd",
@@ -95,7 +93,7 @@ const MATRIX_CELLS: MatrixCellData[] = [
     payoff: "0 / 0",
     sub: "nobody caught anyone",
     color: "var(--accent-defect)",
-    description: "💀 You both step aside. Nobody catches anyone. +1 each.",
+    description: "💀 You both step aside. Nobody catches anyone. 0 each.",
   },
 ];
 
@@ -181,6 +179,7 @@ const PayoffMatrix: React.FC<PayoffMatrixProps> = ({ hoveredChoice }) => {
   return (
     <div
       data-animate
+      className="learning-payoff"
       style={{
         padding: "24px",
         marginBottom: "32px",
@@ -205,6 +204,8 @@ const PayoffMatrix: React.FC<PayoffMatrixProps> = ({ hoveredChoice }) => {
 
       <div
         ref={matrixRef}
+        role="group"
+        aria-label="Payoff matrix"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
@@ -272,6 +273,10 @@ const PayoffMatrix: React.FC<PayoffMatrixProps> = ({ hoveredChoice }) => {
             key={cell.id}
             ref={setCellRef(i)}
             data-animate
+            tabIndex={0}
+            aria-label={cell.description}
+            onFocus={() => setHoveredCell(cell.id)}
+            onBlur={() => setHoveredCell(null)}
             onMouseEnter={() => setHoveredCell(cell.id)}
             onMouseLeave={() => setHoveredCell(null)}
             style={{
@@ -347,6 +352,10 @@ const PayoffMatrix: React.FC<PayoffMatrixProps> = ({ hoveredChoice }) => {
             key={cell.id}
             ref={setCellRef(i + 2)}
             data-animate
+            tabIndex={0}
+            aria-label={cell.description}
+            onFocus={() => setHoveredCell(cell.id)}
+            onBlur={() => setHoveredCell(null)}
             onMouseEnter={() => setHoveredCell(cell.id)}
             onMouseLeave={() => setHoveredCell(null)}
             style={{
@@ -420,6 +429,16 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
     null,
   );
   const [hoveredChoice, setHoveredChoice] = useState<"C" | "D" | null>(null);
+  const resultRef = useRef<HTMLParagraphElement>(null);
+  const cooperateRef = useRef<HTMLButtonElement>(null);
+  const previousMoveRef = useRef<GameMove | null>(null);
+
+  useEffect(() => {
+    if (playerMove) resultRef.current?.focus({ preventScroll: true });
+    else if (previousMoveRef.current)
+      cooperateRef.current?.focus({ preventScroll: true });
+    previousMoveRef.current = playerMove;
+  }, [playerMove]);
 
   const makeChoice = (move: GameMove) => {
     if (playerMove) return; // Already played
@@ -446,8 +465,16 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
     setPayout(null);
   };
 
+  const stageState: TrustStageState =
+    playerMove && outcome
+      ? { phase: "outcome", playerMove, opponentMove: aiMove }
+      : { phase: "choose" };
+
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
+    <div
+      className="learning-round"
+      style={{ margin: "0 auto", textAlign: "center" }}
+    >
       <h2
         data-animate
         style={{
@@ -471,45 +498,50 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
         Your opponent is waiting below. You have two options.
       </p>
 
-      {/* Payoff matrix (proximity-aware & interactive) */}
-      <PayoffMatrix hoveredChoice={hoveredChoice} />
+      <TrustStage
+        state={stageState}
+        opponentLabel="Practice partner"
+        roundKey={playerMove ?? "none"}
+        trustAltitude={outcome === "caught" ? 1 : 0}
+      />
 
       {/* Choice buttons or result */}
       {!playerMove ? (
-        <div data-animate>
-          <div
-            style={{ display: "flex", gap: "16px", justifyContent: "center" }}
-          >
+        <div data-animate style={{ marginTop: "16px" }}>
+          <div className="learning-actions">
             <div
               onMouseEnter={() => setHoveredChoice("C")}
               onMouseLeave={() => setHoveredChoice(null)}
             >
-              <StaggerButton
+              <button
+                type="button"
+                ref={cooperateRef}
+                className="learning-button learning-button-primary"
                 onClick={() => makeChoice("C")}
-                color="cooperate"
-                size="lg"
-                triggerOn="active"
+                onFocus={() => setHoveredChoice("C")}
+                onBlur={() => setHoveredChoice(null)}
               >
-                🤝 Fall (Cooperate)
-              </StaggerButton>
+                Cooperate
+              </button>
             </div>
             <div
               onMouseEnter={() => setHoveredChoice("D")}
               onMouseLeave={() => setHoveredChoice(null)}
             >
-              <StaggerButton
+              <button
+                type="button"
+                className="learning-button"
                 onClick={() => makeChoice("D")}
-                color="defect"
-                size="lg"
-                triggerOn="active"
+                onFocus={() => setHoveredChoice("D")}
+                onBlur={() => setHoveredChoice(null)}
               >
-                ⚔️ Step aside (Defect)
-              </StaggerButton>
+                Defect
+              </button>
             </div>
           </div>
         </div>
       ) : (
-        <div data-animate>
+        <div data-animate style={{ marginTop: "16px" }}>
           <div
             className="glass-panel"
             style={{
@@ -518,60 +550,9 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
               borderColor: outcome ? OUTCOME_INFO[outcome].color : undefined,
             }}
           >
-            <div
-              style={{
-                marginBottom: "12px",
-                display: "flex",
-                justifyContent: "center",
-                gap: "40px",
-              }}
-            >
-              <TrustFallCharacter
-                state={
-                  outcome === "caught"
-                    ? "caught"
-                    : outcome === "betrayed"
-                      ? "impact"
-                      : outcome === "exploited"
-                        ? "celebrating"
-                        : "impact"
-                }
-                color={
-                  outcome === "caught"
-                    ? "cooperator"
-                    : outcome === "betrayed"
-                      ? "you"
-                      : outcome === "exploited"
-                        ? "defector"
-                        : "defector"
-                }
-                size="xl"
-                label="You"
-              />
-              <TrustFallCharacter
-                state={
-                  outcome === "caught"
-                    ? "caught"
-                    : outcome === "betrayed"
-                      ? "celebrating"
-                      : outcome === "exploited"
-                        ? "impact"
-                        : "impact"
-                }
-                color={
-                  outcome === "caught"
-                    ? "cooperator"
-                    : outcome === "betrayed"
-                      ? "defector"
-                      : outcome === "exploited"
-                        ? "opponent"
-                        : "defector"
-                }
-                size="xl"
-                label="Them"
-              />
-            </div>
             <p
+              ref={resultRef}
+              tabIndex={-1}
               style={{
                 fontFamily: "var(--font-display)",
                 fontSize: "var(--text-xl)",
@@ -590,8 +571,8 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
                 }}
               >
                 You: {payout.player > 0 ? "+" : ""}
-                {payout.player} · Them: {payout.ai > 0 ? "+" : ""}
-                {payout.ai}
+                {payout.player} points · Them: {payout.ai > 0 ? "+" : ""}
+                {payout.ai} points
               </p>
             )}
           </div>
@@ -626,18 +607,26 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
             </p>
           )}
 
-          <div
-            style={{ display: "flex", gap: "12px", justifyContent: "center" }}
-          >
-            <ShimmerButton onClick={reset} size="sm">
-              ↺ Try again
-            </ShimmerButton>
-            <ElectricButton onClick={onNext} color="violet" size="sm">
-              What if you played again? →
-            </ElectricButton>
+          <div className="learning-actions">
+            <button type="button" className="learning-button" onClick={reset}>
+              Try again
+            </button>
+            <button
+              type="button"
+              className="learning-button learning-button-primary"
+              onClick={onNext}
+            >
+              What if you played again?
+            </button>
           </div>
         </div>
       )}
+
+      {/* Payoff matrix (proximity-aware & interactive) */}
+      <details className="learning-details" style={{ marginTop: "32px" }}>
+        <summary>How the points work</summary>
+        <PayoffMatrix hoveredChoice={hoveredChoice} />
+      </details>
     </div>
   );
 };

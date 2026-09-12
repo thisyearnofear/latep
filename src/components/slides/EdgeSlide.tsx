@@ -8,115 +8,34 @@
 
 import React from "react";
 import { SlideProps } from "../SlideSystem";
-import { ElectricButton } from "../ui/ElectricButton";
+import { TrustStage } from "../visual/TrustStage";
 
 export const EdgeSlide: React.FC<SlideProps> = ({ onNext }) => {
   return (
     <div
+      className="learning-round"
       style={{
-        maxWidth: "640px",
         margin: "0 auto",
         textAlign: "center",
         padding: "20px",
       }}
     >
       {/* The scene */}
-      <div
-        data-animate
-        style={{
-          position: "relative",
-          height: "280px",
-          marginBottom: "32px",
-          display: "flex",
-          alignItems: "flex-end",
-          justifyContent: "center",
-        }}
-      >
+      <div data-animate style={{ marginBottom: "32px" }}>
         {/* Cliff */}
-        <svg
-          width="280"
-          height="280"
-          viewBox="0 0 280 280"
-          style={{ position: "absolute", bottom: 0 }}
-        >
-          {/* Ground/cliff shape */}
-          <path
-            d="M 0 200 L 120 200 L 120 280 L 0 280 Z"
-            fill="rgba(255,255,255,0.06)"
-            stroke="rgba(255,255,255,0.12)"
-            strokeWidth="1"
-          />
-          {/* Edge line */}
-          <line
-            x1="120"
-            y1="200"
-            x2="280"
-            y2="200"
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth="1"
-            strokeDasharray="4 4"
-          />
-          {/* Figure standing on edge */}
-          <g
-            style={{
-              transformOrigin: "100px 200px",
-              animation: "tf-sway 3s ease-in-out infinite",
-            }}
-          >
-            {/* Head */}
-            <circle cx="100" cy="160" r="8" fill="rgba(255,255,255,0.9)" />
-            {/* Body */}
-            <line
-              x1="100"
-              y1="168"
-              x2="100"
-              y2="190"
-              stroke="rgba(255,255,255,0.9)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            {/* Arms — crossed (hesitant) */}
-            <line
-              x1="100"
-              y1="175"
-              x2="92"
-              y2="182"
-              stroke="rgba(255,255,255,0.9)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <line
-              x1="100"
-              y1="175"
-              x2="108"
-              y2="182"
-              stroke="rgba(255,255,255,0.9)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            {/* Legs */}
-            <line
-              x1="100"
-              y1="190"
-              x2="94"
-              y2="200"
-              stroke="rgba(255,255,255,0.9)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <line
-              x1="100"
-              y1="190"
-              x2="106"
-              y2="200"
-              stroke="rgba(255,255,255,0.9)"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </g>
-          {/* Glow at edge */}
-          <circle cx="120" cy="200" r="20" fill="rgba(240,160,32,0.08)" />
-        </svg>
+        {/* Ground/cliff shape */}
+        {/* Edge line */}
+        {/* Figure standing on edge */}
+        {/* Head */}
+        {/* Body */}
+        {/* Arms — crossed (hesitant) */}
+        {/* Legs */}
+        {/* Glow at edge */}
+        <TrustStage
+          state={{ phase: "idle" }}
+          showChoices={false}
+          announce={false}
+        />
       </div>
 
       <h2
@@ -142,9 +61,8 @@ export const EdgeSlide: React.FC<SlideProps> = ({ onNext }) => {
           lineHeight: 1.6,
         }}
       >
-        Someone is standing below, arms ready. If you fall and they catch you,
-        you both win. If they step aside at the last second — you hit the
-        ground.
+        Two people take a risk. If both offer a catch, both benefit. If one
+        steps aside, the other bears the cost.
       </p>
 
       <p
@@ -161,9 +79,13 @@ export const EdgeSlide: React.FC<SlideProps> = ({ onNext }) => {
       </p>
 
       <div data-animate>
-        <ElectricButton onClick={onNext} color="violet" size="lg">
-          Take the fall →
-        </ElectricButton>
+        <button
+          type="button"
+          className="learning-button learning-button-primary"
+          onClick={onNext}
+        >
+          Take the fall
+        </button>
       </div>
 
       <p
@@ -175,8 +97,8 @@ export const EdgeSlide: React.FC<SlideProps> = ({ onNext }) => {
           marginTop: "32px",
         }}
       >
-        This is the Prisoner's Dilemma. You'll play it with trust, strategy, and
-        real stakes.
+        This is the Prisoner's Dilemma. Start with practice points; explore
+        on-chain stakes later.
       </p>
     </div>
   );

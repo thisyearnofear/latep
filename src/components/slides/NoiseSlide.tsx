@@ -8,20 +8,23 @@
  * Runs a quick simulation: TFT vs TFT with varying noise levels.
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { SlideProps } from "../SlideSystem";
 import { unlockAchievement } from "../ui/AchievementBadge";
-import { ElectricButton } from "../ui/ElectricButton";
+import { TrustStage } from "../visual/TrustStage";
 import {
   createStrategy,
   playRepeatedGame,
   NC_DEFAULT,
+  type GameMove,
 } from "../../util/strategies";
 
 interface SimResult {
   noise: number;
   avgCooperation: number;
   avgScore: number;
+  lastRound: { a: GameMove; b: GameMove } | null;
+  trustAltitude: number;
 }
 
 function runSim(noise: number, rounds = 50): SimResult {
@@ -38,29 +41,56 @@ function runSim(noise: number, rounds = 50): SimResult {
   const avgCooperation = coopCount / (rounds * 2);
   const avgScore = (result.totalA + result.totalB) / 2;
 
-  return { noise, avgCooperation, avgScore };
+  return {
+    noise,
+    avgCooperation,
+    avgScore,
+    lastRound: result.moves[result.moves.length - 1] ?? null,
+    trustAltitude: result.moves.reduce(
+      (height, m) => (m.a === "C" && m.b === "C" ? height + 1 : 0),
+      0,
+    ),
+  };
 }
 
 export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [noise, setNoise] = useState(0);
   const [result, setResult] = useState<SimResult | null>(null);
   const [running, setRunning] = useState(false);
+  const [simulationNumber, setSimulationNumber] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const runSimulation = useCallback(() => {
+    if (running || timerRef.current !== null) return;
+    const requestedNoise = noise;
     setRunning(true);
-    setTimeout(() => {
-      const r = runSim(noise);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      const r = runSim(requestedNoise);
       setResult(r);
+      setSimulationNumber((n) => n + 1);
       setRunning(false);
       unlockAchievement("noise_master");
     }, 300);
-  }, [noise]);
+  }, [noise, running]);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, []);
 
   const coopPercent = result ? Math.round(result.avgCooperation * 100) : 0;
   const scoreLabel = result ? result.avgScore.toFixed(1) : "—";
 
   return (
-    <div style={{ maxWidth: "640px", margin: "0 auto", textAlign: "center" }}>
+    <div
+      className="learning-round"
+      style={{ margin: "0 auto", textAlign: "center" }}
+    >
       <h2
         data-animate
         style={{
@@ -150,6 +180,11 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           value={noise}
           onChange={(e) => {
             setNoise(parseFloat(e.target.value));
+            if (timerRef.current) {
+              clearTimeout(timerRef.current);
+              timerRef.current = null;
+            }
+            setRunning(false);
             setResult(null);
           }}
           style={{
@@ -214,11 +249,11 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           >
             Run a 50-round simulation between two Tit-for-Tat strategies
           </p>
-          <ElectricButton
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
             onClick={runSimulation}
             disabled={running}
-            color="warm"
-            size="lg"
             style={{
               width: "100%",
               maxWidth: "320px",
@@ -226,9 +261,40 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
               fontWeight: 700,
             }}
           >
-            {running ? "Running 50 rounds..." : "▶ Simulate 50 rounds"}
-          </ElectricButton>
+            {running ? "Running 50 rounds..." : "Simulate 50 rounds"}
+          </button>
         </div>
+      </div>
+
+      <div data-animate style={{ marginBottom: "24px" }}>
+        <p
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "var(--text-sm)",
+            color: "var(--text-muted)",
+            marginBottom: "8px",
+          }}
+        >
+          {result
+            ? "Final round of the 50-round simulation"
+            : "Wind risk is a setting, not a guaranteed mistake."}
+        </p>
+        <TrustStage
+          state={
+            result?.lastRound
+              ? {
+                  phase: "outcome",
+                  playerMove: result.lastRound.a,
+                  opponentMove: result.lastRound.b,
+                }
+              : { phase: "idle" }
+          }
+          opponentLabel="Tit-for-Tat partner"
+          roundKey={simulationNumber}
+          showChoices={!!result}
+          trustAltitude={result?.trustAltitude}
+          noise={result?.noise ?? noise}
+        />
       </div>
 
       {/* Results */}
@@ -249,7 +315,14 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
               borderRadius: "var(--radius-lg)",
             }}
           >
-            <div style={{ display: "flex", justifyContent: "space-around" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                flexWrap: "wrap",
+                gap: "16px",
+              }}
+            >
               <div>
                 <p
                   style={{
@@ -290,7 +363,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
                     letterSpacing: "0.1em",
                   }}
                 >
-                  Avg score
+                  Average total points
                 </p>
                 <p
                   style={{
@@ -342,21 +415,19 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
               marginBottom: "24px",
             }}
           >
-            {noise === 0
-              ? "Perfect signals — Tit-for-Tat maintains 100% cooperation. Trust is stable."
-              : noise < 0.15
-                ? "A little noise — cooperation dips but mostly holds. Forgiveness helps."
-                : noise < 0.3
-                  ? "Moderate noise — misunderstandings cascade. Trust erodes."
-                  : "High noise — cooperation collapses. Even perfect partners can't trust each other."}
+            {`At ${Math.round(result.noise * 100)}% noise risk, this run produced ${coopPercent}% cooperation. Run it again to explore variation.`}
           </p>
         </div>
       )}
 
       <div data-animate>
-        <ElectricButton onClick={onNext} color="violet" size="md">
-          Ready for real stakes? →
-        </ElectricButton>
+        <button
+          type="button"
+          className="learning-button learning-button-primary"
+          onClick={onNext}
+        >
+          Ready for real stakes?
+        </button>
       </div>
     </div>
   );
