@@ -76,7 +76,7 @@ Both patterns use Stellar's native cryptographic primitives:
 
 Proofs are generated off-chain in the browser using Noir + bb.js (WASM, lazy-loaded) and verified on-chain by the `ultrahonk_soroban_verifier` (NethermindEth).
 
-**Deployed on testnet:** `CA6PHYHU6OCKSW2KMSWQNBZ4DNUKUWGWNQDFJIHNS22WOT45F6WQTMG5` (2026-07-03)
+**Deployed on testnet:** `CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P` (2026-07-03)
 
 ---
 
@@ -202,7 +202,7 @@ Proofs are generated off-chain in the browser using Noir + bb.js (WASM, lazy-loa
 - [x] Clear README.md explaining what was built, how ZK is used, and what's unfinished
 - [x] ZK is load-bearing: two distinct patterns, both doing real work
 - [x] Stellar integration: Soroban contract verifies proofs using BN254 + Poseidon host functions
-- [x] Contracts deployed on testnet (`CA6PHYHU6OCKSW2KMSWQNBZ4DNUKUWGWNQDFJIHNS22WOT45F6WQTMG5`)
+- [x] Contracts deployed on testnet (`CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P`)
 - [x] Honest about mock data and unfinished features in README
 - [x] 19/19 contract tests passing (7 single-round + 8 multi-round + 4 accreditation)
 - [x] TypeScript clean, ESLint clean, Vite build succeeds
