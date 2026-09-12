@@ -10,6 +10,8 @@ Latep demonstrates two distinct zero-knowledge proof patterns verified on-chain 
 
 Both proofs are generated client-side in the browser using Noir + bb.js (WASM, lazy-loaded) and verified on-chain by the `ultrahonk_soroban_verifier` using Stellar Protocol 25/26's native BN254 and Poseidon host functions.
 
+A third pattern is in progress — **Private Reputation**: prove a cooperation track record without revealing it. See `docs/HACKMERIDIAN.md` for the spec and the HackMeridian 2026 plan.
+
 _Built with Scaffold Stellar for the Stellar Hacks: Real-World ZK hackathon._
 
 ---
@@ -50,7 +52,7 @@ The gap between "powerful primitives" and "finished product" is where this proje
 
 **Demo tree:** The frontend ships with a pre-computed Merkle tree containing credentials 1, 2, and 3 at leaves 0, 1, 2 (all other leaves = `hash_1(0)`). The admin panel lets you initialize accreditation on-chain; the player panel lets you select a credential and generate + verify a proof. In a production system, the operator would build the tree off-chain and distribute credentials + paths privately.
 
-**Known limitation:** Nullifiers are pre-computed for `game_id=0` only. For other game_ids, a JavaScript Poseidon implementation (matching Noir BN254 parameters) would be needed to compute `poseidon(credential_id, game_id)` client-side. The ZK proof itself works for any game_id — only the frontend nullifier pre-computation needs the JS Poseidon.
+**Nullifiers are computed client-side** for any `game_id` via `poseidon-lite` — a JS Poseidon whose BN254 parameters match `noir-lang/poseidon`'s `hash_2` (verified against the circuit's test vectors). In a production system, the operator would build the tree off-chain and distribute credentials + paths privately.
 
 ### Pattern 2: Move Commitment Binding
 
@@ -310,6 +312,18 @@ cargo test -p zk-dilemma
 npx tsc --noEmit
 ```
 
+The contract tests `include_bytes!` proof fixtures that are gitignored. On a fresh clone, regenerate them first:
+
+```bash
+cd circuits/move_commitment && nargo compile && nargo execute witness \
+  && bb prove -s ultra_honk -b target/move_commitment.json -w target/witness.gz -o target --oracle_hash keccak \
+  && bb write_vk -s ultra_honk -b target/move_commitment.json -o target --oracle_hash keccak && cd ../..
+
+cd circuits/allowlist_membership && nargo compile && nargo execute witness \
+  && bb prove -s ultra_honk -b target/allowlist_membership.json -w target/witness.gz -o target/proof --oracle_hash keccak \
+  && bb write_vk -s ultra_honk -b target/allowlist_membership.json -o target --oracle_hash keccak && cd ../..
+```
+
 ### Frontend
 
 ```bash
@@ -325,12 +339,11 @@ npm run format    # Prettier
 
 We'd rather be honest about gaps than polish a mystery:
 
-- **Accreditation demo tree is pre-computed** — 3 credentials with hardcoded Merkle paths. A production system would build the tree off-chain and distribute paths privately. The ZK proof itself is real and works for any tree structure.
-- **Nullifiers only pre-computed for game_id=0** — the frontend needs a JS Poseidon implementation to compute nullifiers for other game_ids. The circuit handles any game_id; only the client-side helper is limited.
+- **Accreditation demo tree is pre-computed** — 3 credentials with hardcoded Merkle paths. A production system would build the tree off-chain and distribute paths privately. The ZK proof itself is real and works for any tree structure. Nullifiers are now computed client-side for any game_id via `poseidon-lite`.
 - **No end-to-end two-wallet browser test** — the cryptographic path (bb.js → on-chain verifier) is cross-verified in Rust tests, but a full two-wallet browser session hasn't been tested.
-- **No proof generation timeout** — if bb.js WASM fails to load, the UI hangs. No timeout or fallback.
+- **No proof generation timeout** — witness generation and proving are wrapped in a 120s timeout (`src/util/withTimeout.ts`), so a stalled bb.js WASM load surfaces an error instead of hanging. If the underlying WASM work never finishes, a page reload is still the recovery path.
 - **Polling, not websockets** — the frontend polls `get_game` every 5 seconds. No event subscription or batching.
-- **Reputation proofs not built** — the original plan included ZK reputation proofs ("I've cooperated in N% of games"). Not implemented. Future work.
+- **Reputation proofs not built** — the original plan included ZK reputation proofs ("I've cooperated in N% of games"). Now the active direction — see `docs/HACKMERIDIAN.md` for the Pattern 3 (private reputation) spec and build plan.
 
 ---
 

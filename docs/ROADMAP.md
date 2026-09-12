@@ -1,12 +1,29 @@
 # Latep — Development Roadmap
 
+> **Active direction (Sept 2026):** Pattern 3 — Private Reputation — and the HackMeridian 2026 (Scale track) build. See `docs/HACKMERIDIAN.md` for the spec, pitch, and work plan.
+
+## Current design priority — cohesive demo
+
+First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVIEW.md#product-direction--september-2026)):
+
+- [x] Home opens with a wallet-free illustrated practice round (choose → seal → reveal → outcome → replay)
+- [x] Welcome wizard and personality quiz are optional actions, not auto-opened overlays
+- [x] Local-sealing disclaimer shown in the interface; no proof or transaction implied
+- [x] Responsive layout (320–1440) and reduced-motion support; sound is opt-in
+- [ ] Carry the stage vocabulary into the tutorial and guided journey
+- [ ] Extend the vocabulary to tournament populations
+- [ ] Integrate the sealed-choice object with real on-chain multiplayer states
+- [ ] Optional stylized Three.js diorama after the 2.5D interaction is reviewed
+
 ## 🎯 Current Status: ZK Multiplayer + Multi-Round Matches + Game Theory Sandbox
 
 - ✅ ZK Dilemma Soroban contract (`contracts/zk_dilemma/`) — on-chain UltraHonk proof verification, keccak256 commitment, XLM escrow, forfeit logic, recovery functions (cancel_game, claim_refund), contract events, self-join prevention, **multi-round matches (best-of-3/5 with rematch)**
 - ✅ Noir move-commitment circuit (`circuits/move_commitment/`) — keccak256-based, external `noir-lang/keccak256` library
 - ✅ UltraHonk verifier integrated (`ultrahonk_soroban_verifier` crate from NethermindEth)
-- ✅ soroban-sdk upgraded to 26.x for BN254 host functions
-- ✅ Real ZK proof verified on-chain in Rust tests (15/15 tests passing — 7 single-round + 8 multi-round match)
+- ✅ soroban-sdk upgraded to 27.x (verifier on upstream `chore/protocol27` branch until NethermindEth/rs-soroban-ultrahonk PR #42 merges)
+- ✅ Real ZK proof verified on-chain in Rust tests (19/19 tests passing — 7 single-round + 8 multi-round match + 4 accreditation)
+- ✅ Nullifiers computed client-side for any game_id via `poseidon-lite` (matches `noir-lang/poseidon` BN254 params)
+- ✅ Proof-generation timeout (`src/util/withTimeout.ts`) — no silent hang on bb.js WASM failure
 - ✅ Browser proof generation via `@noir-lang/noir_js` + `@aztec/bb.js` (lazy-loaded, code-split)
 - ✅ Contract deployed to testnet: `CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P` (includes multi-round match support + recovery functions + events, deployed 2026-07-03)
 - ✅ ZK multiplayer frontend — GameLobby, CommitMove, RevealMove, GameResult, OnboardingOverlay, StatsDisplay, MatchSetup, MatchScoreboard, MatchCommitMove
