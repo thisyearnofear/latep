@@ -1,0 +1,24 @@
+{
+  "bgm": null,
+  "voices": [
+    {
+      "frame": 6,
+      "path": "assets/voice/06.wav",
+      "duration_s": 13.077,
+      "words": []
+    },
+    {
+      "frame": 8,
+      "path": "assets/voice/08.wav",
+      "duration_s": 12.459,
+      "words": []
+    },
+    {
+      "frame": 9,
+      "path": "assets/voice/09.wav",
+      "duration_s": 14.037,
+      "words": []
+    }
+  ],
+  "sfx": []
+}

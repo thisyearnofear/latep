@@ -1,0 +1,35 @@
+Latep — ZK Prisoner's Dilemma on Stellar
+
+Hackathon submission for "Stellar Hacks: Real-World ZK". A 2:30 walkthrough of a working app that uses two zero-knowledge primitives, both verified on-chain by a Soroban contract on Stellar testnet.
+
+KEY MESSAGE
+Trust is proven, not promised. Two ZK primitives make the app real:
+1. Private accreditation — prove you're on the allowlist without revealing which credential is yours. Poseidon Merkle tree + nullifier, verified on-chain via UltraHonk. This maps directly to the "identity / compliance proofs" example the hackathon called out.
+2. Binding move commitment — a ZK proof makes the commit binding at commit time. Rejects garbage commitments immediately, before the opponent locks their stake. UltraHonk proof of keccak256(move || nonce || game_id) with move ∈ {0, 1}.
+
+NARRATIVE ARC (2:30)
+0:00–0:15  title + hook: "Trust is proven, not promised"
+0:15–0:35  the problem: real-world trust needs identity AND integrity — without doxxing
+0:35–1:05  the app: mascot-first UX
+1:05–1:35  ★ ZK primitive #1 — Accreditation
+1:35–2:00  ★ ZK primitive #2 — Move commitment
+2:00–2:15  what's on-chain (Soroban contract on testnet, Stellar Protocol 25+26 host fns)
+2:15–2:30  close: latep.trustfall.xyz + contract ID
+
+STACK
+- Noir circuits: allowlist_membership (depth-4 Poseidon Merkle + nullifier), move_commitment (keccak256, move ∈ {0,1})
+- @noir-lang/noir_js + @aztec/bb.js in the browser, lazy-loaded
+- ultrahonk_soroban_verifier on-chain
+- Stellar Protocol 25 (X-Ray) native Poseidon host functions
+- Stellar Protocol 26 (Yardstick) BN254 host functions (multi-scalar mult, scalar-field arithmetic, curve-membership checks)
+
+DEPLOYED CONTRACT
+CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P (testnet, 2026-07-03)
+
+TONE
+Crafted, playful, technical. Mascot is a stick-figure "you". Palette leans deep-navy background with violet + warm accents. Display-serif for headers (Instrument Serif), Inter for body. Judges are technical (Stellar core devs, ZK researchers). Earn the ZK claim visually — no cheesy stock-promo tone.
+
+DO NOT
+- Crawl latep.trustfall.xyz — we have the raw screen-capture footage
+- Include narration in v1 — kinetic typography carries the pacing
+- Show the Freighter sign popup (it's out-of-DOM in raw footage) — cover with "Signing on Stellar…" overlay
