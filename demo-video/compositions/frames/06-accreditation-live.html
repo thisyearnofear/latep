@@ -1,0 +1,278 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+
+        .acc-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        /* Right-rail callout stack (outside 83% keep-out only where needed;
+           the callouts themselves sit in the upper 60% so they're clear of the
+           caption band). */
+        .callout {
+          position: absolute;
+          right: 48px;
+          padding: 14px 22px;
+          background: rgba(10, 14, 26, 0.94);
+          border-left: 2px solid #f0a020;
+          font-family: "Inter", sans-serif;
+          font-weight: 400;
+          font-size: 22px;
+          line-height: 1.35;
+          color: rgba(255, 255, 255, 0.92);
+          max-width: 480px;
+          opacity: 0;
+        }
+        .callout .k {
+          display: block;
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 12px;
+          letter-spacing: 0.24em;
+          text-transform: uppercase;
+          color: #f0a020;
+          margin-bottom: 6px;
+        }
+
+        .callout.a {
+          top: 90px;
+        }
+        .callout.b {
+          top: 260px;
+        }
+        .callout.c {
+          top: 430px;
+        }
+
+        /* Signing card — covers the last ~2s of the frame,
+           positioned centrally, replaces the CTA hover moment. */
+        .signing-card {
+          position: absolute;
+          left: 50%;
+          top: 46%;
+          transform: translate(-50%, -50%);
+          width: 640px;
+          padding: 32px 40px;
+          background: rgba(10, 14, 26, 0.96);
+          border: 1px solid rgba(102, 126, 234, 0.55);
+          box-shadow: 0 24px 64px rgba(102, 126, 234, 0.18);
+          display: grid;
+          gap: 12px;
+          justify-items: center;
+          text-align: center;
+          opacity: 0;
+        }
+        .signing-card .k {
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 14px;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: #667eea;
+        }
+        .signing-card .title {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 44px;
+          color: rgba(255, 255, 255, 0.96);
+        }
+        .signing-card .tx {
+          font-family: "Inconsolata", monospace;
+          font-weight: 400;
+          font-size: 18px;
+          color: rgba(255, 255, 255, 0.72);
+          letter-spacing: 0.04em;
+        }
+
+        .verdict-chip {
+          position: absolute;
+          left: 50%;
+          top: 46%;
+          transform: translate(-50%, -50%) scale(0.9);
+          padding: 16px 32px;
+          background: rgba(74, 222, 128, 0.14);
+          border: 1px solid rgba(74, 222, 128, 0.55);
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 24px;
+          letter-spacing: 0.06em;
+          color: #4ade80;
+          opacity: 0;
+        }
+
+        .payoff {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 200px; /* above 17% keep-out */
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 56px;
+          text-align: center;
+          color: rgba(255, 255, 255, 0.94);
+          opacity: 0;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="06-accreditation-live"
+        data-width="1920"
+        data-height="1080"
+        data-duration="13.077"
+      >
+        <!-- video hosted at index.html root -->
+
+        <!-- VO-paced callouts -->
+        <div
+          class="callout a clip"
+          id="acc-cta-a"
+          data-start="0.4"
+          data-duration="12.6"
+          data-track-index="1"
+        >
+          <span class="k">Poseidon Merkle root</span>
+          depth 4, verified on-chain.
+        </div>
+
+        <div
+          class="callout b clip"
+          id="acc-cta-b"
+          data-start="4.0"
+          data-duration="9.0"
+          data-track-index="2"
+        >
+          <span class="k">Nullifier</span>
+          prevents replay — without linking your identity.
+        </div>
+
+        <div
+          class="callout c clip"
+          id="acc-cta-c"
+          data-start="7.5"
+          data-duration="5.5"
+          data-track-index="3"
+        >
+          <span class="k">UltraHonk proof</span>
+          generated client-side via bb.js.
+        </div>
+
+        <!-- Signing-on-Stellar card (elides the wallet popup) -->
+        <div
+          class="signing-card clip"
+          id="acc-sign"
+          data-start="10.6"
+          data-duration="1.4"
+          data-track-index="4"
+        >
+          <span class="k">Signing on Stellar</span>
+          <span class="title">verify_accreditation</span>
+          <span class="tx">tx · a1f7b3c2…</span>
+        </div>
+
+        <!-- Verdict chip + payoff line -->
+        <div
+          class="verdict-chip clip"
+          id="acc-verdict"
+          data-start="11.9"
+          data-duration="1.177"
+          data-track-index="5"
+        >
+          ✓ Verified on-chain
+        </div>
+
+        <div
+          class="payoff clip"
+          id="acc-payoff"
+          data-start="12.0"
+          data-duration="1.077"
+          data-track-index="6"
+        >
+          No identity leaked.
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Callouts fade in with the VO cues
+        tl.fromTo(
+          "#acc-cta-a",
+          { opacity: 0, x: 12 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+          0.5,
+        );
+        tl.fromTo(
+          "#acc-cta-b",
+          { opacity: 0, x: 12 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+          4.1,
+        );
+        tl.fromTo(
+          "#acc-cta-c",
+          { opacity: 0, x: 12 },
+          { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" },
+          7.6,
+        );
+
+        // Dim earlier callouts as new ones arrive so the eye follows
+        tl.to(
+          "#acc-cta-a",
+          { opacity: 0.4, duration: 0.4, ease: "power3.out" },
+          4.2,
+        );
+        tl.to(
+          "#acc-cta-b",
+          { opacity: 0.4, duration: 0.4, ease: "power3.out" },
+          7.7,
+        );
+
+        // Signing card slides up over the CTA (mimics Freighter sign moment)
+        tl.fromTo(
+          "#acc-sign",
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" },
+          10.7,
+        );
+
+        // Verdict + payoff resolve
+        tl.to(
+          "#acc-sign",
+          { opacity: 0, duration: 0.25, ease: "power3.out" },
+          11.85,
+        );
+        tl.fromTo(
+          "#acc-verdict",
+          { opacity: 0, scale: 0.9 },
+          { opacity: 1, scale: 1, duration: 0.5, ease: "power3.out" },
+          11.9,
+        );
+        tl.fromTo(
+          "#acc-payoff",
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          12.1,
+        );
+
+        window.__timelines["06-accreditation-live"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

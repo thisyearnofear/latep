@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+
+        .meet-video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .overlay-strip {
+          position: absolute;
+          left: 6%;
+          right: 6%;
+          bottom: 92px; /* above 17% keep-out */
+          padding: 26px 40px;
+          background: rgba(10, 14, 26, 0.92);
+          border-top: 1px solid rgba(240, 160, 32, 0.55);
+          border-bottom: 1px solid rgba(240, 160, 32, 0.55);
+          display: grid;
+          gap: 8px;
+          opacity: 0;
+          transform: translateY(24px);
+        }
+
+        .overlay-strip .title {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 64px;
+          line-height: 1;
+          color: rgba(255, 255, 255, 0.96);
+        }
+        .overlay-strip .sub {
+          font-family: "Inter", sans-serif;
+          font-weight: 400;
+          font-size: 24px;
+          color: rgba(255, 255, 255, 0.72);
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="03-meet"
+        data-width="1920"
+        data-height="1080"
+        data-duration="12"
+      >
+        <!-- video is hosted at the root of index.html; this sub-comp only carries the overlay -->
+
+        <div
+          class="overlay-strip clip"
+          id="meet-overlay"
+          data-start="8.5"
+          data-duration="3.5"
+          data-track-index="2"
+        >
+          <div class="title">Meet Latep</div>
+          <div class="sub">
+            an interactive game about trust — with real cryptographic stakes.
+          </div>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Scene 2 (8.5–12.0s): overlay strip spring-pops up from the lower third
+        tl.fromTo(
+          "#meet-overlay",
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" },
+          8.7,
+        );
+
+        window.__timelines["03-meet"] = tl;
+      </script>
+    </template>
+  </body>
+</html>

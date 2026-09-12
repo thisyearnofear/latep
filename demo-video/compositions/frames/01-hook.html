@@ -1,0 +1,228 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <template>
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;600;800&family=Inconsolata:wght@400;600&display=swap");
+
+        #root {
+          position: absolute;
+          inset: 0;
+          overflow: hidden;
+        }
+
+        .bg {
+          background: #0a0e1a;
+        }
+
+        .stage {
+          position: absolute;
+          inset: 0;
+          display: grid;
+          place-items: center;
+          padding: 0;
+        }
+
+        .stack {
+          position: relative;
+          width: 1200px;
+          display: grid;
+          gap: 24px;
+          justify-items: center;
+          text-align: center;
+          transform: translateY(-40px); /* land upper-two-thirds */
+        }
+
+        .line-a,
+        .line-b {
+          font-family: "Instrument Serif", serif;
+          font-weight: 400;
+          font-size: 132px;
+          line-height: 0.96;
+          letter-spacing: -0.005em;
+          color: rgba(255, 255, 255, 0.94);
+          white-space: nowrap;
+        }
+
+        .line-a .w {
+          display: inline-block;
+          opacity: 0;
+        }
+        .line-b {
+          color: rgba(255, 255, 255, 0.72);
+          position: relative;
+        }
+        .line-b .word-slot {
+          display: inline-block;
+          position: relative;
+        }
+        .line-b .promised,
+        .line-b .proven {
+          display: inline-block;
+          position: absolute;
+          left: 0;
+          top: 0;
+        }
+        .line-b .proven {
+          color: #667eea;
+          opacity: 0;
+        }
+
+        .mascot {
+          position: absolute;
+          top: 62%;
+          left: 50%;
+          width: 60px;
+          height: 88px;
+          transform: translate(-50%, 0);
+          opacity: 0;
+        }
+
+        .mascot svg {
+          width: 100%;
+          height: 100%;
+          display: block;
+        }
+
+        .rail-label {
+          position: absolute;
+          left: 48px;
+          bottom: 48px;
+          font-family: "Inter", sans-serif;
+          font-weight: 600;
+          font-size: 13px;
+          letter-spacing: 0.32em;
+          text-transform: uppercase;
+          color: #f0a020;
+          opacity: 0;
+        }
+
+        .rail-label .sep {
+          color: rgba(240, 160, 32, 0.55);
+          margin: 0 8px;
+        }
+      </style>
+
+      <div
+        id="root"
+        data-composition-id="01-hook"
+        data-width="1920"
+        data-height="1080"
+        data-duration="12"
+      >
+        <div
+          class="bg clip"
+          data-start="0"
+          data-duration="12"
+          data-track-index="0"
+        ></div>
+
+        <div
+          class="stage clip"
+          data-start="0"
+          data-duration="12"
+          data-track-index="1"
+        >
+          <div class="stack">
+            <div class="line-a">
+              <span class="w">Trust</span><span>&nbsp;</span
+              ><span class="w">is…</span>
+            </div>
+            <div class="line-b">
+              <span class="word-slot">
+                <span class="promised">promised.</span>
+                <span class="proven">PROVEN.</span>
+              </span>
+            </div>
+          </div>
+
+          <!-- stick-figure mascot silhouette (violet ink) -->
+          <div class="mascot" id="hook-mascot">
+            <svg
+              viewBox="0 0 60 88"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              stroke="#667eea"
+              stroke-width="4"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="30" cy="14" r="10" />
+              <line x1="30" y1="24" x2="30" y2="58" />
+              <line x1="30" y1="34" x2="10" y2="48" />
+              <line x1="30" y1="34" x2="50" y2="48" />
+              <line x1="30" y1="58" x2="14" y2="82" />
+              <line x1="30" y1="58" x2="46" y2="82" />
+            </svg>
+          </div>
+
+          <div class="rail-label" id="hook-rail">
+            Latep<span class="sep">·</span>ZK on Stellar
+          </div>
+        </div>
+      </div>
+
+      <script>
+        window.__timelines = window.__timelines || {};
+        const tl = gsap.timeline({ paused: true });
+
+        // Scene 1 (0.0–2.5s): "Trust is…" per-word staggered reveal
+        tl.fromTo(
+          "#root .line-a .w",
+          { opacity: 0, y: 16 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.55,
+            ease: "power3.out",
+            stagger: 0.28,
+          },
+          0.15,
+        );
+
+        // Scene 2 (2.5–5.5s): "promised." types-in below via clip-path reveal
+        tl.fromTo(
+          "#root .line-b .promised",
+          { clipPath: "inset(0 100% 0 0)" },
+          { clipPath: "inset(0 0% 0 0)", duration: 1.4, ease: "power3.out" },
+          2.6,
+        );
+
+        // Scene 3 (5.5–7.5s): swap "promised." out to "PROVEN." (violet) — in-place token cycle + spring-pop
+        tl.to("#root .line-b .promised", { opacity: 0, duration: 0.08 }, 5.7);
+        tl.fromTo(
+          "#root .line-b .proven",
+          { opacity: 0, scale: 0.86, y: -6 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.65, ease: "power3.out" },
+          5.7,
+        );
+
+        // Scene 4 (7.5–12.0s): mascot drops in with spring-pop + subtle jitter; rail-label fades in
+        tl.fromTo(
+          "#hook-mascot",
+          { opacity: 0, y: -24, scale: 0.9 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.7, ease: "power3.out" },
+          7.6,
+        );
+        // subtle jitter — deterministic sine, low amplitude, seek-safe
+        tl.to(
+          "#hook-mascot",
+          { y: 3, duration: 1.3, ease: "sine.inOut", repeat: 2, yoyo: true },
+          8.6,
+        );
+
+        tl.fromTo(
+          "#hook-rail",
+          { opacity: 0, x: -6 },
+          { opacity: 1, x: 0, duration: 0.7, ease: "power3.out" },
+          8.4,
+        );
+
+        window.__timelines["01-hook"] = tl;
+      </script>
+    </template>
+  </body>
+</html>
