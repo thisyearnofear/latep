@@ -1,14 +1,14 @@
-# Cloudflare Pages configuration for Trustfall
+# Cloudflare Pages configuration for Latep
 #
 # Deploy:
-#   npx wrangler pages deploy dist --project-name=trustfall
+#   npx wrangler pages deploy dist --project-name=latep
 #
 # Or connect your GitHub repo in the Cloudflare dashboard for auto-deploy.
 #
 # Environment variables (set in Cloudflare Pages dashboard):
 #   VITE_ZK_DILEMMA_CONTRACT_ID  — deployed contract ID
 #   VITE_VENICE_API_KEY          — Venice AI key (optional, can use proxy instead)
-#   VITE_API_PROXY_URL           — URL of the deployed Cloudflare Worker (e.g. https://api.trustfall.xyz)
+#   VITE_API_PROXY_URL           — URL of the deployed Cloudflare Worker (e.g. https://api.latep.trustfall.xyz)
 #   PUBLIC_STELLAR_NETWORK       — TESTNET
 #   PUBLIC_STELLAR_NETWORK_PASSPHRASE — Test SDF Network ; September 2015
 #   PUBLIC_STELLAR_RPC_URL       — https://soroban-testnet.stellar.org

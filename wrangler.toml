@@ -1,4 +1,4 @@
-# Trustfall API Workers — Cloudflare Worker configuration
+# Latep API Workers — Cloudflare Worker configuration
 #
 # Deploy:
 #   npx wrangler deploy api/matchmaking-worker.ts --config api/wrangler.toml
@@ -9,7 +9,7 @@
 #   npx wrangler secret put STELLAR_RPC_URL --config api/wrangler.toml
 #   npx wrangler secret put CONTRACT_ID --config api/wrangler.toml
 
-name = "trustfall-api"
+name = "latep-api"
 main = "api/index.ts"
 compatibility_date = "2026-07-01"
 
@@ -24,5 +24,5 @@ id = "5386e0a3e0f4494ca096d6c2cac64c0b"
 
 # Routes (uncomment when deploying to a custom domain)
 # routes = [
-#   { pattern = "api.trustfall.xyz/*", zone_name = "trustfall.xyz" }
+#   { pattern = "api.latep.trustfall.xyz/*", zone_name = "trustfall.xyz" }
 # ]

@@ -3,7 +3,7 @@
  *
  * Replaces the 8-slide linear deck as the landing page. Three clear entry
  * points (Learn / Tournament / Play) presented as glass-panel cards, plus
- * a brief hero explaining what Trustfall is.
+ * a brief hero explaining what Latep is.
  *
  * The guided narrative slide deck is now at /learn.
  * The tutorial sandbox is at /learn/play.

@@ -3,7 +3,7 @@
  *
  * Inspired by codrops BalloonButton. Uses SVG rects that slide in
  * from the left with a GSAP stagger when activated/hovered.
- * Adapted to Trustfall's aesthetic with skewed stripes.
+ * Adapted to Latep's aesthetic with skewed stripes.
  *
  * Perfect for the Cooperate/Defect choice buttons — the fill animation
  * makes choosing feel impactful.

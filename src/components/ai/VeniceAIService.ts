@@ -24,7 +24,7 @@ export class VeniceAIService {
   private model = "venice-uncensored"; // Fast, uncensored model for tutoring
   // API proxy URL — when set, requests go through the serverless proxy
   // instead of calling Venice directly. This keeps the API key server-side.
-  // Set VITE_API_PROXY_URL in .env to enable (e.g. https://api.trustfall.xyz)
+  // Set VITE_API_PROXY_URL in .env to enable (e.g. https://api.latep.trustfall.xyz)
   private proxyUrl: string;
 
   constructor() {

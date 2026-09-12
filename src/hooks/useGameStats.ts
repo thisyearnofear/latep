@@ -1,7 +1,7 @@
 /**
  * useGameStats — persistent game stats + history backed by localStorage.
  *
- * Tracks aggregate Trustfall stats (wins/losses/ties, XLM net, cooperation
+ * Tracks aggregate Latep stats (wins/losses/ties, XLM net, cooperation
  * rate) and a rolling history of the last 50 games. All localStorage access
  * is wrapped in try/catch so a corrupted/unavailable store never crashes the
  * UI.
@@ -41,7 +41,7 @@ export interface GameStats {
 // Constants
 // ============================================================================
 
-const STORAGE_KEY = "trustfall:game-stats";
+const STORAGE_KEY = "latep:game-stats";
 const MAX_HISTORY = 50;
 
 const EMPTY_STATS: GameStats = {

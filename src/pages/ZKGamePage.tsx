@@ -164,7 +164,7 @@ export const ZKGamePage: React.FC = () => {
   }, [currentGame]);
 
   const handleCopyGameLink = useCallback((gameId: number) => {
-    const link = `https://trustfall.xyz/play/${gameId}`;
+    const link = `https://latep.trustfall.xyz/play/${gameId}`;
     try {
       void navigator.clipboard.writeText(link).then(() => {
         setCopiedLink(true);

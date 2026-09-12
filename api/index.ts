@@ -1,5 +1,5 @@
 /**
- * Trustfall API — combined Cloudflare Worker entry point
+ * Latep API — combined Cloudflare Worker entry point
  *
  * Routes:
  *   /api/games*          → matchmaking relay (open game discovery)

@@ -75,7 +75,7 @@ const AppShell: React.FC = () => {
           >
             <TrustFallCharacter state="standing" color="you" size="sm" />
           </span>
-          <span>Trustfall</span>
+          <span>Latep</span>
         </NavLink>
 
         {/* Center nav */}

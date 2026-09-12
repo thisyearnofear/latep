@@ -1,4 +1,4 @@
-# Trustfall — Development Roadmap
+# Latep — Development Roadmap
 
 ## 🎯 Current Status: ZK Multiplayer + Multi-Round Matches + Game Theory Sandbox
 
@@ -19,7 +19,7 @@
 - ✅ Auto-retry for game_id race condition in create flow
 - ✅ Nonce persisted in localStorage (survives browser close)
 - ✅ Move auto-fill in reveal phase
-- ✅ Trustfall thematic UI — the fall, the catch, the impact (CSS animations, trust altitude visual)
+- ✅ Latep thematic UI — the fall, the catch, the impact (CSS animations, trust altitude visual)
 - ✅ Iterated tutorial — 9 stateful strategies (TFT, TF2T, Grudge, Pavlov, Prober, Generous TFT, All-C, All-D, Random), move history table, trust altitude, noise slider, payoff matrix editor, strategy inspector
 - ✅ Tournament mode — evolutionary simulation, round-robin, population bar chart, auto-play, noise slider, payoff presets, population-over-generations chart, winner detection
 - ✅ Configurable payoff matrix — 5 presets (Classic PD, Stag Hunt, Harmony, Snowdrift, High Temptation), live dilemma type detection, custom P/S/R/T editing

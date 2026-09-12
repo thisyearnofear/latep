@@ -1,5 +1,5 @@
 /**
- * StatsDisplay — glassmorphic panel showing persistent Trustfall stats.
+ * StatsDisplay — glassmorphic panel showing persistent Latep stats.
  *
  * Renders above the game list in the lobby. Shows total games, W/L/T record,
  * net XLM, and cooperation rate. Falls back to an encouraging empty state

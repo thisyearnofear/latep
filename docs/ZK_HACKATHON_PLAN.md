@@ -1,10 +1,10 @@
-# Trustfall — Two Real-World ZK Patterns on Stellar
+# Latep — Two Real-World ZK Patterns on Stellar
 
 ## Hackathon: Stellar Hacks - Real-World ZK
 
-**Project Name:** Trustfall
+**Project Name:** Latep
 
-**Website:** [trustfall.xyz](https://trustfall.xyz)
+**Website:** [latep.trustfall.xyz](https://latep.trustfall.xyz)
 
 **One-liner:** Two distinct ZK proof patterns verified on-chain in Soroban — private accreditation (Poseidon Merkle tree membership) and commitment binding (keccak256 + UltraHonk) — demonstrated through a trust-fall game with real XLM stakes.
 
@@ -206,7 +206,7 @@ Proofs are generated off-chain in the browser using Noir + bb.js (WASM, lazy-loa
 - [x] Honest about mock data and unfinished features in README
 - [x] 19/19 contract tests passing (7 single-round + 8 multi-round + 4 accreditation)
 - [x] TypeScript clean, ESLint clean, Vite build succeeds
-- [x] Live deployment at trustfall.xyz
+- [x] Live deployment at latep.trustfall.xyz
 - [ ] 2-3 minute demo video
 
 ---

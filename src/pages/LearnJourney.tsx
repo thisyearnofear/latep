@@ -2,7 +2,7 @@
  * LearnJourney — The guided narrative slide deck
  *
  * The 8-slide interactive journey from Nicky Case's "Evolution of Trust",
- * adapted for Trustfall. This is the "Learn" section — a linear narrative
+ * adapted for Latep. This is the "Learn" section — a linear narrative
  * that teaches the game theory concepts, ending with a CTA to play
  * the tutorial sandbox or jump to ZK multiplayer.
  */

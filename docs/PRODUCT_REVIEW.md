@@ -1,4 +1,4 @@
-# Product Review — Trustfall
+# Product Review — Latep
 
 Comprehensive review of product design, UI/UX, system architecture, reliability/performance, and intuitiveness/cogency. Based on full codebase analysis (contract, circuit, frontend).
 
@@ -6,7 +6,7 @@ Comprehensive review of product design, UI/UX, system architecture, reliability/
 
 ## 0. Two ZK Patterns Overview
 
-Trustfall now has **two distinct ZK patterns**, both verified on-chain:
+Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 ### Pattern 1: Private Accreditation (ZK Allowlist Membership)
 
@@ -77,7 +77,7 @@ Trustfall now has **two distinct ZK patterns**, both verified on-chain:
 
 **Move selection buttons are visually distinct** — green Cooperate vs. red Defect with emoji icons.
 
-**Trustfall thematic UI is distinctive.** The trust fall metaphor runs through the entire experience — "the fall" during commitment, "the catch or the impact" as the result. Trust altitude visual grows with consecutive mutual cooperation. CSS animations (fall, sway, catch, impact, shake, glow) create a cohesive visual language.
+**Latep thematic UI is distinctive.** The trust fall metaphor runs through the entire experience — "the fall" during commitment, "the catch or the impact" as the result. Trust altitude visual grows with consecutive mutual cooperation. CSS animations (fall, sway, catch, impact, shake, glow) create a cohesive visual language.
 
 **Iterated tutorial is rich.** 9 stateful strategies with distinct personalities, move history table, trust altitude, noise slider, payoff matrix editor, and strategy inspector — all in the tutorial mode. This matches the depth of Nicky Case's original.
 

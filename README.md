@@ -1,8 +1,8 @@
-# Trustfall — Two Real-World ZK Patterns on Stellar
+# Latep — Two Real-World ZK Patterns on Stellar
 
-**[trustfall.xyz](https://trustfall.xyz)**
+**[latep.trustfall.xyz](https://latep.trustfall.xyz)**
 
-Trustfall demonstrates two distinct zero-knowledge proof patterns verified on-chain in Soroban smart contracts, using a trust-fall game as the interactive demo vehicle:
+Latep demonstrates two distinct zero-knowledge proof patterns verified on-chain in Soroban smart contracts, using a trust-fall game as the interactive demo vehicle:
 
 1. **Private Accreditation** — Prove you're on an allowlist without revealing which credential is yours. A Poseidon Merkle tree membership proof with nullifier-based replay protection. This is the same pattern used in real-world KYC/AML, accredited investor verification, and compliance-gated access — prove eligibility without exposing identity.
 
@@ -21,7 +21,7 @@ Stellar moves real money — stablecoins, cross-border payments, tokenized asset
 - **Compliance without exposure** — proving accreditation status without revealing customer identity
 - **Fair settlement** — proving commitments are valid before locking counterparty funds
 
-Trustfall demonstrates both patterns working on-chain today, using the cryptographic primitives Stellar shipped in Protocol 25 ("X-Ray") and Protocol 26 ("Yardstick"):
+Latep demonstrates both patterns working on-chain today, using the cryptographic primitives Stellar shipped in Protocol 25 ("X-Ray") and Protocol 26 ("Yardstick"):
 
 - **BN254 elliptic curve operations** — native host functions for pairing-based proof verification
 - **Poseidon/Poseidon2 hashing** — ZK-friendly hashing used in the accreditation Merkle tree
@@ -205,8 +205,8 @@ These must match. A version mismatch causes `acvm_js` to fail deserializing the 
 ## Quick Start
 
 ```bash
-git clone https://github.com/thisyearnofear/trustfall.git
-cd trustfall
+git clone https://github.com/thisyearnofear/latep.git
+cd latep
 npm install
 npm run dev
 ```
@@ -220,7 +220,7 @@ Open http://localhost:5173, connect your Stellar wallet, and play.
 ## Project Structure
 
 ```
-trustfall/
+latep/
 ├── circuits/                       # Noir ZK circuits
 │   ├── move_commitment/           # Pattern 2: keccak256 commitment binding
 │   └── allowlist_membership/      # Pattern 1: Poseidon Merkle tree accreditation
@@ -336,12 +336,12 @@ We'd rather be honest about gaps than polish a mystery:
 
 ## Inspiration
 
-Trustfall adapts Nicky Case's ["The Evolution of Trust"](https://ncase.me/trust/) to blockchain, transforming theoretical game theory into experiential learning with real economic consequences and zero-knowledge privacy. The two ZK patterns demonstrated here — private accreditation and commitment binding — are directly applicable to the compliance, escrow, and fair settlement use cases that Stellar is built for.
+Latep adapts Nicky Case's ["The Evolution of Trust"](https://ncase.me/trust/) to blockchain, transforming theoretical game theory into experiential learning with real economic consequences and zero-knowledge privacy. The two ZK patterns demonstrated here — private accreditation and commitment binding — are directly applicable to the compliance, escrow, and fair settlement use cases that Stellar is built for.
 
 ## Links
 
-- **Website:** [trustfall.xyz](https://trustfall.xyz)
-- **Source:** [github.com/thisyearnofear/trustfall](https://github.com/thisyearnofear/trustfall)
+- **Website:** [latep.trustfall.xyz](https://latep.trustfall.xyz)
+- **Source:** [github.com/thisyearnofear/latep](https://github.com/thisyearnofear/latep)
 
 ## License
 
