@@ -14,6 +14,7 @@
  */
 
 import { keccak_256 } from "@noble/hashes/sha3.js";
+import { withTimeout } from "../util/withTimeout";
 
 export interface ProofInputs {
   move: 0 | 1; // 0 = Cooperate, 1 = Defect
@@ -179,7 +180,10 @@ export async function generateProof(inputs: ProofInputs): Promise<ProofOutput> {
 
   // Generate witness
   const noir = await getNoir();
-  const { witness } = await noir.execute(circuitInputs);
+  const { witness } = await withTimeout(
+    noir.execute(circuitInputs),
+    "Witness generation",
+  );
 
   // Generate UltraHonk proof with the keccak oracle hash (non-ZK), matching the
   // on-chain verifier (NethermindEth/rs-soroban-ultrahonk). It expects the
@@ -190,7 +194,10 @@ export async function generateProof(inputs: ProofInputs): Promise<ProofOutput> {
   // disabled (the EVM-verifier flavor). Do NOT use `{ keccakZK: true }` — that
   // produces the larger ZK-flavored proof that fails on-chain verification.
   const backend = await getBackend();
-  const { proof } = await backend.generateProof(witness, { keccak: true });
+  const { proof } = await withTimeout(
+    backend.generateProof(witness, { keccak: true }),
+    "Proof generation",
+  );
 
   return {
     proof: new Uint8Array(proof),
