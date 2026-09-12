@@ -11,17 +11,15 @@
  * ZK multiplayer is at /play.
  */
 
-import React, { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { ElectricButton } from "../components/ui/ElectricButton";
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useWallet } from "../hooks/useWallet";
 import { FirstRunWizard, NextStepHint } from "../components/FirstRunWizard";
 import {
   PersonalityQuiz,
   getStoredProfile,
 } from "../components/PersonalityQuiz";
-import { DemoRound } from "../components/DemoRound";
-import { TrustFallCharacter } from "../components/TrustFallCharacter";
+import { TrustExperiment } from "../components/TrustExperiment";
 import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
 
@@ -38,7 +36,7 @@ interface HubCard {
 const CARDS: HubCard[] = [
   {
     icon: "🤝",
-    title: "Learn",
+    title: "Practice with strategies",
     description:
       "Play the iterated Prisoner's Dilemma against 9 stateful AI strategies. Adjust noise, payoffs, and watch how trust evolves.",
     cta: "Start learning",
@@ -48,7 +46,7 @@ const CARDS: HubCard[] = [
   },
   {
     icon: "🏆",
-    title: "Tournament",
+    title: "Watch trust evolve",
     description:
       "Watch all 9 strategies compete in an evolutionary tournament. The weak are eliminated, the strong reproduce. Trust evolves.",
     cta: "Watch it evolve",
@@ -58,9 +56,9 @@ const CARDS: HubCard[] = [
   },
   {
     icon: "🔒",
-    title: "Play for Real",
+    title: "Try ZK multiplayer",
     description:
-      "ZK-powered multiplayer with real XLM stakes. Commit moves with zero-knowledge proofs — trust is proven, not promised.",
+      "Commit moves with zero-knowledge proofs — trust is proven, not promised. Wallet required. Network and stakes are shown in the lobby.",
     cta: "Enter ZK lobby",
     route: "/play",
     color: "var(--accent-cooperate)",
@@ -75,6 +73,7 @@ const Home: React.FC = () => {
   const profile = getStoredProfile();
   const { react } = useMascot();
   const greetedRef = useRef(false);
+  const [intro, setIntro] = useState<"welcome" | "quiz" | null>(null);
 
   // Greet the user on arrival (once per session)
   useEffect(() => {
@@ -96,28 +95,29 @@ const Home: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        padding: "40px 24px",
+        padding: "24px 24px 40px",
       }}
     >
-      <FirstRunWizard />
-      <PersonalityQuiz />
-
-      {/* Next step hint for returning users */}
-      <NextStepHint />
+      {intro === "welcome" && (
+        <FirstRunWizard manual onClose={() => setIntro(null)} />
+      )}
+      {intro === "quiz" && (
+        <PersonalityQuiz manual onClose={() => setIntro(null)} />
+      )}
 
       {/* Hero */}
-      <div style={{ textAlign: "center", marginBottom: "48px" }}>
-        <div
-          data-animate
+      <div style={{ textAlign: "center", marginBottom: "24px" }}>
+        <p
           style={{
-            marginBottom: "20px",
-            display: "flex",
-            justifyContent: "center",
+            fontFamily: "var(--font-body)",
+            fontSize: "var(--text-sm)",
+            color: "var(--text-secondary)",
+            marginBottom: "12px",
+            letterSpacing: "0.04em",
           }}
         >
-          <TrustFallCharacter state="celebrating" color="you" size="xl" />
-        </div>
+          An interactive experiment in trust.
+        </p>
         <h1
           style={{
             fontFamily: "var(--font-display)",
@@ -126,33 +126,26 @@ const Home: React.FC = () => {
             lineHeight: 1.05,
           }}
         >
-          The Evolution of Trust
+          Will you catch me?
         </h1>
         <p
           style={{
             fontFamily: "var(--font-display)",
             fontSize: "var(--text-xl)",
             maxWidth: "560px",
-            margin: "0 auto 16px",
+            margin: "0 auto",
             lineHeight: 1.5,
             color: "var(--text-secondary)",
           }}
         >
-          An interactive guide to why we trust — and why trust{" "}
-          <em style={{ color: "var(--accent-warm)" }}>evolves</em>. Learn the
-          theory, watch strategies compete, then put real stakes on the line
-          with zero-knowledge proofs.
+          One choice. Two people. Find out what happens when trust is returned —
+          or broken.
         </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            color: "var(--text-muted)",
-          }}
-        >
-          Based on Nicky Case's "The Evolution of Trust" — enhanced with ZK
-          proofs on Stellar.
-        </p>
+      </div>
+
+      {/* Demo round — shows new users what the game looks like */}
+      <div style={{ maxWidth: "1000px", width: "100%" }}>
+        <TrustExperiment />
       </div>
 
       {/* Three entry points */}
@@ -163,6 +156,7 @@ const Home: React.FC = () => {
           gap: "20px",
           maxWidth: "880px",
           width: "100%",
+          marginTop: "40px",
         }}
       >
         {CARDS.map((card) => (
@@ -175,25 +169,7 @@ const Home: React.FC = () => {
               flexDirection: "column",
               alignItems: "center",
               textAlign: "center",
-              cursor: "pointer",
               boxShadow: `0 8px 32px ${card.glow}`,
-              transition: "all var(--duration-normal) var(--ease-out)",
-            }}
-            onClick={() => {
-              if (card.route === "/learn" || card.route === "/learn/play") {
-                unlock("visited_learn");
-              }
-              void navigate(card.route);
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-4px)";
-              e.currentTarget.style.boxShadow = `0 16px 48px ${card.glow}`;
-              e.currentTarget.style.borderColor = card.color;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = `0 8px 32px ${card.glow}`;
-              e.currentTarget.style.borderColor = "var(--border-glass)";
             }}
           >
             <div
@@ -227,26 +203,81 @@ const Home: React.FC = () => {
             >
               {card.description}
             </p>
-            <ElectricButton
+            <Link
+              to={card.route}
               onClick={() => {
                 if (card.route === "/learn" || card.route === "/learn/play") {
                   unlock("visited_learn");
                 }
-                void navigate(card.route);
               }}
-              color={
-                card.title === "Learn"
-                  ? "violet"
-                  : card.title === "Tournament"
-                    ? "warm"
-                    : "cooperate"
-              }
-              size="md"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                minHeight: "48px",
+                padding: "10px 24px",
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid var(--border-glass)",
+                background: "var(--bg-glass-light)",
+                color: "var(--text-primary)",
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--text-sm)",
+                fontWeight: 600,
+                textDecoration: "none",
+              }}
             >
               {card.cta} →
-            </ElectricButton>
+            </Link>
           </div>
         ))}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          gap: "12px",
+          marginTop: "24px",
+          flexWrap: "wrap",
+          justifyContent: "center",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setIntro("welcome")}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "var(--radius-sm)",
+            border: "1px solid var(--border-glass)",
+            background: "transparent",
+            color: "var(--text-secondary)",
+            fontFamily: "var(--font-body)",
+            fontSize: "var(--text-sm)",
+            cursor: "pointer",
+          }}
+        >
+          Getting started
+        </button>
+        <button
+          type="button"
+          onClick={() => setIntro("quiz")}
+          style={{
+            padding: "8px 16px",
+            borderRadius: "var(--radius-sm)",
+            border: "1px solid var(--border-glass)",
+            background: "transparent",
+            color: "var(--text-secondary)",
+            fontFamily: "var(--font-body)",
+            fontSize: "var(--text-sm)",
+            cursor: "pointer",
+          }}
+        >
+          Discover your trust style
+        </button>
+      </div>
+
+      {/* Next step hint for returning users */}
+      <div style={{ marginTop: "24px", width: "100%", maxWidth: "640px" }}>
+        <NextStepHint />
       </div>
 
       {/* Wallet hint for Play card */}
@@ -256,12 +287,12 @@ const Home: React.FC = () => {
             fontFamily: "var(--font-body)",
             fontSize: "var(--text-xs)",
             color: "var(--text-muted)",
-            marginTop: "32px",
+            marginTop: "24px",
             textAlign: "center",
           }}
         >
-          💡 To play for real XLM stakes, connect a Stellar wallet from the top
-          right.
+          ZK multiplayer uses a Stellar wallet — you can connect one in the
+          lobby.
         </p>
       )}
 
@@ -295,24 +326,6 @@ const Home: React.FC = () => {
         </div>
       )}
 
-      {/* Demo round — shows new users what the game looks like */}
-      {!milestones.played_tutorial && (
-        <div style={{ marginTop: "48px", maxWidth: "600px", width: "100%" }}>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-lg)",
-              color: "var(--text-secondary)",
-              textAlign: "center",
-              marginBottom: "16px",
-            }}
-          >
-            See how it works ↓
-          </p>
-          <DemoRound size="md" />
-        </div>
-      )}
-
       {/* Guided journey link */}
       <button
         type="button"
@@ -340,6 +353,19 @@ const Home: React.FC = () => {
       >
         📖 Prefer the guided narrative? Take the full journey →
       </button>
+
+      <p
+        style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "var(--text-xs)",
+          color: "var(--text-muted)",
+          marginTop: "40px",
+          textAlign: "center",
+        }}
+      >
+        Based on Nicky Case's "The Evolution of Trust" — enhanced with ZK proofs
+        on Stellar.
+      </p>
     </div>
   );
 };
