@@ -10,6 +10,9 @@ import React, { useState, useCallback } from "react";
 import { SlideProps } from "../SlideSystem";
 import TournamentViz from "../visual/TournamentViz";
 import { ShareableResult } from "../ui/ShareableResult";
+import { LessonLayout } from "../learning/LessonLayout";
+import { LessonActions } from "../learning/LessonActions";
+import { LessonDetails } from "../learning/LessonDetails";
 import { unlockAchievement } from "../ui/AchievementBadge";
 import {
   getStrategyInfo,
@@ -171,145 +174,107 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
   }, [isComplete]);
 
   return (
-    <div
-      className="learning-round narrative-tournament"
-      style={{ margin: "0 auto", textAlign: "center" }}
-    >
-      <h2
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-3xl)",
-          marginBottom: "12px",
-        }}
-      >
-        The Tournament
-      </h2>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base)",
-          color: "var(--text-secondary)",
-          marginBottom: "24px",
-        }}
-      >
-        All nine strategies compete in a round-robin. After each generation, the
-        worst performers die. The best reproduce. Watch what survives.
-      </p>
-
-      {/* Tournament visualization */}
-      <div
-        data-animate
-        className="narrative-panel"
-        style={{ marginBottom: "24px" }}
-      >
-        <TournamentViz population={population} generation={generation} />
-      </div>
-
-      {/* Controls */}
-      {!isComplete && (
-        <div data-animate>
-          {stage === "rest" && (
-            <button
-              type="button"
-              className="learning-button learning-button-primary"
-              onClick={runGeneration}
-            >
-              {generation === 0 ? "Start tournament" : "Run next generation"}
-            </button>
-          )}
-          {stage === "playing" && (
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-lg)",
-                color: "var(--accent-violet)",
-              }}
-            >
-              ⚔️ Competing...
-            </p>
-          )}
-          {stage === "evolving" && (
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-lg)",
-                color: "var(--accent-warm)",
-              }}
-            >
-              🧬 Evolving...
-            </p>
-          )}
+    <LessonLayout
+      className="narrative-tournament"
+      title="The Tournament"
+      description="Strategies compete. Better performers reproduce; weaker ones disappear."
+      visual={
+        <div className="narrative-panel">
+          {/* Tournament visualization */}
+          <TournamentViz
+            compact
+            population={population}
+            generation={generation}
+          />
         </div>
-      )}
+      }
+    >
+      <p>
+        Generation {generation} of 5 —{" "}
+        {stage === "playing"
+          ? "competing…"
+          : stage === "evolving"
+            ? "evolving…"
+            : isComplete
+              ? "complete."
+              : "watch which strategies grow."}
+      </p>
 
       {/* Completion */}
       {isComplete && (
-        <div data-animate>
-          <div
-            className="glass-panel"
+        <div
+          className="glass-panel lesson-result"
+          style={{
+            borderColor: "rgba(102,126,234,0.3)",
+          }}
+        >
+          <p
             style={{
-              padding: "24px",
-              marginBottom: "24px",
-              borderColor: "rgba(102,126,234,0.3)",
+              fontFamily: "var(--font-display)",
+              fontSize: "var(--text-lg)",
+              color: dominantStrategy?.color || "var(--accent-violet)",
+              marginBottom: "8px",
             }}
           >
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-xl)",
-                color: "var(--text-primary)",
-                marginBottom: "8px",
-              }}
-            >
-              After {generation} generations:
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-2xl)",
-                color: dominantStrategy?.color || "var(--accent-violet)",
-                marginBottom: "8px",
-              }}
-            >
-              {dominantStrategy?.emoji} {dominantStrategy?.name} dominates
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontStyle: "italic",
-                fontSize: "var(--text-base)",
-                color: "var(--text-secondary)",
-              }}
-            >
-              This is one simulated population under these payoffs. Change the
-              conditions in the tournament sandbox to explore different
-              outcomes.
-            </p>
-          </div>
-          <div style={{ marginBottom: "24px" }}>
-            <ShareableResult
-              title="Tournament Result"
-              strategy={dominantStrategy?.name}
-              rounds={generation}
-            />
-          </div>
-          <div className="learning-actions">
-            <button type="button" className="learning-button" onClick={reset}>
-              Reset
-            </button>
-            <button
-              type="button"
-              className="learning-button learning-button-primary"
-              onClick={onNext}
-            >
-              What about noise?
-            </button>
-          </div>
+            {dominantStrategy?.emoji} {dominantStrategy?.name} dominates
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: "var(--text-base)",
+              color: "var(--text-secondary)",
+              margin: 0,
+            }}
+          >
+            This is one simulated population under these payoffs. Change the
+            conditions in the tournament sandbox to explore different outcomes.
+          </p>
         </div>
       )}
-    </div>
+
+      {isComplete && (
+        <LessonDetails trigger="Share result" title="Tournament result">
+          <ShareableResult
+            title="Tournament Result"
+            strategy={dominantStrategy?.name}
+            rounds={generation}
+          />
+        </LessonDetails>
+      )}
+
+      {/* Controls */}
+      {!isComplete ? (
+        <LessonActions>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={runGeneration}
+            disabled={stage !== "rest"}
+          >
+            {stage === "playing"
+              ? "Competing…"
+              : stage === "evolving"
+                ? "Evolving…"
+                : generation === 0
+                  ? "Start tournament"
+                  : "Next generation"}
+          </button>
+        </LessonActions>
+      ) : (
+        <LessonActions>
+          <button type="button" className="learning-button" onClick={reset}>
+            Reset
+          </button>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={onNext}
+          >
+            Continue
+          </button>
+        </LessonActions>
+      )}
+    </LessonLayout>
   );
 };

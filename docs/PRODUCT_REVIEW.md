@@ -313,3 +313,7 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 | 14  | Reputation proofs not built                 | Future work — see `HACKMERIDIAN.md`                     |
 | 15  | Inefficient polling (no batching/websocket) | Scalability                                             |
 | 17  | ~~Contract redeployment needed~~            | ✅ Redeployed 2026-07-03 with multi-round match support |
+
+### Compact lesson player
+
+The guided journey uses one chapter selector and the app-header audio controls. A shared bottom action bar hosts each chapter’s current controls without duplicating a generic Next action. On standard laptop viewports the stage and explanation sit side by side; chapter essentials are designed to fit without page or panel scrolling at 1280×720 and 1366×768. Payoff explanations, history, sharing, and attribution open in native dialogs. Small screens, short landscape windows, and enlarged text retain accessible scrolling with space reserved for the action bar. Home, the tutorial sandbox, and live multiplayer keep their existing layouts.

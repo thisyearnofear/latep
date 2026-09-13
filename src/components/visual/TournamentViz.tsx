@@ -21,12 +21,14 @@ interface TournamentVizProps {
   population: PopulationEntry[];
   generation: number;
   maxCount?: number;
+  compact?: boolean;
 }
 
 const TournamentViz: React.FC<TournamentVizProps> = ({
   population,
   generation,
   maxCount,
+  compact = false,
 }) => {
   const barsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const countsRef = useRef<Map<string, HTMLSpanElement>>(new Map());
@@ -88,12 +90,12 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "baseline",
-    marginBottom: 16,
+    marginBottom: compact ? 8 : 16,
   };
 
   const generationStyle: React.CSSProperties = {
     fontFamily: "var(--font-display)",
-    fontSize: "1.25rem",
+    fontSize: compact ? "1rem" : "1.25rem",
     color: "var(--text-primary)",
     margin: 0,
   };
@@ -107,24 +109,24 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
   const rowStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
-    gap: 12,
-    marginBottom: 10,
+    gap: compact ? 8 : 12,
+    marginBottom: compact ? 6 : 10,
   };
 
   const labelStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    width: 120,
+    width: compact ? "min(140px, 36vw)" : 120,
     flexShrink: 0,
     fontFamily: "var(--font-body)",
-    fontSize: "0.85rem",
+    fontSize: compact ? "0.875rem" : "0.85rem",
     color: "var(--text-secondary)",
   };
 
   const trackStyle: React.CSSProperties = {
     flex: 1,
-    height: 22,
+    height: compact ? 12 : 22,
     background: "var(--bg-glass-light)",
     borderRadius: 11,
     overflow: "hidden",
@@ -140,7 +142,7 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
   });
 
   const countStyle: React.CSSProperties = {
-    width: 40,
+    width: compact ? 28 : 40,
     textAlign: "right",
     fontFamily: "var(--font-mono, monospace)",
     fontSize: "0.85rem",
@@ -158,7 +160,7 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
   };
 
   return (
-    <div>
+    <div className={compact ? "tournament-viz-compact" : undefined}>
       <div style={headerStyle}>
         <h4 style={generationStyle}>Generation {generation}</h4>
         <span style={totalStyle}>{totalCount} agents</span>
@@ -173,7 +175,9 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
           {population.map((entry) => (
             <div key={entry.strategyId} style={rowStyle}>
               <div style={labelStyle}>
-                <span style={{ fontSize: "1.1rem" }}>{entry.emoji}</span>
+                <span style={{ fontSize: compact ? "1rem" : "1.1rem" }}>
+                  {entry.emoji}
+                </span>
                 <span>{entry.name}</span>
               </div>
               <div style={trackStyle}>
