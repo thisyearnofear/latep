@@ -10,6 +10,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { SlideProps } from "../SlideSystem";
 import { unlockAchievement } from "../ui/AchievementBadge";
 import { TrustStage, type TrustStageState } from "../visual/TrustStage";
+import { LessonLayout } from "../learning/LessonLayout";
+import { LessonActions } from "../learning/LessonActions";
+import { LessonDetails } from "../learning/LessonDetails";
 import {
   createStrategy,
   calculatePayoff,
@@ -112,56 +115,25 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
       : { phase: "choose" };
 
   return (
-    <div
-      className="learning-round"
-      style={{ margin: "0 auto", textAlign: "center" }}
+    <LessonLayout
+      title="The Repeat"
+      description="Five rounds against Tit-for-Tat: it starts kind, then copies your last move."
+      visual={
+        <TrustStage
+          compact
+          state={stageState}
+          opponentLabel="Tit-for-Tat"
+          roundKey={rounds.length}
+          trustAltitude={trustAltitude}
+        />
+      }
     >
-      <h2
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-3xl)",
-          marginBottom: "12px",
-        }}
-      >
-        The Repeat
-      </h2>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base)",
-          color: "var(--text-secondary)",
-          marginBottom: "8px",
-        }}
-      >
-        You're playing 5 rounds against{" "}
-        <strong style={{ color: "var(--accent-violet)" }}>Tit-for-Tat</strong> —
-        a strategy that starts kind, then copies whatever you did last.
-      </p>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontStyle: "italic",
-          fontSize: "var(--text-lg)",
-          color: "var(--text-muted)",
-          marginBottom: "32px",
-        }}
-      >
-        Does knowing you'll meet again change anything?
-      </p>
-
       {/* Score */}
       <div
-        data-animate
+        className="lesson-scoreboard"
         style={{
           display: "flex",
-          justifyContent: "center",
-          gap: "32px",
-          marginBottom: "24px",
+          gap: "24px",
         }}
       >
         <div>
@@ -243,34 +215,72 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
         </div>
       </div>
 
-      <TrustStage
-        state={stageState}
-        opponentLabel="Tit-for-Tat"
-        roundKey={rounds.length}
-        trustAltitude={trustAltitude}
-      />
+      {!isComplete && !playerMove && (
+        <p
+          style={{
+            fontFamily: "var(--font-display)",
+            fontStyle: "italic",
+            fontSize: "var(--text-lg)",
+            color: "var(--text-muted)",
+          }}
+        >
+          Does knowing you'll meet again change your choice?
+        </p>
+      )}
+
+      {/* Choice or outcome */}
+      {playerMove && !isComplete && (
+        <p
+          ref={resultRef}
+          tabIndex={-1}
+          role="status"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "var(--text-lg)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          {lastOutcome}
+        </p>
+      )}
+
+      {isComplete && (
+        <div className="glass-panel lesson-result">
+          <p
+            ref={resultRef}
+            tabIndex={-1}
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "var(--text-xl)",
+              color: "var(--text-primary)",
+              marginBottom: "8px",
+            }}
+          >
+            {playerTotal > aiTotal
+              ? "You outscored Tit-for-Tat!"
+              : playerTotal === aiTotal
+                ? "A perfect tie."
+                : "Tit-for-Tat outscored you."}
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-display)",
+              fontStyle: "italic",
+              fontSize: "var(--text-base)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            {playerTotal === aiTotal && rounds.every((r) => r.player === "C")
+              ? "Five rounds of mutual trust. That's the best outcome for everyone."
+              : "When you'll meet again, betrayal has consequences. Tit-for-Tat punishes defection — and rewards cooperation."}
+          </p>
+        </div>
+      )}
 
       {/* Round history */}
       {rounds.length > 0 && (
-        <details
-          className="learning-details"
-          style={{
-            maxWidth: "400px",
-            margin: "0 auto 24px",
-            textAlign: "left",
-          }}
-        >
-          <summary>Round history</summary>
-          <div
-            data-animate
-            className="glass-panel"
-            style={{
-              padding: "16px",
-              marginBottom: "24px",
-              maxWidth: "400px",
-              margin: "0 auto 24px",
-            }}
-          >
+        <LessonDetails trigger="Round history" title="Round history">
+          <div className="glass-panel" style={{ padding: "16px" }}>
             {rounds.map((r) => (
               <div
                 key={r.num}
@@ -304,47 +314,31 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
               </div>
             ))}
           </div>
-        </details>
+        </LessonDetails>
       )}
 
-      {/* Choice or outcome */}
       {!isComplete && !playerMove && (
-        <div data-animate>
-          <div className="learning-actions" style={{ marginTop: "16px" }}>
-            <button
-              type="button"
-              ref={cooperateRef}
-              className="learning-button learning-button-primary"
-              onClick={() => playRound("C")}
-            >
-              Cooperate
-            </button>
-            <button
-              type="button"
-              className="learning-button"
-              onClick={() => playRound("D")}
-            >
-              Defect
-            </button>
-          </div>
-        </div>
+        <LessonActions>
+          <button
+            type="button"
+            ref={cooperateRef}
+            className="learning-button learning-button-primary"
+            onClick={() => playRound("C")}
+          >
+            Cooperate
+          </button>
+          <button
+            type="button"
+            className="learning-button"
+            onClick={() => playRound("D")}
+          >
+            Defect
+          </button>
+        </LessonActions>
       )}
 
       {playerMove && !isComplete && (
-        <div data-animate>
-          <p
-            ref={resultRef}
-            tabIndex={-1}
-            role="status"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-lg)",
-              color: "var(--text-secondary)",
-              marginBottom: "20px",
-            }}
-          >
-            {lastOutcome}
-          </p>
+        <LessonActions>
           <button
             type="button"
             className="learning-button learning-button-primary"
@@ -352,58 +346,23 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
           >
             Next round
           </button>
-        </div>
+        </LessonActions>
       )}
 
       {isComplete && (
-        <div data-animate>
-          <div
-            className="glass-panel"
-            style={{ padding: "24px", marginBottom: "24px" }}
+        <LessonActions>
+          <button type="button" className="learning-button" onClick={reset}>
+            Play again
+          </button>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={onNext}
           >
-            <p
-              ref={resultRef}
-              tabIndex={-1}
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-xl)",
-                color: "var(--text-primary)",
-                marginBottom: "8px",
-              }}
-            >
-              {playerTotal > aiTotal
-                ? "You outscored Tit-for-Tat!"
-                : playerTotal === aiTotal
-                  ? "A perfect tie."
-                  : "Tit-for-Tat outscored you."}
-            </p>
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontStyle: "italic",
-                fontSize: "var(--text-base)",
-                color: "var(--text-secondary)",
-              }}
-            >
-              {playerTotal === aiTotal && rounds.every((r) => r.player === "C")
-                ? "Five rounds of mutual trust. That's the best outcome for everyone."
-                : "When you'll meet again, betrayal has consequences. Tit-for-Tat punishes defection — and rewards cooperation."}
-            </p>
-          </div>
-          <div className="learning-actions">
-            <button type="button" className="learning-button" onClick={reset}>
-              Play again
-            </button>
-            <button
-              type="button"
-              className="learning-button learning-button-primary"
-              onClick={onNext}
-            >
-              Meet the strategies
-            </button>
-          </div>
-        </div>
+            Continue
+          </button>
+        </LessonActions>
       )}
-    </div>
+    </LessonLayout>
   );
 };

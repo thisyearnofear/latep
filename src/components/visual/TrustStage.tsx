@@ -26,6 +26,7 @@ export interface TrustStageProps {
   noise?: number;
   noiseEvent?: { player: boolean; opponent: boolean };
   showChoices?: boolean;
+  compact?: boolean;
 }
 
 function outcomeActorState(
@@ -79,6 +80,7 @@ export function TrustStage({
   noise,
   noiseEvent,
   showChoices = true,
+  compact = false,
 }: TrustStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const previousAltitude = useRef(0);
@@ -107,6 +109,7 @@ export function TrustStage({
             : "none"
       : "none";
 
+  const motionScale = compact ? 0.5 : 1;
   const youPose =
     state.phase === "outcome" && playerMove && opponentMove
       ? outcomeActorState(playerMove, opponentMove)
@@ -136,7 +139,11 @@ export function TrustStage({
         }
         if (state.phase === "choose" || state.phase === "idle") {
           reset();
-          gsap.from(actors, { y: -8, duration: 0.35, ease: "power2.out" });
+          gsap.from(actors, {
+            y: -8 * motionScale,
+            duration: 0.35,
+            ease: "power2.out",
+          });
         } else if (state.phase === "sealed") {
           gsap.set(actors, { clearProps: "transform" });
           gsap.fromTo(
@@ -148,22 +155,30 @@ export function TrustStage({
           const tl = gsap.timeline();
           tl.to(actors[0], { rotation: 12, duration: 0.22 }, 0)
             .to(actors[1], { rotation: -12, duration: 0.22 }, 0)
-            .to(actors[0], { y: 45, rotation: 35, duration: 0.6 }, 0.22)
-            .to(actors[1], { y: 45, rotation: -35, duration: 0.6 }, 0.22);
+            .to(
+              actors[0],
+              { y: 45 * motionScale, rotation: 35, duration: 0.6 },
+              0.22,
+            )
+            .to(
+              actors[1],
+              { y: 45 * motionScale, rotation: -35, duration: 0.6 },
+              0.22,
+            );
         } else if (state.phase === "outcome" && playerMove && opponentMove) {
           gsap.set(actors, { clearProps: "transform" });
           const you = outcomeActorState(playerMove, opponentMove);
           const partner = outcomeActorState(opponentMove, playerMove);
           if (you.drop) {
             gsap.to(actors[0], {
-              y: you.drop,
+              y: you.drop * motionScale,
               duration: 0.5,
               ease: "bounce.out",
             });
           }
           if (partner.drop) {
             gsap.to(actors[1], {
-              y: partner.drop,
+              y: partner.drop * motionScale,
               duration: 0.5,
               ease: "bounce.out",
             });
@@ -178,7 +193,7 @@ export function TrustStage({
       media.removeEventListener("change", onChange);
       ctx.revert();
     };
-  }, [state.phase, playerMove, opponentMove, roundKey]);
+  }, [state.phase, playerMove, opponentMove, roundKey, motionScale]);
 
   useEffect(() => {
     const root = stageRef.current;
@@ -224,7 +239,7 @@ export function TrustStage({
 
   return (
     <div
-      className="trust-stage-surface"
+      className={`trust-stage-surface${compact ? " trust-stage-compact" : ""}`}
       data-stage-phase={state.phase}
       data-trust-height={trustAltitude !== undefined ? altitude : undefined}
       data-wind-event={windEvent}

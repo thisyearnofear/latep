@@ -10,6 +10,9 @@ import React, { useState, useRef } from "react";
 import { SlideProps } from "../SlideSystem";
 import StrategyCard from "../visual/StrategyCard";
 import { TrustStage } from "../visual/TrustStage";
+import { LessonLayout } from "../learning/LessonLayout";
+import { LessonActions } from "../learning/LessonActions";
+import { LessonDetails } from "../learning/LessonDetails";
 import {
   createStrategy,
   calculatePayoff,
@@ -70,305 +73,254 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
   const matchComplete = matchRound >= 3;
 
   return (
-    <div
-      className="learning-round"
-      style={{ margin: "0 auto", textAlign: "center" }}
+    <LessonLayout
+      title="Meet the Opponents"
+      description={
+        selected
+          ? `Round ${matchRound || 1}/3 against ${getStrategyInfo(selected).name}`
+          : "Pick a strategy for a three-round match."
+      }
+      visual={
+        selected ? (
+          <TrustStage
+            compact
+            state={
+              lastMoves
+                ? {
+                    phase: "outcome",
+                    playerMove: lastMoves.player,
+                    opponentMove: lastMoves.opponent,
+                  }
+                : { phase: "choose" }
+            }
+            opponentLabel={getStrategyInfo(selected).name}
+            roundKey={matchRound}
+            trustAltitude={trustAltitude}
+          />
+        ) : undefined
+      }
     >
-      <h2
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-3xl)",
-          marginBottom: "12px",
-        }}
-      >
-        Meet the Opponents
-      </h2>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base)",
-          color: "var(--text-secondary)",
-          marginBottom: "32px",
-        }}
-      >
-        Nine strategies, nine personalities. Click one to play a quick 3-round
-        match.
-      </p>
-
       {/* Strategy grid */}
       {!selected && (
-        <div
-          data-animate
-          className="narrative-strategies"
-          style={{ marginBottom: "32px" }}
-        >
-          {ALL_STRATEGY_IDS.map((id) => {
-            const info = getStrategyInfo(id);
-            return (
-              <StrategyCard
-                key={id}
-                id={id}
-                name={info.name}
-                description={info.description}
-                emoji={info.emoji}
-                color={info.color}
-                compact
-                onClick={() => startMatch(id)}
-              />
-            );
-          })}
-        </div>
+        <>
+          <div className="narrative-strategies">
+            {ALL_STRATEGY_IDS.map((id) => {
+              const info = getStrategyInfo(id);
+              return (
+                <StrategyCard
+                  key={id}
+                  id={id}
+                  name={info.name}
+                  description={info.description}
+                  emoji={info.emoji}
+                  color={info.color}
+                  compact
+                  onClick={() => startMatch(id)}
+                />
+              );
+            })}
+          </div>
+
+          {/* The reveal — shown when browsing strategies */}
+          <LessonDetails
+            trigger="About these strategies"
+            title="Strategy guide"
+          >
+            <p>
+              <strong>A strategy to start with: Tit-for-Tat.</strong> It starts
+              by cooperating, then mirrors your last move. Its performance
+              depends on the other strategies, the payoffs, and the noise level.
+            </p>
+          </LessonDetails>
+        </>
       )}
 
       {/* Match view */}
       {selected && (
-        <div data-animate>
+        <>
           <div
-            className="glass-panel"
-            style={{ padding: "24px", marginBottom: "24px" }}
+            className="lesson-scoreboard"
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "24px",
+              minWidth: 0,
+            }}
           >
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: "8px",
-                marginBottom: "16px",
-                minWidth: 0,
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--text-muted)",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  You
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--text-2xl)",
-                    color: "var(--accent-violet)",
-                    margin: 0,
-                  }}
-                >
-                  {playerScore > 0 ? "+" : ""}
-                  {playerScore}
-                </p>
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-sm)",
-                    color: "var(--text-muted)",
-                    margin: 0,
-                  }}
-                >
-                  Round {matchRound || 1}/3
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--text-lg)",
-                    color: "var(--text-primary)",
-                    margin: 0,
-                  }}
-                >
-                  {getStrategyInfo(selected).emoji}{" "}
-                  {getStrategyInfo(selected).name}
-                </p>
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--text-muted)",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  Them
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--text-2xl)",
-                    color: "var(--accent-warm)",
-                    margin: 0,
-                  }}
-                >
-                  {aiScore > 0 ? "+" : ""}
-                  {aiScore}
-                </p>
-              </div>
-            </div>
-
-            <TrustStage
-              state={
-                lastMoves
-                  ? {
-                      phase: "outcome",
-                      playerMove: lastMoves.player,
-                      opponentMove: lastMoves.opponent,
-                    }
-                  : { phase: "choose" }
-              }
-              opponentLabel={getStrategyInfo(selected).name}
-              roundKey={matchRound}
-              trustAltitude={trustAltitude}
-            />
-
-            {lastResult && !matchComplete && (
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  margin: 0,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                You
+              </p>
               <p
                 style={{
                   fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-lg)",
-                  color: "var(--text-secondary)",
-                  marginBottom: "16px",
+                  fontSize: "var(--text-2xl)",
+                  color: "var(--accent-violet)",
+                  margin: 0,
                 }}
               >
-                {lastResult}
+                {playerScore > 0 ? "+" : ""}
+                {playerScore}
               </p>
-            )}
-
-            {!matchComplete && (
+            </div>
+            <div>
               <p
                 style={{
                   fontFamily: "var(--font-body)",
                   fontSize: "var(--text-sm)",
                   color: "var(--text-muted)",
-                  marginBottom: "12px",
+                  margin: 0,
                 }}
               >
-                Choose your next move
+                Round {matchRound || 1}/3
               </p>
-            )}
-            {!matchComplete ? (
-              <div className="learning-actions">
-                <button
-                  type="button"
-                  className="learning-button learning-button-primary"
-                  onClick={() => playMove("C")}
-                >
-                  Cooperate
-                </button>
-                <button
-                  type="button"
-                  className="learning-button"
-                  onClick={() => playMove("D")}
-                >
-                  Defect
-                </button>
-              </div>
-            ) : (
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--text-lg)",
-                    color:
-                      playerScore > aiScore
-                        ? "var(--accent-cooperate)"
-                        : playerScore === aiScore
-                          ? "var(--text-primary)"
-                          : "var(--accent-defect)",
-                    marginBottom: "16px",
-                  }}
-                >
-                  {playerScore > aiScore
-                    ? "You won this match."
-                    : playerScore === aiScore
-                      ? "A tie."
-                      : `${getStrategyInfo(selected).name} won this match.`}
-                </p>
-                <div className="learning-actions">
-                  <button
-                    type="button"
-                    className="learning-button"
-                    onClick={() => setSelected(null)}
-                  >
-                    Try another
-                  </button>
-                  <button
-                    type="button"
-                    className="learning-button learning-button-primary"
-                    onClick={onNext}
-                  >
-                    Watch them compete
-                  </button>
-                </div>
-              </div>
-            )}
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "var(--text-lg)",
+                  color: "var(--text-primary)",
+                  margin: 0,
+                }}
+              >
+                {getStrategyInfo(selected).emoji}{" "}
+                {getStrategyInfo(selected).name}
+              </p>
+            </div>
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  margin: 0,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Them
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "var(--text-2xl)",
+                  color: "var(--accent-warm)",
+                  margin: 0,
+                }}
+              >
+                {aiScore > 0 ? "+" : ""}
+                {aiScore}
+              </p>
+            </div>
           </div>
 
-          {/* Strategy description */}
-          <div
-            className="glass-panel"
-            style={{ padding: "16px", textAlign: "left" }}
-          >
+          {lastResult && !matchComplete && (
+            <p
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "var(--text-lg)",
+                color: "var(--text-secondary)",
+              }}
+            >
+              {lastResult}
+            </p>
+          )}
+
+          {!matchComplete && (
             <p
               style={{
                 fontFamily: "var(--font-body)",
                 fontSize: "var(--text-sm)",
-                color: "var(--text-secondary)",
-                margin: 0,
+                color: "var(--text-muted)",
               }}
             >
-              <strong style={{ color: "var(--text-primary)" }}>
-                {getStrategyInfo(selected).name}:
-              </strong>{" "}
-              {getStrategyInfo(selected).description}
+              Choose your next move
             </p>
-          </div>
-        </div>
-      )}
+          )}
 
-      {/* The reveal — shown when browsing strategies */}
-      {!selected && (
-        <div
-          data-animate
-          className="glass-panel"
-          style={{
-            padding: "24px",
-            borderColor: "rgba(102,126,234,0.3)",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-lg)",
-              color: "var(--accent-violet)",
-              marginBottom: "8px",
-            }}
-          >
-            🏆 A strategy to start with: Tit-for-Tat
-          </p>
+          {matchComplete && (
+            <p
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "var(--text-lg)",
+                color:
+                  playerScore > aiScore
+                    ? "var(--accent-cooperate)"
+                    : playerScore === aiScore
+                      ? "var(--text-primary)"
+                      : "var(--accent-defect)",
+              }}
+            >
+              {playerScore > aiScore
+                ? "You won this match."
+                : playerScore === aiScore
+                  ? "A tie."
+                  : `${getStrategyInfo(selected).name} won this match.`}
+            </p>
+          )}
+
+          {/* Strategy description */}
           <p
             style={{
               fontFamily: "var(--font-body)",
               fontSize: "var(--text-sm)",
               color: "var(--text-secondary)",
+              margin: 0,
             }}
           >
-            It starts by cooperating, then mirrors your last move. Its
-            performance depends on the other strategies, the payoffs, and the
-            noise level.
+            <strong style={{ color: "var(--text-primary)" }}>
+              {getStrategyInfo(selected).name}:
+            </strong>{" "}
+            {getStrategyInfo(selected).description}
           </p>
-        </div>
+        </>
       )}
-    </div>
+
+      {selected && !matchComplete && (
+        <LessonActions>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={() => playMove("C")}
+          >
+            Cooperate
+          </button>
+          <button
+            type="button"
+            className="learning-button"
+            onClick={() => playMove("D")}
+          >
+            Defect
+          </button>
+        </LessonActions>
+      )}
+
+      {selected && matchComplete && (
+        <LessonActions>
+          <button
+            type="button"
+            className="learning-button"
+            onClick={() => setSelected(null)}
+          >
+            Try another
+          </button>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={onNext}
+          >
+            Continue
+          </button>
+        </LessonActions>
+      )}
+    </LessonLayout>
   );
 };

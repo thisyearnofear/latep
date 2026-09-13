@@ -13,6 +13,7 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - [x] Share the stage across the tutorial and guided Choice/Repeat chapters
 - [x] Unify remaining narrative scenes and shared altitude/wind choreography
 - [x] Opt-in shared journey audio with synchronized controls and unmount cleanup
+- [x] Compact lesson player — viewport-first guided journey with chapter selector, shared action bar, and native dialogs
 - [ ] Extend the vocabulary to tournament populations
 - [ ] Integrate the sealed-choice object with real on-chain multiplayer states
 - [ ] Optional stylized Three.js diorama after the 2.5D interaction is reviewed
