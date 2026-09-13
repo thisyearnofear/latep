@@ -22,6 +22,9 @@ import {
 import { unlockAchievement } from "../ui/AchievementBadge";
 import { TrustFallCharacter } from "../TrustFallCharacter";
 import { TrustStage, type TrustStageState } from "../visual/TrustStage";
+import { LessonLayout } from "../learning/LessonLayout";
+import { LessonActions } from "../learning/LessonActions";
+import { LessonDetails } from "../learning/LessonDetails";
 
 type Outcome = "caught" | "betrayed" | "exploited" | "mutual-destruction";
 
@@ -471,82 +474,30 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
       : { phase: "choose" };
 
   return (
-    <div
-      className="learning-round"
-      style={{ margin: "0 auto", textAlign: "center" }}
+    <LessonLayout
+      title="The Choice"
+      description="Choose without seeing your partner’s move."
+      visual={
+        <TrustStage
+          compact
+          state={stageState}
+          opponentLabel="Practice partner"
+          roundKey={playerMove ?? "none"}
+          trustAltitude={outcome === "caught" ? 1 : 0}
+        />
+      }
     >
-      <h2
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-3xl)",
-          marginBottom: "12px",
-        }}
-      >
-        The Choice
-      </h2>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base)",
-          color: "var(--text-secondary)",
-          marginBottom: "32px",
-        }}
-      >
-        Your opponent is waiting below. You have two options.
-      </p>
-
-      <TrustStage
-        state={stageState}
-        opponentLabel="Practice partner"
-        roundKey={playerMove ?? "none"}
-        trustAltitude={outcome === "caught" ? 1 : 0}
-      />
-
       {/* Choice buttons or result */}
       {!playerMove ? (
-        <div data-animate style={{ marginTop: "16px" }}>
-          <div className="learning-actions">
-            <div
-              onMouseEnter={() => setHoveredChoice("C")}
-              onMouseLeave={() => setHoveredChoice(null)}
-            >
-              <button
-                type="button"
-                ref={cooperateRef}
-                className="learning-button learning-button-primary"
-                onClick={() => makeChoice("C")}
-                onFocus={() => setHoveredChoice("C")}
-                onBlur={() => setHoveredChoice(null)}
-              >
-                Cooperate
-              </button>
-            </div>
-            <div
-              onMouseEnter={() => setHoveredChoice("D")}
-              onMouseLeave={() => setHoveredChoice(null)}
-            >
-              <button
-                type="button"
-                className="learning-button"
-                onClick={() => makeChoice("D")}
-                onFocus={() => setHoveredChoice("D")}
-                onBlur={() => setHoveredChoice(null)}
-              >
-                Defect
-              </button>
-            </div>
-          </div>
-        </div>
+        <p>
+          Cooperate to offer a catch, or defect to step aside. Both choices have
+          consequences.
+        </p>
       ) : (
-        <div data-animate style={{ marginTop: "16px" }}>
+        <>
           <div
-            className="glass-panel"
+            className="glass-panel lesson-result"
             style={{
-              padding: "32px",
-              marginBottom: "24px",
               borderColor: outcome ? OUTCOME_INFO[outcome].color : undefined,
             }}
           >
@@ -579,13 +530,11 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
 
           {outcome === "caught" && (
             <p
-              data-animate
               style={{
                 fontFamily: "var(--font-display)",
                 fontStyle: "italic",
                 fontSize: "var(--text-lg)",
                 color: "var(--text-secondary)",
-                marginBottom: "24px",
               }}
             >
               You both gained +2. Trust paid off — this time.
@@ -593,40 +542,71 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
           )}
           {outcome === "exploited" && (
             <p
-              data-animate
               style={{
                 fontFamily: "var(--font-display)",
                 fontStyle: "italic",
                 fontSize: "var(--text-lg)",
                 color: "var(--text-secondary)",
-                marginBottom: "24px",
               }}
             >
               You gained +3 by stepping aside. But would you play the same way
               if you had to see them again?
             </p>
           )}
-
-          <div className="learning-actions">
-            <button type="button" className="learning-button" onClick={reset}>
-              Try again
-            </button>
-            <button
-              type="button"
-              className="learning-button learning-button-primary"
-              onClick={onNext}
-            >
-              What if you played again?
-            </button>
-          </div>
-        </div>
+        </>
       )}
 
       {/* Payoff matrix (proximity-aware & interactive) */}
-      <details className="learning-details" style={{ marginTop: "32px" }}>
-        <summary>How the points work</summary>
+      <LessonDetails trigger="How the points work" title="Payoff matrix">
         <PayoffMatrix hoveredChoice={hoveredChoice} />
-      </details>
-    </div>
+      </LessonDetails>
+
+      {!playerMove ? (
+        <LessonActions>
+          <div
+            onMouseEnter={() => setHoveredChoice("C")}
+            onMouseLeave={() => setHoveredChoice(null)}
+          >
+            <button
+              type="button"
+              ref={cooperateRef}
+              className="learning-button learning-button-primary"
+              onClick={() => makeChoice("C")}
+              onFocus={() => setHoveredChoice("C")}
+              onBlur={() => setHoveredChoice(null)}
+            >
+              Cooperate
+            </button>
+          </div>
+          <div
+            onMouseEnter={() => setHoveredChoice("D")}
+            onMouseLeave={() => setHoveredChoice(null)}
+          >
+            <button
+              type="button"
+              className="learning-button"
+              onClick={() => makeChoice("D")}
+              onFocus={() => setHoveredChoice("D")}
+              onBlur={() => setHoveredChoice(null)}
+            >
+              Defect
+            </button>
+          </div>
+        </LessonActions>
+      ) : (
+        <LessonActions>
+          <button type="button" className="learning-button" onClick={reset}>
+            Try again
+          </button>
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={onNext}
+          >
+            Continue
+          </button>
+        </LessonActions>
+      )}
+    </LessonLayout>
   );
 };

@@ -31,8 +31,10 @@ const AppShell: React.FC = () => {
   const pathname = useLocation().pathname;
   const isHome = pathname === "/";
   const isLearning = pathname === "/learn" || pathname === "/learn/play";
+  const isLesson = pathname === "/learn";
   const audioManager = useAudioSettings();
   const [audioOpen, setAudioOpen] = useState(false);
+  const audioButtonRef = React.useRef<HTMLButtonElement>(null);
 
   return (
     <>
@@ -156,7 +158,11 @@ const AppShell: React.FC = () => {
               <div style={{ position: "relative" }}>
                 <button
                   type="button"
+                  ref={audioButtonRef}
                   onClick={() => setAudioOpen(!audioOpen)}
+                  aria-label="Audio settings"
+                  aria-expanded={audioOpen}
+                  aria-controls="shell-audio-settings"
                   style={{
                     width: "36px",
                     height: "36px",
@@ -178,6 +184,15 @@ const AppShell: React.FC = () => {
                 {audioOpen && (
                   <div
                     className="glass-panel"
+                    id="shell-audio-settings"
+                    role="group"
+                    aria-label="Sound settings"
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") {
+                        setAudioOpen(false);
+                        audioButtonRef.current?.focus();
+                      }
+                    }}
                     style={{
                       position: "absolute",
                       top: "44px",
@@ -244,10 +259,10 @@ const AppShell: React.FC = () => {
 
       {/* Page content */}
       <main
-        className="shell-content"
+        className={`shell-content${isLesson ? " shell-content-lesson" : ""}`}
         style={{
           paddingTop: "64px",
-          minHeight: "100vh",
+          minHeight: isLesson ? "0" : "100vh",
           position: "relative",
           zIndex: 1,
         }}

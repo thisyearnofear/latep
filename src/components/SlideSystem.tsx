@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import gsap from "gsap";
 import { useAudioSettings } from "../hooks/useAudioSettings";
-import { useSlideAnimation } from "../hooks/useSlideAnimation";
-import JourneyProgress from "./visual/JourneyProgress";
+import { LessonActionProvider } from "./learning/LessonActions";
+import { LessonDetails } from "./learning/LessonDetails";
 import "../styles/slides.css";
 import "../styles/learning.css";
 
@@ -27,9 +27,6 @@ interface SlideSystemProps {
   onComplete?: () => void;
 }
 
-// Icons for the journey progress — mapped by slide index
-const JOURNEY_ICONS = ["🪂", "🏔️", "🤝", "🔄", "⚔️", "🏆", "💨", "🔒"];
-
 export const SlideSystem: React.FC<SlideSystemProps> = ({
   slides,
   onComplete,
@@ -40,6 +37,9 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
   const directionRef = useRef<"forward" | "backward">("forward");
   const slideContentRef = useRef<HTMLDivElement>(null);
   const prevSlideRef = useRef(0);
+  const [actionTarget, setActionTarget] = useState<HTMLDivElement | null>(null);
+  const footerRef = useRef<HTMLElement>(null);
+  const playerRef = useRef<HTMLDivElement>(null);
 
   // Initialize audio on first load
   useEffect(() => {
@@ -63,6 +63,23 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
       audioManager.playSound("click");
     }
   }, [currentSlide, audioManager]);
+
+  // Reserve space for the fixed action bar on small/short layouts
+  useEffect(() => {
+    const footer = footerRef.current;
+    const player = playerRef.current;
+    if (!footer || !player) return;
+    const measure = () => {
+      player.style.setProperty(
+        "--lesson-action-height",
+        `${footer.getBoundingClientRect().height}px`,
+      );
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   const handleNext = useCallback(() => {
     directionRef.current = "forward";
@@ -98,6 +115,7 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
         e.ctrlKey ||
         e.metaKey ||
         e.shiftKey ||
+        document.querySelector(".lesson-dialog[open]") ||
         (e.target instanceof HTMLElement &&
           e.target.closest(
             'input, textarea, select, button, a, summary, [role="button"], [tabindex], [contenteditable="true"]',
@@ -128,9 +146,10 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
     }
 
     const dir = directionRef.current;
-    const xOffset = dir === "forward" ? 60 : -60;
+    const xOffset = dir === "forward" ? 16 : -16;
 
-    el.scrollIntoView({ block: "start", behavior: "auto" });
+    el.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: "auto" });
 
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -146,20 +165,25 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
           {
             x: 0,
             opacity: 1,
-            duration: 0.5,
-            ease: "power3.out",
+            duration: 0.2,
+            ease: "power2.out",
           },
         );
 
-        // Parallax on data-animate children — they stagger in
-        const animatables = gsap.utils.toArray("[data-animate]", el);
+        // Parallax on visible data-animate children — they stagger in
+        const animatables = gsap.utils
+          .toArray<HTMLElement>("[data-animate]", el)
+          .filter(
+            (node) =>
+              node.isConnected && node.offsetWidth > 0 && node.offsetHeight > 0,
+          );
         if (animatables.length > 0) {
           gsap.from(animatables, {
             opacity: 0,
-            x: xOffset * 0.5,
-            duration: 0.6,
-            ease: "power3.out",
-            stagger: 0.06,
+            x: xOffset * 0.25,
+            duration: 0.2,
+            ease: "power2.out",
+            stagger: 0.02,
           });
         }
       }, el);
@@ -172,53 +196,18 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
 
   const currentSlideConfig = slides[currentSlide];
   const SlideComponent = currentSlideConfig.component;
-  const slideRef = useSlideAnimation<HTMLDivElement>();
-
-  // Build journey steps for the progress indicator
-  const journeySteps = slides.map((slide, index) => ({
-    id: slide.id,
-    label: slide.title || slide.id,
-    icon: JOURNEY_ICONS[index] || "•",
-  }));
 
   return (
-    <div className="slide-container learning-journey" ref={slideRef}>
-      {/* Audio controls */}
-      <div className="audio-controls">
-        <button
-          type="button"
-          className={`learning-button audio-button ${!audioManager.isMusicEnabled ? "disabled" : ""}`}
-          onClick={() => audioManager.toggleMusic()}
-          aria-label="Toggle journey music"
-          aria-pressed={audioManager.isMusicEnabled}
-          title="Toggle Music"
-        >
-          {audioManager.isMusicEnabled ? "🎵" : "🔇"}
-        </button>
-        <button
-          type="button"
-          className={`learning-button audio-button ${!audioManager.isSFXEnabled ? "disabled" : ""}`}
-          onClick={() => audioManager.toggleSFX()}
-          aria-label="Toggle journey sound effects"
-          aria-pressed={audioManager.isSFXEnabled}
-          title="Toggle Sound Effects"
-        >
-          {audioManager.isSFXEnabled ? "🔊" : "🔈"}
-        </button>
-      </div>
-
-      {/* Journey progress — replaces the old dots */}
-      {slides.length > 1 && (
-        <div className="learning-progress">
-          <div className="learning-progress-desktop">
-            <JourneyProgress
-              steps={journeySteps}
-              currentStep={currentSlide}
-              onStepClick={handleSlideJump}
-            />
-          </div>
-          <label className="learning-mobile-progress">
-            Chapter
+    <LessonActionProvider target={actionTarget}>
+      <div className="learning-journey lesson-player" ref={playerRef}>
+        {/* Audio controls live in the app header; the bar below is the
+            single navigation surface */}
+        <div className="lesson-toolbar">
+          <span className="lesson-position">
+            Chapter {currentSlide + 1} of {slides.length}
+          </span>
+          <label className="lesson-chapters">
+            <span className="lesson-sr-only">Choose chapter</span>
             <select
               aria-label="Choose chapter"
               value={currentSlide}
@@ -231,38 +220,62 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
               ))}
             </select>
           </label>
+          <LessonDetails trigger="About" title="About this journey">
+            <p>
+              Based on Nicky Case’s “The Evolution of Trust”, adapted for Latep
+              with zero-knowledge proofs on Stellar.
+            </p>
+            <p>
+              Local lessons use practice points. On-chain play is a separate
+              flow.
+            </p>
+          </LessonDetails>
         </div>
-      )}
 
-      {/* Slide content */}
-      <div ref={slideContentRef} className="learning-slide-content">
-        <SlideComponent
-          key={currentSlide}
-          onNext={handleNext}
-          onPrev={handlePrev}
-          slideData={slideData}
-        />
-      </div>
-
-      {/* Navigation */}
-      <div className="learning-nav">
-        <button
-          type="button"
-          className="learning-button"
-          onClick={handlePrev}
-          disabled={currentSlide === 0}
+        {/* Slide content */}
+        <div
+          ref={slideContentRef}
+          className="learning-slide-content lesson-content"
+          data-chapter={currentSlideConfig.id}
         >
-          Previous
-        </button>
+          <SlideComponent
+            key={currentSlide}
+            onNext={handleNext}
+            onPrev={handlePrev}
+            slideData={slideData}
+          />
+        </div>
 
-        <button
-          type="button"
-          className="learning-button learning-button-primary"
-          onClick={handleNext}
+        {/* Navigation */}
+        <footer
+          className="learning-nav lesson-footer"
+          ref={footerRef}
+          aria-label="Lesson navigation"
         >
-          {currentSlide === slides.length - 1 ? "Complete" : "Next"}
-        </button>
+          <button
+            type="button"
+            className="learning-button"
+            onClick={handlePrev}
+            disabled={currentSlide === 0}
+          >
+            Previous
+          </button>
+
+          <div className="lesson-action-host" ref={setActionTarget} />
+
+          <button
+            type="button"
+            className="learning-button learning-button-primary lesson-default-next"
+            onClick={handleNext}
+          >
+            {currentSlide === 0
+              ? "Begin"
+              : currentSlide === slides.length - 1
+                ? "Complete"
+                : "Next"}
+          </button>
+        </footer>
       </div>
-    </div>
+    </LessonActionProvider>
   );
 };

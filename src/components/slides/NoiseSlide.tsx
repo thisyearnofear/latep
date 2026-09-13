@@ -12,6 +12,8 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import { SlideProps } from "../SlideSystem";
 import { unlockAchievement } from "../ui/AchievementBadge";
 import { TrustStage } from "../visual/TrustStage";
+import { LessonLayout } from "../learning/LessonLayout";
+import { LessonActions } from "../learning/LessonActions";
 import {
   createStrategy,
   playRepeatedGame,
@@ -87,54 +89,47 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
   const scoreLabel = result ? result.avgScore.toFixed(1) : "—";
 
   return (
-    <div
-      className="learning-round"
-      style={{ margin: "0 auto", textAlign: "center" }}
+    <LessonLayout
+      title="The Noise"
+      description="Even a cooperative choice can be changed by noise."
+      visual={
+        <>
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--text-sm)",
+              color: "var(--text-muted)",
+              marginBottom: "8px",
+            }}
+          >
+            {result
+              ? "Final round of the 50-round simulation"
+              : "Wind risk is a setting, not a guaranteed mistake."}
+          </p>
+          <TrustStage
+            compact
+            state={
+              result?.lastRound
+                ? {
+                    phase: "outcome",
+                    playerMove: result.lastRound.a,
+                    opponentMove: result.lastRound.b,
+                  }
+                : { phase: "idle" }
+            }
+            opponentLabel="Tit-for-Tat partner"
+            roundKey={simulationNumber}
+            showChoices={!!result}
+            trustAltitude={result?.trustAltitude}
+            noise={result?.noise ?? noise}
+          />
+        </>
+      }
     >
-      <h2
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-3xl)",
-          marginBottom: "12px",
-        }}
-      >
-        The Noise
-      </h2>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base)",
-          color: "var(--text-secondary)",
-          marginBottom: "8px",
-        }}
-      >
-        What if a cooperative signal gets garbled? You meant to catch — but they
-        thought you stepped aside. Misunderstanding breeds mistrust.
-      </p>
-
-      <p
-        data-animate
-        style={{
-          fontFamily: "var(--font-display)",
-          fontStyle: "italic",
-          fontSize: "var(--text-lg)",
-          color: "var(--text-muted)",
-          marginBottom: "32px",
-        }}
-      >
-        Two Tit-for-Tat players. Perfect partners. Add noise — watch what
-        happens.
-      </p>
-
       {/* Noise slider */}
       <div
-        data-animate
         style={{
-          padding: "28px",
-          marginBottom: "24px",
+          padding: "16px",
           background: "rgba(10, 14, 26, 0.85)",
           border: "1px solid var(--border-glass)",
           borderRadius: "var(--radius-lg)",
@@ -145,10 +140,11 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: "12px",
+            marginBottom: "8px",
           }}
         >
-          <p
+          <label
+            htmlFor="lesson-noise"
             style={{
               fontFamily: "var(--font-body)",
               fontSize: "var(--text-sm)",
@@ -159,7 +155,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
             }}
           >
             Noise Level
-          </p>
+          </label>
           <p
             style={{
               fontFamily: "var(--font-display)",
@@ -173,11 +169,13 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
         </div>
 
         <input
+          id="lesson-noise"
           type="range"
           min="0"
           max="0.5"
           step="0.05"
           value={noise}
+          aria-label="Noise level"
           onChange={(e) => {
             setNoise(parseFloat(e.target.value));
             if (timerRef.current) {
@@ -198,221 +196,129 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           }}
         />
 
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: "8px",
-          }}
-        >
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-            }}
-          >
-            Perfect signals
-          </span>
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-            }}
-          >
-            Chaos
-          </span>
-        </div>
-
-        {/* Submit button — made prominent so it's easy to find */}
-        <div
-          style={{
-            marginTop: "20px",
-            padding: "16px",
-            background: "rgba(240, 160, 32, 0.08)",
-            border: "1px solid rgba(240, 160, 32, 0.2)",
-            borderRadius: "var(--radius-md)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
-            Run a 50-round simulation between two Tit-for-Tat strategies
-          </p>
-          <button
-            type="button"
-            className="learning-button learning-button-primary"
-            onClick={runSimulation}
-            disabled={running}
-            style={{
-              width: "100%",
-              maxWidth: "320px",
-              fontSize: "var(--text-base)",
-              fontWeight: 700,
-            }}
-          >
-            {running ? "Running 50 rounds..." : "Simulate 50 rounds"}
-          </button>
-        </div>
-      </div>
-
-      <div data-animate style={{ marginBottom: "24px" }}>
         <p
           style={{
             fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
+            fontSize: "var(--text-xs)",
             color: "var(--text-muted)",
-            marginBottom: "8px",
+            margin: "8px 0 0",
           }}
         >
-          {result
-            ? "Final round of the 50-round simulation"
-            : "Wind risk is a setting, not a guaranteed mistake."}
+          Chance that each move is flipped.
         </p>
-        <TrustStage
-          state={
-            result?.lastRound
-              ? {
-                  phase: "outcome",
-                  playerMove: result.lastRound.a,
-                  opponentMove: result.lastRound.b,
-                }
-              : { phase: "idle" }
-          }
-          opponentLabel="Tit-for-Tat partner"
-          roundKey={simulationNumber}
-          showChoices={!!result}
-          trustAltitude={result?.trustAltitude}
-          noise={result?.noise ?? noise}
-        />
       </div>
 
       {/* Results */}
       {result && (
-        <div data-animate>
+        <div
+          className="lesson-result"
+          style={{
+            padding: "16px",
+            background: "rgba(10, 14, 26, 0.85)",
+            border: `1px solid ${
+              coopPercent > 60
+                ? "rgba(74,222,128,0.3)"
+                : coopPercent > 30
+                  ? "rgba(240,160,32,0.3)"
+                  : "rgba(248,113,113,0.3)"
+            }`,
+            borderRadius: "var(--radius-lg)",
+          }}
+        >
           <div
             style={{
-              padding: "24px",
-              marginBottom: "24px",
-              background: "rgba(10, 14, 26, 0.85)",
-              border: `1px solid ${
-                coopPercent > 60
-                  ? "rgba(74,222,128,0.3)"
-                  : coopPercent > 30
-                    ? "rgba(240,160,32,0.3)"
-                    : "rgba(248,113,113,0.3)"
-              }`,
-              borderRadius: "var(--radius-lg)",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "24px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-around",
-                flexWrap: "wrap",
-                gap: "16px",
-              }}
-            >
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--text-muted)",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  Cooperation rate
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--text-3xl)",
-                    color:
-                      coopPercent > 60
-                        ? "var(--accent-cooperate)"
-                        : coopPercent > 30
-                          ? "var(--accent-warm)"
-                          : "var(--accent-defect)",
-                    margin: 0,
-                  }}
-                >
-                  {coopPercent}%
-                </p>
-              </div>
-              <div>
-                <p
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-xs)",
-                    color: "var(--text-muted)",
-                    margin: 0,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                  }}
-                >
-                  Average total points
-                </p>
-                <p
-                  style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: "var(--text-3xl)",
-                    color: "var(--text-primary)",
-                    margin: 0,
-                  }}
-                >
-                  {scoreLabel}
-                </p>
-              </div>
-            </div>
-
-            {/* Cooperation bar */}
-            <div
-              style={{
-                marginTop: "16px",
-                height: "8px",
-                borderRadius: "4px",
-                background: "rgba(255,255,255,0.08)",
-                overflow: "hidden",
-              }}
-            >
-              <div
+            <div>
+              <p
                 style={{
-                  height: "100%",
-                  width: `${coopPercent}%`,
-                  background:
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  margin: 0,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Cooperation rate
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "var(--text-2xl)",
+                  color:
                     coopPercent > 60
                       ? "var(--accent-cooperate)"
                       : coopPercent > 30
                         ? "var(--accent-warm)"
                         : "var(--accent-defect)",
-                  transition: "width 0.6s var(--ease-out)",
-                  borderRadius: "4px",
+                  margin: 0,
                 }}
-              />
+              >
+                {coopPercent}%
+              </p>
+            </div>
+            <div>
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  margin: 0,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                }}
+              >
+                Average total points
+              </p>
+              <p
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontSize: "var(--text-2xl)",
+                  color: "var(--text-primary)",
+                  margin: 0,
+                }}
+              >
+                {scoreLabel}
+              </p>
             </div>
           </div>
 
-          <p
-            data-animate
+          {/* Cooperation bar */}
+          <div
             style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: "var(--text-lg)",
+              marginTop: "12px",
+              height: "6px",
+              borderRadius: "3px",
+              background: "rgba(255,255,255,0.08)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                height: "100%",
+                width: `${coopPercent}%`,
+                background:
+                  coopPercent > 60
+                    ? "var(--accent-cooperate)"
+                    : coopPercent > 30
+                      ? "var(--accent-warm)"
+                      : "var(--accent-defect)",
+                transition: "width 0.6s var(--ease-out)",
+                borderRadius: "3px",
+              }}
+            />
+          </div>
+
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--text-sm)",
               color: "var(--text-secondary)",
-              marginBottom: "24px",
+              margin: "12px 0 0",
             }}
           >
             {`At ${Math.round(result.noise * 100)}% noise risk, this run produced ${coopPercent}% cooperation. Run it again to explore variation.`}
@@ -420,15 +326,26 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
         </div>
       )}
 
-      <div data-animate>
+      {/* Submit button */}
+      <LessonActions>
         <button
           type="button"
-          className="learning-button learning-button-primary"
-          onClick={onNext}
+          className={`learning-button ${result ? "" : "learning-button-primary"}`}
+          onClick={runSimulation}
+          disabled={running}
         >
-          Ready for real stakes?
+          {running ? "Running 50 rounds..." : "Simulate 50 rounds"}
         </button>
-      </div>
-    </div>
+        {result && (
+          <button
+            type="button"
+            className="learning-button learning-button-primary"
+            onClick={onNext}
+          >
+            Continue
+          </button>
+        )}
+      </LessonActions>
+    </LessonLayout>
   );
 };

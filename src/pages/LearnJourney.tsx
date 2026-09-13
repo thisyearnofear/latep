@@ -75,14 +75,12 @@ const LearnJourney: React.FC = () => {
   ];
 
   return (
-    <div className="slide-container">
-      <SlideSystem
-        slides={slides}
-        onComplete={() => {
-          // The RealThingSlide handles its own navigation to /play
-        }}
-      />
-    </div>
+    <SlideSystem
+      slides={slides}
+      onComplete={() => {
+        // The RealThingSlide handles its own navigation to /play
+      }}
+    />
   );
 };
 
