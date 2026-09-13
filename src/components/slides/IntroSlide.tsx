@@ -9,6 +9,7 @@ import React from "react";
 import { SlideProps } from "../SlideSystem";
 import { TrustStage } from "../visual/TrustStage";
 import { LessonLayout } from "../learning/LessonLayout";
+import { LessonDetails } from "../learning/LessonDetails";
 
 export const IntroSlide: React.FC<SlideProps> = () => {
   return (
@@ -30,8 +31,17 @@ export const IntroSlide: React.FC<SlideProps> = () => {
       <h3>A small choice. A shared consequence.</h3>
       <p>
         Play against different strategies, see how trust evolves, and discover
-        what zero-knowledge proofs can—and cannot—guarantee.
+        what zero-knowledge proofs can—and cannot—guarantee. The same question
+        appears when a stranger pays you from another country — except then, the
+        stakes are real.
       </p>
+      <LessonDetails trigger="Why this matters" title="Why this matters">
+        <p>
+          Everything in this journey is a miniature of a real problem: paying,
+          trading, or agreeing with a stranger you will never meet. The internet
+          made those interactions instant — but gave you no way to trust them.
+        </p>
+      </LessonDetails>
     </LessonLayout>
   );
 };

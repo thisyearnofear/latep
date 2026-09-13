@@ -1,7 +1,7 @@
 /**
  * LearnJourney — The guided narrative slide deck
  *
- * The 8-slide interactive journey from Nicky Case's "Evolution of Trust",
+ * The 9-slide interactive journey from Nicky Case's "Evolution of Trust",
  * adapted for Latep. This is the "Learn" section — a linear narrative
  * that teaches the game theory concepts, ending with a CTA to play
  * the tutorial sandbox or jump to ZK multiplayer.
@@ -18,6 +18,7 @@ import {
   TournamentSlide,
   NoiseSlide,
   RealThingSlide,
+  EpilogueSlide,
 } from "../components/slides";
 import { useFirstRun } from "../hooks/useFirstRun";
 import "../styles/slides.css";
@@ -71,6 +72,11 @@ const LearnJourney: React.FC = () => {
       id: "real",
       title: "The Real Thing",
       component: RealThingSlide,
+    },
+    {
+      id: "epilogue",
+      title: "The Internet",
+      component: EpilogueSlide,
     },
   ];
 

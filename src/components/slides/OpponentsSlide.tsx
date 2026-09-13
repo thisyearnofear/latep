@@ -78,7 +78,7 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
       description={
         selected
           ? `Round ${matchRound || 1}/3 against ${getStrategyInfo(selected).name}`
-          : "Pick a strategy for a three-round match."
+          : "Pick a strategy for a three-round match — each one is a different policy for trusting strangers."
       }
       visual={
         selected ? (
@@ -102,37 +102,23 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
     >
       {/* Strategy grid */}
       {!selected && (
-        <>
-          <div className="narrative-strategies">
-            {ALL_STRATEGY_IDS.map((id) => {
-              const info = getStrategyInfo(id);
-              return (
-                <StrategyCard
-                  key={id}
-                  id={id}
-                  name={info.name}
-                  description={info.description}
-                  emoji={info.emoji}
-                  color={info.color}
-                  compact
-                  onClick={() => startMatch(id)}
-                />
-              );
-            })}
-          </div>
-
-          {/* The reveal — shown when browsing strategies */}
-          <LessonDetails
-            trigger="About these strategies"
-            title="Strategy guide"
-          >
-            <p>
-              <strong>A strategy to start with: Tit-for-Tat.</strong> It starts
-              by cooperating, then mirrors your last move. Its performance
-              depends on the other strategies, the payoffs, and the noise level.
-            </p>
-          </LessonDetails>
-        </>
+        <div className="narrative-strategies">
+          {ALL_STRATEGY_IDS.map((id) => {
+            const info = getStrategyInfo(id);
+            return (
+              <StrategyCard
+                key={id}
+                id={id}
+                name={info.name}
+                description={info.description}
+                emoji={info.emoji}
+                color={info.color}
+                compact
+                onClick={() => startMatch(id)}
+              />
+            );
+          })}
+        </div>
       )}
 
       {/* Match view */}
@@ -283,6 +269,29 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
           </p>
         </>
       )}
+
+      {/* The reveal + why it matters — paired at the end of the copy */}
+      <div className="lesson-detail-row">
+        {!selected && (
+          <LessonDetails
+            trigger="About these strategies"
+            title="Strategy guide"
+          >
+            <p>
+              <strong>A strategy to start with: Tit-for-Tat.</strong> It starts
+              by cooperating, then mirrors your last move. Its performance
+              depends on the other strategies, the payoffs, and the noise level.
+            </p>
+          </LessonDetails>
+        )}
+        <LessonDetails trigger="Why this matters" title="Why this matters">
+          <p>
+            Strategies are policies. Markets, protocols, and agents all run
+            policies — some forgiving, some exploitative. Choosing who you play
+            with is choosing which rules govern your trust.
+          </p>
+        </LessonDetails>
+      </div>
 
       {selected && !matchComplete && (
         <LessonActions>

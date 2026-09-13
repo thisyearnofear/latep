@@ -14,6 +14,7 @@ import { unlockAchievement } from "../ui/AchievementBadge";
 import { TrustStage } from "../visual/TrustStage";
 import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
+import { LessonDetails } from "../learning/LessonDetails";
 import {
   createStrategy,
   playRepeatedGame,
@@ -325,6 +326,14 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           </p>
         </div>
       )}
+
+      <LessonDetails trigger="Why this matters" title="Why this matters">
+        <p>
+          The real world is noisy: failed payments, ambiguous data, disputed
+          outcomes. That is why settlement rules must be deterministic about
+          what counts.
+        </p>
+      </LessonDetails>
 
       {/* Submit button */}
       <LessonActions>

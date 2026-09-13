@@ -561,6 +561,14 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
         <PayoffMatrix hoveredChoice={hoveredChoice} />
       </LessonDetails>
 
+      <LessonDetails trigger="Why this matters" title="Why this matters">
+        <p>
+          The sealed choice is real. On-chain, a commitment is binding but
+          hidden — the same pattern behind auctions, voting, and protection
+          against front-running.
+        </p>
+      </LessonDetails>
+
       {!playerMove ? (
         <LessonActions>
           <div

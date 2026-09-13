@@ -457,6 +457,17 @@
   align-self: flex-start;
 }
 
+.lesson-detail-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.lesson-detail-row .lesson-detail-trigger {
+  align-self: auto;
+}
+
 .lesson-footer {
   position: fixed;
   bottom: 0;
@@ -588,5 +599,43 @@
 
   .lesson-content {
     padding: 16px 12px;
+  }
+}
+
+/* --- Epilogue: mechanic → primitive map ------------------------------------ */
+
+.epilogue-map {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(130px, auto) minmax(0, 1fr);
+  gap: 8px 10px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.epilogue-map dt {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.epilogue-map dd {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 520px) {
+  .epilogue-map {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .epilogue-map dd {
+    margin-bottom: 8px;
+  }
+
+  .epilogue-map dd:last-child {
+    margin-bottom: 0;
   }
 }

@@ -243,6 +243,14 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
         </LessonDetails>
       )}
 
+      <LessonDetails trigger="Why this matters" title="Why this matters">
+        <p>
+          Ecosystems select for behavior the way this simulation does — reliable
+          strategies propagate. Mechanism design is engineering that selection
+          pressure.
+        </p>
+      </LessonDetails>
+
       {/* Controls */}
       {!isComplete ? (
         <LessonActions>

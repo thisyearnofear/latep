@@ -14,6 +14,7 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - [x] Unify remaining narrative scenes and shared altitude/wind choreography
 - [x] Opt-in shared journey audio with synchronized controls and unmount cleanup
 - [x] Compact lesson player — viewport-first guided journey with chapter selector, shared action bar, and native dialogs
+- [x] Epilogue: map the journey to real Stellar primitives (reputation, commit-reveal, escrow, accreditation vs KYC)
 - [ ] Extend the vocabulary to tournament populations
 - [ ] Integrate the sealed-choice object with real on-chain multiplayer states
 - [ ] Optional stylized Three.js diorama after the 2.5D interaction is reviewed
