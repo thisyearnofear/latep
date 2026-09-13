@@ -7,4 +7,5 @@ export { OpponentsSlide } from "./OpponentsSlide";
 export { TournamentSlide } from "./TournamentSlide";
 export { NoiseSlide } from "./NoiseSlide";
 export { RealThingSlide } from "./RealThingSlide";
+export { EpilogueSlide } from "./EpilogueSlide";
 export { ConclusionSlide } from "./ConclusionSlide";

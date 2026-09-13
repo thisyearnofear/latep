@@ -317,3 +317,5 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 ### Compact lesson player
 
 The guided journey uses one chapter selector and the app-header audio controls. A shared bottom action bar hosts each chapter’s current controls without duplicating a generic Next action. On standard laptop viewports the stage and explanation sit side by side; chapter essentials are designed to fit without page or panel scrolling at 1280×720 and 1366×768. Payoff explanations, history, sharing, and attribution open in native dialogs. Small screens, short landscape windows, and enlarged text retain accessible scrolling with space reserved for the action bar. Home, the tutorial sandbox, and live multiplayer keep their existing layouts.
+
+The journey now ends with an epilogue that maps each mechanic to a real primitive — reputation, commit-reveal, escrowed settlement, accreditation — and states honest scope: the demo proves moves and membership, not balances or full identity privacy. Privacy-vs-KYC is presented through the contract's existing accreditation methods, and each earlier chapter carries a short "Why this matters" bridge in a native dialog.

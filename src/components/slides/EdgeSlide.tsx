@@ -11,6 +11,7 @@ import { SlideProps } from "../SlideSystem";
 import { TrustStage } from "../visual/TrustStage";
 import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
+import { LessonDetails } from "../learning/LessonDetails";
 
 export const EdgeSlide: React.FC<SlideProps> = ({ onNext }) => {
   return (
@@ -45,6 +46,12 @@ export const EdgeSlide: React.FC<SlideProps> = ({ onNext }) => {
       <p>
         The lesson uses practice points. You can explore on-chain stakes later.
       </p>
+      <LessonDetails trigger="Why this matters" title="Why this matters">
+        <p>
+          Most online exchanges are one-shot. No history, no repeat — just a
+          single decision about whether to extend trust to someone anonymous.
+        </p>
+      </LessonDetails>
       <LessonActions>
         <button
           type="button"

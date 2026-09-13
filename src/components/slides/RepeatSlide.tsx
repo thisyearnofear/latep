@@ -317,6 +317,13 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
         </LessonDetails>
       )}
 
+      <LessonDetails trigger="Why this matters" title="Why this matters">
+        <p>
+          Reputation is repeated play. It works — until the interaction is
+          one-shot, or your history is locked inside a platform you are leaving.
+        </p>
+      </LessonDetails>
+
       {!isComplete && !playerMove && (
         <LessonActions>
           <button
