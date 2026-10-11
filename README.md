@@ -15,12 +15,17 @@ A third pattern — **private reputation** (prove a track record without reveali
 
 ## What's real vs. demo scaffolding
 
-- **Real:** both ZK proofs generate in the browser (Noir + bb.js) and verify on-chain. 19/19 Rust contract tests pass. Contract deployed on testnet: `CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P`.
-- **Demo scaffolding:** the accreditation tree is pre-computed (3 hardcoded credentials), the frontend polls instead of subscribing to events, and no full two-wallet browser session has been tested. Details in `docs/PRODUCT_REVIEW.md`.
+- **Real:** both ZK proofs generate in the browser (Noir + bb.js) and verify on-chain. 19/19 Rust contract tests pass. Contract deployed on testnet: `CCYHIUOAUWFCWA5RV34UPT4SEXJFNE3SITGFR5HM2BL2K2RFOSGECE4P`. The full multiplayer flow — two independent wallets, create → join → prove → reveal ×2 → escrow settlement — has been verified end-to-end on testnet headlessly (`scripts/e2e-testnet.mjs`, run log with tx hashes: `docs/E2E_TESTNET_RUN.md`). The contract holds a house reserve so CC/DC payouts (which exceed escrow) can settle; the script tops it up automatically.
+- **Demo scaffolding:** the accreditation tree is pre-computed (3 hardcoded credentials), the frontend polls instead of subscribing to events, and the in-browser wallet session should be walked through per `docs/PITCH.md` before demoing. Details in `docs/PRODUCT_REVIEW.md`.
+
+## Find Your Way (Stellar, General Track)
+
+Entered as the education + games story: playable wallet-free tutorial/tournament plus two on-chain-verified ZK patterns (commitment binding, private accreditation). Submit by Oct 13, 0:59 — ship as-is, no new patterns; write-up stresses "real ZK verification runs on Stellar today."
 
 ## Docs
 
 - `docs/HACKMERIDIAN.md` — the three-pattern story, Pattern 3 (private reputation) spec, HackMeridian plan
+- `docs/PITCH.md` — pitch script, submission copy, two-wallet demo runbook
 - `docs/PRODUCT_REVIEW.md` — honest product review, gaps, what was fixed
 - `docs/ROADMAP.md` — build status, current design priority
 - `docs/ZK_HACKATHON_PLAN.md` — original hackathon plan

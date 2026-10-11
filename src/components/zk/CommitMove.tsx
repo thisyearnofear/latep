@@ -60,6 +60,7 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
   );
   const [txError, setTxError] = useState<string | null>(null);
   const [commitDebug, setCommitDebug] = useState<string>("");
+  const [showTech, setShowTech] = useState(false);
   const [savedNonce, setSavedNonce] = useState<bigint | null>(null);
 
   // Persist nonce and move for the reveal step
@@ -671,7 +672,7 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
                 fontSize: "13px",
               }}
             >
-              🔑 Save Your Nonce!
+              🔑 Your secret code
             </p>
             <p
               style={{
@@ -680,7 +681,8 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
                 color: "var(--text-secondary)",
               }}
             >
-              You'll need this to reveal your move:
+              Needed to reveal your move. Saved automatically in this browser —
+              write it down as a backup in case you switch device.
             </p>
             <p
               style={{
@@ -701,7 +703,7 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
                 color: "var(--text-muted)",
               }}
             >
-              (Saved in your browser session)
+              (It reappears automatically when you reveal)
             </p>
           </div>
         )}
@@ -742,6 +744,17 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
                 >
                   You're falling... your ZK proof is binding your move.
                 </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "12px",
+                    color: "var(--text-muted)",
+                    marginTop: "4px",
+                  }}
+                >
+                  Creating a zero-knowledge proof that your move is valid — this
+                  takes a few seconds.
+                </div>
               </div>
             )}
             {status === "submitting" && (
@@ -767,12 +780,35 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
                 </div>
               </div>
             )}
-            {commitDebug && (
+            {showTech && commitDebug && (
               <div style={{ marginTop: "4px", color: "var(--text-secondary)" }}>
                 {commitDebug}
               </div>
             )}
           </div>
+        )}
+
+        {status !== "choose" && (
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              marginBottom: "16px",
+              fontFamily: "var(--font-body)",
+              fontSize: "12px",
+              color: "var(--text-muted)",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={showTech}
+              onChange={(e) => setShowTech(e.target.checked)}
+            />
+            Show technical details
+          </label>
         )}
 
         {txError && (
