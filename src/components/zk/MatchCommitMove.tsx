@@ -56,6 +56,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
   );
   const [txError, setTxError] = useState<string | null>(null);
   const [debug, setDebug] = useState<string>("");
+  const [showTech, setShowTech] = useState(false);
   const [savedNonce, setSavedNonce] = useState<bigint | null>(null);
 
   // Persist nonce + move for the reveal step (keyed by predicted/known game id)
@@ -405,6 +406,17 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                 >
                   Generating ZK proof...
                 </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "12px",
+                    color: "var(--text-muted)",
+                    marginTop: "4px",
+                  }}
+                >
+                  Creating a proof that your move is valid — this takes a few
+                  seconds.
+                </div>
               </div>
             )}
             {status === "submitting" && (
@@ -426,8 +438,33 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                 </div>
               </div>
             )}
-            {debug && <div style={{ marginTop: "4px" }}>{debug}</div>}
+            {showTech && debug && (
+              <div style={{ marginTop: "4px" }}>{debug}</div>
+            )}
           </div>
+        )}
+
+        {status !== "choose" && (
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              marginBottom: "16px",
+              fontFamily: "var(--font-body)",
+              fontSize: "12px",
+              color: "var(--text-muted)",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={showTech}
+              onChange={(e) => setShowTech(e.target.checked)}
+            />
+            Show technical details
+          </label>
         )}
 
         {txError && (

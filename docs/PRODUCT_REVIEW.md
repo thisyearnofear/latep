@@ -153,7 +153,7 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 1. ~~**Auto-fill move in reveal phase**~~ ✅ Done
 2. ~~**Add responsive breakpoints**~~ ✅ Done
-3. **Hide debug info behind a toggle** — "Show technical details" checkbox
+3. ~~**Hide debug info behind a toggle**~~ ✅ Done — "Show technical details" checkbox gates the hex/debug line in both commit components
 4. **Add toast notification on wallet disconnect** — "Wallet disconnected. Reconnect to continue."
 5. **Add "Last updated: 12:34:05" timestamp** in the game view polling area
 6. ~~**Show actionable buttons after deadline**~~ ✅ Done for cancel/refund; claim forfeit button still needed
@@ -212,7 +212,9 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 ### What's not working
 
-**Proof generation latency is unknown in-browser.** The Rust test verifies the proof, but browser WASM performance varies. The UI shows "Generating ZK proof..." but there's no timeout or progress indicator. If bb.js WASM fails to load (e.g., worker path issues), the app hangs silently.
+**~~Settlement funding gap (found by headless two-wallet E2E).~~** ✅ **Fixed.** `resolve_game` pays winners more than the 2×-stake escrow holds (CC pays 4×stake total, DC pays 3×), and the freshly redeployed contract account held no XLM reserve — any non-DD outcome would have trapped the payout ("balance is not sufficient to spend"). Discovered by `scripts/e2e-testnet.mjs`, which drives two friendbot-funded accounts through the full flow on testnet with real browser-flavor keccak-UltraHonk proofs (game resolved on-chain; run log with tx hashes in `docs/E2E_TESTNET_RUN.md`). Fix: the script tops up the contract's house reserve via a Soroban native-token transfer whenever it falls below `4×stake + 5 XLM`. **Any redeployment must run the script once (or send a Soroban transfer to the contract) before demoing settlement.**
+
+**Proof generation latency is unknown in-browser.** The Rust test verifies the proof, but browser WASM performance varies. The UI shows "Generating ZK proof..." but there's no timeout or progress indicator. If bb.js WASM fails to load (e.g., worker path issues), the app hangs silently. (Node-side proof generation is now measured via the E2E script; the browser path still needs the live two-wallet walkthrough in `docs/PITCH.md`.)
 
 **No proof generation timeout.** If bb.js hangs (WASM init failure, browser incompatibility), the user is stuck on "Generating ZK proof..." forever. No timeout, no error, no fallback.
 
@@ -258,8 +260,8 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 ### Recommendations
 
 1. ~~**Add a 3-step onboarding overlay**~~ ✅ Done
-2. **Add helper text during proof generation** — "Creating a zero-knowledge proof that your move is valid. This takes a few seconds."
-3. **Reframe the nonce** — "Your secret code" with "Saved automatically — write it down as backup in case you close your browser"
+2. ~~**Add helper text during proof generation**~~ ✅ Done — "Creating a zero-knowledge proof that your move is valid — this takes a few seconds." in both commit components
+3. ~~**Reframe the nonce**~~ ✅ Done — "Your secret code", "Saved automatically in this browser — write it down as a backup…"
 4. **Connect the tutorial to the game** — add a final slide that says "Ready to play for real? Click here to start a ZK game" linking to `/play`
 5. **Add a "How it works" expandable section** in the lobby — 3 sentences about commit-reveal + ZK, with a link to the README for details
 
@@ -277,14 +279,14 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 ### Fixed if time permits (high value) ✅
 
-| #   | Issue                              | Impact              | Status                                     |
-| --- | ---------------------------------- | ------------------- | ------------------------------------------ |
-| 4   | Add `cancel_game` for stuck escrow | Locked funds        | ✅ Fixed + tested                          |
-| 5   | Add proof generation timeout       | Silent hang         | ✅ Fixed (`src/util/withTimeout.ts`, 120s) |
-| 6   | Hide debug info behind toggle      | Polish              | ⬜ Not done                                |
-| 7   | Add onboarding overlay             | Judge comprehension | ✅ Done                                    |
-| 8   | Fix `claim_forfeit` error message  | Misleading error    | ✅ Fixed                                   |
-| 9   | Add responsive breakpoints         | Mobile judging      | ✅ Done                                    |
+| #   | Issue                              | Impact              | Status                                                                      |
+| --- | ---------------------------------- | ------------------- | --------------------------------------------------------------------------- |
+| 4   | Add `cancel_game` for stuck escrow | Locked funds        | ✅ Fixed + tested                                                           |
+| 5   | Add proof generation timeout       | Silent hang         | ✅ Fixed (`src/util/withTimeout.ts`, 120s)                                  |
+| 6   | Hide debug info behind toggle      | Polish              | ✅ Done (`Show technical details` checkbox in CommitMove + MatchCommitMove) |
+| 7   | Add onboarding overlay             | Judge comprehension | ✅ Done                                                                     |
+| 8   | Fix `claim_forfeit` error message  | Misleading error    | ✅ Fixed                                                                    |
+| 9   | Add responsive breakpoints         | Mobile judging      | ✅ Done                                                                     |
 
 ### Previously acknowledged, now fixed ✅
 
