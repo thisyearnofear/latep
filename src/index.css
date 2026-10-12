@@ -914,58 +914,15 @@ p {
   color: var(--text-secondary);
 }
 
+/* The shell's own rules live in styles/shell.css (ticket A2). The block that
+   used to live here forced `flex-wrap: wrap` and `height: auto` under 700px,
+   which put the header on two rows — the one thing design.md §10 rules out.
+   It also carried the old glass-nav hover overrides. */
+
 .text-muted {
   color: var(--text-muted);
 }
 
-.shell-nav-link:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: var(--text-primary) !important;
-}
-
-.shell-nav-link.active:hover {
-  background: rgba(102, 126, 234, 0.2) !important;
-}
-
-.shell-nav-link:focus-visible {
-  outline: 2px solid var(--accent-warm);
-  outline-offset: 2px;
-}
-
-@media (max-width: 700px) {
-  .shell-header {
-    position: sticky !important;
-    height: auto !important;
-    flex-wrap: wrap;
-    padding: 12px !important;
-    row-gap: 8px;
-  }
-
-  .shell-nav {
-    order: 3;
-    flex-basis: 100%;
-    width: auto;
-    min-width: 0;
-    justify-content: center;
-  }
-
-  .shell-nav-link {
-    padding: 8px 10px !important;
-  }
-
-  .shell-content {
-    padding-top: 0 !important;
-  }
-}
-
-@media (max-width: 400px) {
-  .shell-nav-link {
-    padding: 8px 6px !important;
-    gap: 4px !important;
-    font-size: var(--text-xs) !important;
-  }
-
-  div#root {
-    --sds-window-width-min: 0;
-  }
+div#root {
+  --sds-window-width-min: 0;
 }

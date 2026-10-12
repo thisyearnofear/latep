@@ -426,6 +426,16 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Replace the audio emoji with `lucide-react` `Volume2` / `VolumeX`.
 - Done: nav fits on one row at 320px; the active link is shown by underline
   plus weight, not colour alone; keyboard order is logical.
+- **Shipped 2026-10-12.** Notes for A3:
+  1. A legacy `max-width: 700px` block in `index.css` was forcing
+     `.shell-header { flex-wrap: wrap; height: auto }`, which put the header on
+     **two rows** below 700px — the one thing design.md §10 rules out. It is
+     gone. If you add a `.shell-*` rule anywhere, it goes in `shell.css`.
+  2. `CustomCursor` and `TopographicBackground` are no longer rendered, but the
+     **files are still imported by nothing and still on disk** until B9. Do not
+     assume they are safe to delete; check first.
+  3. The active nav state is an underline plus weight. Keep it that way — a
+     judge at a distance cannot see a colour-only difference.
 
 **A3 · Home** (L) — Dev A. _Depends on B3 and B4. Build the layout against
 the current stage first, then swap._
