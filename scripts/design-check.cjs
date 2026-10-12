@@ -60,10 +60,20 @@ const METRICS = [
     label: 'user-visible "Cooperate" / "Defect"',
     target: "glossary + inspector only",
     files: (f) => f.endsWith(".ts") || f.endsWith(".tsx"),
-    // Word-boundary "Cooperate"/"Defect" anywhere in the string. Deliberately
-    // blunt: over-counting a handful of legitimate glossary/inspector uses is
-    // cheaper than letting a new user-visible label slip past the guard.
-    count: (text) => matchAll(text, /\b(Cooperate|Defect)\b/g),
+    // Word-boundary "Cooperate"/"Defect" in a quoted string or JSX text node.
+    // Deliberately blunt: over-counting a handful of legitimate glossary and
+    // inspector uses is cheaper than letting a new user-visible label slip
+    // past the guard. Comments are stripped first so documentation about the
+    // vocabulary doesn't count against the metric.
+    count: (text) => {
+      const code = text
+        .replace(/\/\*[\s\S]*?\*\//g, " ")
+        .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+      return matchAll(
+        code,
+        /["'`](?:[^"'`]*\b)?\b(Cooperate|Defect)\b[^"'`]*["'`]|[>"'`]\s*(Cooperate|Defect)\s*[<"'`]/g,
+      );
+    },
   },
   {
     key: "glassPanel",

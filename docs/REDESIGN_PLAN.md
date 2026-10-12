@@ -163,7 +163,7 @@ Two scripts the team runs on every PR.
 | Hex / `rgb()` / `rgba()` literals in `.tsx` and `.css` (outside `tokens.css`) | 527                   | 0                               |
 | `style={{` blocks                                                             | 941                   | under 120 (dynamic values only) |
 | Emoji (`\p{Extended_Pictographic}`) in `.ts`/`.tsx`                           | 329                   | 0                               |
-| Word-boundary `Cooperate` / `Defect`                                          | 80                    | Glossary and inspector only     |
+| Word-boundary `Cooperate` / `Defect` in strings and JSX text                  | 56                    | Glossary and inspector only     |
 | `glass-panel` uses                                                            | 47                    | 0                               |
 
 The script reads `scripts/design-baseline.json` and **fails if any number goes
@@ -171,11 +171,15 @@ up**. When a PR brings a number down, run `npm run design:check:write` and
 commit the updated baseline in the same PR. That makes progress visible and
 stops regressions. It runs in the pre-commit hook, so it cannot be merged past.
 
-Measured over 112 files under `src/`, excluding `src/contracts/` (generated
+Measured over the files under `src/`, excluding `src/contracts/` (generated
 from Rust) and `src/debug/` (the deliberate escape hatch). `src/styles/tokens.css`
-is the one file allowed to hold raw colour values. The `Cooperate`/`Defect`
-count is a blunt word-boundary match, so it deliberately over-counts the
-glossary and inspector — those land at their target, not at 0.
+is the one file allowed to hold raw colour values.
+
+The `Cooperate`/`Defect` metric matches quoted strings and JSX text nodes only,
+and strips comments first — otherwise the vocabulary file's own documentation
+about the words would count against the metric. It is deliberately blunt within
+that scope, so it over-counts the glossary and inspector; those land at their
+target, not at 0. Baseline 56 as of B1.
 
 **`npm run shots`** (`scripts/shots.cjs`). Starts against a running `npm run dev`
 and screenshots `/`, `/learn`, `/learn/play`, `/tournament`, `/play`,
@@ -243,6 +247,18 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
   unreadable in the PR description.
 - Done: every route is readable at 1440 and 390, with no purple and no glass
   blur; `design:check` doesn't go up.
+- **Shipped 2026-10-12** (`a64111b`). Two things the next tickets must know:
+  1. The legacy block is **not all aliases**. `--space-xs/sm/md/lg/xl` and
+     `--radius-md/lg/xl` hold _literal_ old values, because custom properties
+     on the same element are last-declaration-wins: aliasing `--space-md` to
+     `--space-sm` inside the block resolves to the block's own redefined
+     `--space-sm`, not the token. Do not "tidy" those into aliases.
+  2. Fonts resolve in the browser (verified via `document.fonts.check`).
+     Martian Mono is lazy — it only downloads once a component uses
+     `--font-print`, which today is the game-view set, not the landing pages.
+- Pre-existing bugs confirmed **not** caused by A1 (shot the same route from
+  `main` and compared): the invisible "Evolution Settings" / "Payoff Matrix" /
+  "Stage: Ready" text on `/tournament`. Already B6 scope.
 
 **B1 · Content and marks** (M) — Dev B
 
@@ -262,6 +278,9 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
   include screenshots in the PR.
 - Done: marks are recognisable at 24px. The lead signs off on the drawings
   before anything uses them.
+- **Shipped 2026-10-12.** `NetMark` was redrawn after review: the first pass
+  was a square grid, which reads as a _window pane_ at 24px, not netting. It is
+  now a diamond lattice. The other three were legible as drawn.
 
 **B1b · Receipt kit and thread** (M) — Dev B
 
@@ -524,13 +543,17 @@ in **Blockers** sends it back.
 Locked by the project owner (2026-10-12):
 
 - **Visual direction: Receipts + Threads**, as defined in `design.md`.
-
-Still open:
-
-1. **The trust lean replaces the one-way trust fall** as the core picture
-   (section 1). The name, the "trust me, trust me not" story, and the falling
-   rig all stay; the new poses are additive. Confirm before B3 starts.
-2. **Nav labels** "Everyday" and "Play with a friend" (A2).
-3. **Deletion list** in B9 (sign off when Phase 3 is done).
-4. **Strategy display names in `src/util/strategies.ts`** may be edited for
-   emoji removal only (B6).
+- **Decision 1 — the trust lean replaces the one-way trust fall** as the core
+  picture (section 1). The name, the "trust me, trust me not" story, and the
+  falling rig all stay; the lean poses are additive, so the fall survives for
+  the ZK commit/reveal beats. Unblocks B2 and B3.
+- **Decision 2 — nav labels are "Everyday"** (`/real-life`) **and "Play with a
+  friend"** (`/play`). Unblocks A2.
+- **Decision 3 — merge timing.** `main` is frozen until after the Oct 13
+  submission. All redesign work lands on `redesign`; `redesign` merges to `main`
+  after Phase 4 review. A winner-announcement hotfix on `main` is not a
+  conflict risk: rebase the ticket branches forward when it lands.
+- **Decision 4 — the deletion list** (B9) still needs sign-off when Phase 3 is
+  done. Candidates are listed in B9; none may be removed before that.
+- **Decision 5 — strategy display names in `src/util/strategies.ts`** may be
+  edited for emoji removal only (B6).
