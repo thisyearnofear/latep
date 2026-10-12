@@ -269,6 +269,22 @@
 }
 
 /* ----------------------------------------------------------------------------
+ * RoundReceipt — the outcome stamp, plus the practice stamp beside it.
+ * ---------------------------------------------------------------------------- */
+
+.round-receipt-stamps {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-block: var(--space-2xs);
+}
+
+.round-receipt-stamp-extra {
+  display: inline-block;
+}
+
+/* ----------------------------------------------------------------------------
  * Reduced motion: no feed, no tear animation. The final state appears with a
  * 150ms opacity crossfade and the full flow still works (design.md §8).
  * -------------------------------------------------------------------------- */
