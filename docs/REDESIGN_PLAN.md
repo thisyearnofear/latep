@@ -163,18 +163,25 @@ Two scripts the team runs on every PR.
 | Hex / `rgb()` / `rgba()` literals in `.tsx` and `.css` (outside `tokens.css`) | 527                   | 0                               |
 | `style={{` blocks                                                             | 941                   | under 120 (dynamic values only) |
 | Emoji (`\p{Extended_Pictographic}`) in `.ts`/`.tsx`                           | 329                   | 0                               |
-| User-visible "Cooperate" / "Defect" strings                                   | 90                    | Glossary and inspector only     |
+| Word-boundary `Cooperate` / `Defect`                                          | 80                    | Glossary and inspector only     |
 | `glass-panel` uses                                                            | 47                    | 0                               |
 
 The script reads `scripts/design-baseline.json` and **fails if any number goes
-up**. When a PR brings a number down, it updates the baseline in the same PR.
-That makes progress visible and stops regressions. Add it to `lint-staged`.
+up**. When a PR brings a number down, run `npm run design:check:write` and
+commit the updated baseline in the same PR. That makes progress visible and
+stops regressions. It runs in the pre-commit hook, so it cannot be merged past.
 
-**`npm run shots`** (`scripts/shots.mjs`). Starts from a running `npm run dev`
+Measured over 112 files under `src/`, excluding `src/contracts/` (generated
+from Rust) and `src/debug/` (the deliberate escape hatch). `src/styles/tokens.css`
+is the one file allowed to hold raw colour values. The `Cooperate`/`Defect`
+count is a blunt word-boundary match, so it deliberately over-counts the
+glossary and inspector — those land at their target, not at 0.
+
+**`npm run shots`** (`scripts/shots.cjs`). Starts against a running `npm run dev`
 and screenshots `/`, `/learn`, `/learn/play`, `/tournament`, `/play`,
-`/real-life` at 390 and 1440 px into `e2e/shots/` (add to `.gitignore`; never
-commit them, per `AGENTS.md`). Use Playwright with `channel: "chrome"` so no
-browser download is needed.
+`/real-life` at 390 and 1440 px into `e2e/shots/` (gitignored; never commit
+them, per `AGENTS.md`). Uses Playwright with `channel: "chrome"` so no browser
+download is needed.
 
 **Every PR runs:** `npm run build`, `npm run lint`, `npm run design:check`,
 `npm run shots`.
@@ -202,9 +209,12 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 **A0 · Tooling** (S) — Dev A
 
 - Create `scripts/design-check.cjs`, `scripts/design-baseline.json`,
-  `scripts/shots.mjs`; add `design:check` and `shots` to `package.json`;
-  add `e2e/shots/` to `.gitignore`.
-- Done: both scripts run; baseline matches the table in section 4.
+  `scripts/shots.cjs`; add `design:check`, `design:check:write`, and `shots` to
+  `package.json`; add the `design:check` line to `.husky/pre-commit`; add
+  `e2e/shots/` to `.gitignore`.
+- Done: `npm run design:check` reproduces the table in section 4 exactly and
+  exits 1 on a planted regression; `npm run shots` writes both widths for all
+  six routes.
 
 **A1 · Tokens and the counter flip** (M) — Dev A
 

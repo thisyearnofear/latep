@@ -77,3 +77,6 @@ src/contracts/zk_dilemma/node_modules/
 # Generated media — regenerable, keep out of history
 demo-video/renders/
 e2e/demo-footage/
+
+# Redesign review screenshots — regenerate with `npm run shots`
+e2e/shots/

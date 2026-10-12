@@ -12,6 +12,9 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier . --write",
+    "design:check": "node scripts/design-check.cjs",
+    "design:check:write": "node scripts/design-check.cjs --write",
+    "shots": "node scripts/shots.cjs",
     "prepare": "husky",
     "demo:capture": "playwright test --project=demo-capture"
   },
