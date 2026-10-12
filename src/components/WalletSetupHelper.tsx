@@ -223,11 +223,11 @@ export const WalletSetupHelper: React.FC = () => {
           <Step
             status={step1Status}
             icon="🦊"
-            title="Install Freighter Wallet"
+            title="Install a Stellar wallet (Freighter recommended)"
             body={
               freighterDetected === false
-                ? "Freighter is a free Stellar wallet browser extension. You'll need it to sign transactions."
-                : "Freighter detected! Click connect to link your wallet."
+                ? "Freighter is a free Stellar wallet browser extension and works best here. Other wallets in the connect modal are experimental on testnet."
+                : "Wallet detected! Click connect to link it to your account."
             }
             cta={
               freighterDetected === false

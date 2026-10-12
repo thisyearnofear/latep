@@ -7,11 +7,19 @@ import {
   useState,
   useTransition,
 } from "react";
-import { wallet, connectWallet, disconnectWallet } from "../util/wallet";
+import {
+  wallet,
+  connectWallet,
+  disconnectWallet,
+  FREIGHTER_ID,
+} from "../util/wallet";
+import { networkPassphrase as appNetworkPassphrase } from "../contracts/util";
+import { useNotification } from "../hooks/useNotification";
 import storage from "../util/storage";
 
 export interface WalletContextType {
   address?: string;
+  walletId?: string;
   network?: string;
   networkPassphrase?: string;
   isPending: boolean;
@@ -37,13 +45,16 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     useState<Omit<WalletContextType, "isPending">>(initialState);
   const [isPending, startTransition] = useTransition();
   const popupLock = useRef(false);
+  const pollFailures = useRef(0);
+  const { addNotification } = useNotification();
   const updateState = useCallback(
     (newState: Omit<WalletContextType, "isPending">) => {
       setState((prev: Omit<WalletContextType, "isPending">) => {
         if (
           prev.address !== newState.address ||
           prev.network !== newState.network ||
-          prev.networkPassphrase !== newState.networkPassphrase
+          prev.networkPassphrase !== newState.networkPassphrase ||
+          prev.walletId !== newState.walletId
         ) {
           return newState;
         }
@@ -78,6 +89,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     ) {
       updateState({
         address: walletAddr,
+        walletId: walletId ?? undefined,
         network: walletNetwork,
         networkPassphrase: passphrase,
       });
@@ -87,17 +99,22 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       nullify();
     } else {
       if (popupLock.current) return;
+      // Freighter supports silent getAddress(); other wallets can pop up or
+      // throw, so after the initial connect we trust the stored values.
+      if (walletId !== FREIGHTER_ID && walletAddr !== null) {
+        if (!state.walletId) updateState({ ...state, walletId });
+        return;
+      }
       // If our storage item is there, then we try to get the user's address &
       // network from their wallet. Note: `getAddress` MAY open their wallet
       // extension, depending on which wallet they select!
       try {
         popupLock.current = true;
-        // Skip re-polling for non-freighter wallets when we already have address
-        if (walletId !== "freighter" && walletAddr !== null) return;
         const [addressResult, networkResult] = await Promise.all([
           wallet.getAddress(),
           wallet.getNetwork(),
         ]);
+        pollFailures.current = 0;
 
         const address = addressResult;
         if (!address) storage.setItem("walletId", "");
@@ -109,13 +126,19 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
           storage.setItem("walletAddress", address);
           updateState({
             address,
+            walletId,
             network: networkResult.network,
             networkPassphrase: networkResult.networkPassphrase,
           });
         }
       } catch (e) {
-        // If `getNetwork` or `getAddress` throw errors... sign the user out???
-        nullify();
+        // A single transient failure (popup dismissed, network hiccup) is not
+        // a disconnect — only sign out after repeated failures.
+        pollFailures.current += 1;
+        if (pollFailures.current >= 3) {
+          nullify();
+          pollFailures.current = 0;
+        }
         // then log the error (instead of throwing) so we have visibility
         // into the error while working on Scaffold Stellar but we do not
         // crash the app process
@@ -170,13 +193,23 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     startTransition(async () => {
       try {
         const result = await connectWallet();
-        const { address, network, networkPassphrase } = result as {
+        const { walletId, address, network, networkPassphrase } = result as {
+          walletId: string;
           address: string;
           network: string;
           networkPassphrase: string;
         };
-        updateState({ address, network, networkPassphrase });
-        storage.setItem("walletId", "freighter");
+        if (String(networkPassphrase) !== String(appNetworkPassphrase)) {
+          disconnectWallet();
+          nullify();
+          addNotification(
+            `Your wallet is on ${network || "another network"} — switch it to this app's network, then reconnect.`,
+            "error",
+          );
+          return;
+        }
+        updateState({ address, walletId, network, networkPassphrase });
+        storage.setItem("walletId", walletId);
         storage.setItem("walletAddress", address);
         storage.setItem("walletNetwork", network);
         storage.setItem("networkPassphrase", networkPassphrase);
@@ -185,7 +218,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
         nullify();
       }
     });
-  }, [nullify, updateState]);
+  }, [addNotification, nullify, updateState]);
 
   const disconnect = useCallback(() => {
     startTransition(() => {
