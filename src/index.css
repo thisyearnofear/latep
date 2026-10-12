@@ -1,84 +1,98 @@
 /* ============================================================================
  * Latep — Design System
  *
- * Typography: Instrument Serif (display) + Inter (body)
- * Background: WebGL topographic shader (see TopographicBackground.tsx)
- * Cards: Glassmorphism with light-sweep hover
- * Interactions: Card lift, button press, tilt
- * ============================================================================ */
-
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Inconsolata:wght@500&family=Instrument+Serif:ital@0;1&display=swap");
+ * Tokens live in styles/tokens.css (imported here, below). This file is the
+ * legacy stylesheet: the old purple/glass look plus a temporary alias block
+ * that points the old token names at the new system so the ~941 inline styles
+ * pick up the new colours without being rewritten first.
+ *
+ * See ../design.md and docs/REDESIGN_PLAN.md ticket A1.
+ * ========================================================================== */
 
 /* ============================================================================
- * Design Tokens
- * ============================================================================ */
+ * Design Tokens (see styles/tokens.css for the full system)
+ * ========================================================================== */
+
+/* ============================================================================
+ * LEGACY: removed in Phase 4 (ticket A7)
+ *
+ * These names are the old palette. Each one is an alias, so flipping a token
+ * in tokens.css restyles every one of its call sites at once. Nothing new may
+ * reference any name in this block.
+ *
+ * Two kinds of entry, and the difference matters:
+ *
+ *   1. Aliased names that DON'T collide with the new scale. These stay real
+ *      aliases, so a change in tokens.css propagates through all ~941 inline
+ *      styles at once. This is the point of the exercise.
+ *
+ *   2. Literal values for names that DO collide — the old --space-* and
+ *      --text-* steps, and --radius-md/lg/xl. Custom properties on the same
+ *      element are last-declaration-wins, so aliasing --space-md to --space-sm
+ *      here would resolve to *this block's* redefined --space-sm, not the
+ *      token. Literals are the only safe way to preserve the old values.
+ *      New code never uses these names; it uses the scale in tokens.css.
+ * ========================================================================== */
 
 :root {
-  /* Typography */
-  --font-display: "Instrument Serif", Georgia, serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "Inconsolata", "SF Mono", monospace;
+  /* --- 1. Aliases (no collision) ----------------------------------------- */
 
-  /* Type scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.5rem;
-  --text-4xl: 3.5rem;
-  --text-5xl: 5rem;
+  --font-mono: var(--font-print);
+  --text-base: var(--text-md);
+  --text-4xl: var(--text-3xl);
 
-  /* Colors — trust terrain palette */
-  --bg-deep: #0a0e1a;
-  --bg-mid: #141a2e;
-  --bg-surface: rgba(255, 255, 255, 0.06);
-  --bg-surface-hover: rgba(255, 255, 255, 0.1);
-  --bg-glass: rgba(20, 26, 46, 0.55);
-  --bg-glass-light: rgba(255, 255, 255, 0.08);
+  --bg-deep: var(--color-counter);
+  --bg-mid: var(--color-counter-2);
+  --bg-surface: var(--color-counter-2);
+  --bg-surface-hover: var(--color-counter-rule);
+  --bg-glass: var(--color-counter-2);
+  --bg-glass-light: var(--color-counter-2);
 
-  --border-glass: rgba(255, 255, 255, 0.12);
-  --border-glass-hover: rgba(255, 255, 255, 0.2);
+  --border-glass: var(--color-counter-rule);
+  --border-glass-hover: var(--color-counter-muted);
 
-  --text-primary: rgba(255, 255, 255, 0.95);
-  --text-secondary: rgba(255, 255, 255, 0.65);
-  --text-muted: rgba(255, 255, 255, 0.4);
+  --text-primary: var(--color-counter-text);
+  --text-secondary: var(--color-counter-text-2);
+  --text-muted: var(--color-counter-muted);
 
-  --accent-violet: #667eea;
-  --accent-purple: #764ba2;
-  --accent-warm: #f0a020;
-  --accent-cool: #4a90d9;
-  --accent-cooperate: #4ade80;
-  --accent-defect: #f87171;
+  /* Old purple #667eea → #764ba2 and the cooperate/defect greens and reds all
+     collapse onto the two thread colours. Blue is you, amber is your partner;
+     stamp red is reserved for stamps and errors. */
+  --accent-violet: var(--color-you);
+  --accent-purple: var(--color-you);
+  --accent-cool: var(--color-you);
+  --accent-cooperate: var(--color-you);
+  --accent-warm: var(--color-partner);
+  --accent-defect: var(--color-partner);
 
-  /* Shadows — multi-layer for depth */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.2);
-  --shadow-glow-violet: 0 0 40px rgba(102, 126, 234, 0.15);
-  --shadow-glow-warm: 0 0 40px rgba(240, 160, 32, 0.2);
+  /* Glows are gone. --shadow-sm doubles as a contact shadow. */
+  --shadow-sm: var(--shadow-receipt);
+  --shadow-md: var(--shadow-receipt);
+  --shadow-lg: var(--shadow-receipt);
+  --shadow-glow-violet: none;
+  --shadow-glow-warm: none;
 
-  /* Spacing */
+  --ease-spring: var(--ease-out);
+  --duration-fast: var(--dur-short);
+  --duration-normal: var(--dur-long);
+  --duration-slow: var(--dur-scene);
+
+  /* --- 2. Literals (names collide with the new scale) -------------------- */
+
+  /* Old spacing steps, preserved verbatim. The new scale in tokens.css is
+     offset by one step (new --space-xs is 12px, old was 4px), so these cannot
+     alias through it. */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 40px;
-  --space-2xl: 64px;
 
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-
-  /* Transitions */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-fast: 0.2s;
-  --duration-normal: 0.4s;
-  --duration-slow: 0.6s;
+  /* 3px everywhere: receipts tear instead of rounding, and no pill survives
+     except the network badge. */
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
 }
 
 /* ============================================================================
@@ -89,25 +103,27 @@ html,
 body {
   width: 100%;
   height: 100%;
+  /* No horizontal scroll at any width (design.md §10). */
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
-  overflow-x: hidden;
-  background: var(--bg-deep);
+  background: var(--color-counter);
   font-family: var(--font-body);
-  color: var(--text-primary);
-  font-size: var(--text-base);
-  line-height: 1.6;
+  color: var(--color-counter-text);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
-/* Fallback background if WebGL fails */
+/* Counter background when WebGL is unavailable. Flat, no gradient
+   (design.md §3). */
 .slide-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #0a0e1a 0%, #141a2e 50%, #1a1f3a 100%);
+  background: var(--color-counter);
   font-family: var(--font-body);
   position: relative;
   overflow: hidden;
