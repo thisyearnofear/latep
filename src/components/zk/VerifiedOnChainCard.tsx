@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { txExplorerUrl } from "../../contracts/util";
 
 interface Props {
@@ -62,5 +63,25 @@ export const VerifiedOnChainCard: React.FC<Props> = ({
         View transaction on the explorer ↗
       </a>
     )}
+    <div
+      style={{
+        marginTop: "14px",
+        paddingTop: "10px",
+        borderTop: "1px dashed rgba(74, 222, 128, 0.35)",
+        fontFamily: "var(--font-body)",
+        fontSize: "12px",
+        color: "var(--text-muted)",
+        lineHeight: 1.5,
+      }}
+    >
+      📸 Keep this receipt — the same math secures{" "}
+      <Link
+        to="/real-life"
+        style={{ color: "var(--accent-violet)", textDecoration: "underline" }}
+      >
+        votes, deposits and memberships in real life
+      </Link>
+      .
+    </div>
   </div>
 );

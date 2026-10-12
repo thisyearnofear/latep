@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
 import { useGameStats, type GameRecord } from "../../hooks/useGameStats";
@@ -671,6 +672,35 @@ export const GameResult: React.FC<GameResultProps> = ({
                 ← Back to Lobby
               </ShimmerButton>
             </div>
+          )}
+
+          {/* Relatability bridge: game mechanic -> everyday trust problems */}
+          {isResolved && (
+            <Link
+              to="/real-life"
+              className="tf-fade-in-up"
+              style={{
+                display: "block",
+                width: "100%",
+                boxSizing: "border-box",
+                padding: "14px 18px",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border-glass)",
+                background: "var(--bg-glass, rgba(255,255,255,0.04))",
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--text-sm)",
+                color: "var(--text-secondary)",
+                lineHeight: 1.6,
+                textDecoration: "none",
+                textAlign: "center",
+              }}
+            >
+              🌍 That wasn&apos;t just a game — sealed votes, group-buy deposits
+              and members-only drops run on this exact math.{" "}
+              <span style={{ color: "var(--accent-violet)", fontWeight: 600 }}>
+                See where you&apos;ll meet this again →
+              </span>
+            </Link>
           )}
 
           {!isResolved && !isForfeited && (

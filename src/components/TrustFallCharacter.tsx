@@ -1,27 +1,15 @@
 /**
  * TrustFallCharacter — the unified SVG stick figure mascot.
  *
- * One consistent character across the entire app. Replaces all emoji-based
- * stick figures (🧍, 🏃, 🪂) and the old Character component.
+ * A jointed rig (shoulder/elbow, hip/knee) posed per state. Poses are
+ * interpolated with CSS transform transitions, so state changes blend
+ * instead of snapping. The whole figure toples for "falling" and lies
+ * flat for "impact" (with dust puffs).
  *
- * States:
- *   standing    — upright at the edge, gentle sway
- *   falling     — rotated 90°, moving downward
- *   caught      — arms outstretched, happy expression
- *   impact      — squashed at bottom, dazed expression
- *   thinking    — head tilted, thought bubble
- *   celebrating — arms raised, bouncing
- *   waiting     — standing with question mark
- *
- * Colors:
- *   "you"       — violet (var(--accent-violet))
- *   "opponent"  — warm amber (var(--accent-warm))
- *   "neutral"   — muted gray
- *   "cooperator"— green
- *   "defector"  — red
- *
- * The SVG is lightweight (~30 lines) and all animation is CSS-driven
- * via classes from index.css (tf-sway, tf-falling, tf-impact, tf-catch).
+ * States: standing | falling | caught | impact | thinking | celebrating | waiting
+ * Colors: you (violet) | opponent (amber) | neutral | cooperator | defector
+ *   — "you" carries a hero arc, "opponent" a hair tuft, so the two are
+ *     recognizable silhouettes at a glance.
  */
 import React from "react";
 
@@ -49,6 +37,8 @@ interface TrustFallCharacterProps {
   speech?: string;
   /** Label under the character */
   label?: string;
+  /** Mirror the figure horizontally (for right-side actors) */
+  flip?: boolean;
   /** Additional className for custom animations */
   className?: string;
 }
@@ -74,9 +64,120 @@ const STATE_ANIMATION: Record<CharacterState, string> = {
   caught: "tf-catch",
   impact: "tf-impact",
   thinking: "tf-sway",
-  celebrating: "tf-catch",
+  celebrating: "tf-bounce",
   waiting: "tf-sway",
 };
+
+/** Joint angles in degrees. Arms/legs hang along +y at 0deg. */
+interface Pose {
+  body: number; // torso rotation around the hips
+  head: number; // head tilt around the neck
+  lS: number; // left shoulder
+  lE: number; // left elbow
+  rS: number;
+  rE: number;
+  lH: number; // left hip
+  lK: number; // left knee
+  rH: number;
+  rK: number;
+}
+
+const POSES: Record<CharacterState, Pose> = {
+  standing: {
+    body: 0,
+    head: 0,
+    lS: -20,
+    lE: -8,
+    rS: 20,
+    rE: 8,
+    lH: -10,
+    lK: 6,
+    rH: 10,
+    rK: -6,
+  },
+  waiting: {
+    body: 0,
+    head: 0,
+    lS: -40,
+    lE: -14,
+    rS: 40,
+    rE: 14,
+    lH: -10,
+    lK: 6,
+    rH: 10,
+    rK: -6,
+  },
+  thinking: {
+    body: 0,
+    head: 8,
+    lS: -20,
+    lE: -10,
+    rS: 42,
+    rE: -88,
+    lH: -10,
+    lK: 6,
+    rH: 10,
+    rK: -6,
+  },
+  falling: {
+    body: 82,
+    head: -18,
+    lS: -150,
+    lE: -25,
+    rS: 150,
+    rE: 25,
+    lH: -28,
+    lK: 40,
+    rH: 12,
+    rK: 30,
+  },
+  caught: {
+    body: -6,
+    head: -4,
+    lS: -70,
+    lE: -25,
+    rS: 70,
+    rE: 25,
+    lH: -8,
+    lK: 4,
+    rH: 8,
+    rK: -4,
+  },
+  celebrating: {
+    body: 0,
+    head: -4,
+    lS: -150,
+    lE: -8,
+    rS: 150,
+    rE: 8,
+    lH: -16,
+    lK: 8,
+    rH: 16,
+    rK: -8,
+  },
+  impact: {
+    body: 88,
+    head: -24,
+    lS: -50,
+    lE: 22,
+    rS: -70,
+    rE: 18,
+    lH: -26,
+    lK: 18,
+    rH: -12,
+    rK: 12,
+  },
+};
+
+const TRANSITION =
+  "transform 0.5s var(--rig-ease, cubic-bezier(.34,1.56,.64,1))";
+
+const joint = (rotation: number): React.CSSProperties => ({
+  transform: `rotate(${rotation}deg)`,
+  transformOrigin: "0px 0px",
+  transformBox: "view-box",
+  transition: TRANSITION,
+});
 
 export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
   state = "standing",
@@ -84,51 +185,63 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
   size = "md",
   speech,
   label,
+  flip = false,
   className = "",
 }) => {
   const dim = SIZE_MAP[size];
   const stroke = color === "neutral" ? 2.5 : 3;
   const c = COLOR_MAP[color];
   const animClass = STATE_ANIMATION[state];
+  const p = POSES[state];
 
-  // Expression based on state
-  const expression = (() => {
-    switch (state) {
-      case "caught":
-      case "celebrating":
-        return { eyes: "happy", mouth: "smile" };
-      case "impact":
-        return { eyes: "dazed", mouth: "o" };
-      case "thinking":
-        return { eyes: "thinking", mouth: "flat" };
-      case "waiting":
-        return { eyes: "neutral", mouth: "flat" };
-      default:
-        return { eyes: "neutral", mouth: "neutral" };
-    }
-  })();
+  const eyes: "happy" | "wide" | "dazed" | "thinking" | "neutral" =
+    state === "caught" || state === "celebrating"
+      ? "happy"
+      : state === "impact"
+        ? "dazed"
+        : state === "falling"
+          ? "wide"
+          : state === "thinking"
+            ? "thinking"
+            : "neutral";
+  const mouth: "smile" | "o" | "flat" | "neutral" =
+    state === "caught" || state === "celebrating"
+      ? "smile"
+      : state === "impact" || state === "falling"
+        ? "o"
+        : state === "thinking" || state === "waiting"
+          ? "flat"
+          : "neutral";
 
-  // Arm positions based on state
-  const arms = (() => {
-    switch (state) {
-      case "caught":
-      case "celebrating":
-        // Arms up/outstretched
-        return { leftX: 8, leftY: 18, rightX: 32, rightY: 18 };
-      case "impact":
-        // Arms splayed
-        return { leftX: 6, leftY: 28, rightX: 34, rightY: 28 };
-      case "thinking":
-        // One hand to chin
-        return { leftX: 12, leftY: 25, rightX: 22, rightY: 14 };
-      default:
-        // Arms at sides
-        return { leftX: 10, leftY: 26, rightX: 30, rightY: 26 };
-    }
-  })();
-
-  // Body rotation for falling state
-  const bodyTransform = state === "falling" ? "rotate(90 20 28)" : "";
+  const limb = (elbow: number, upper: number, lower: number) => (
+    <React.Fragment>
+      {/* upper segment */}
+      <line
+        x1="0"
+        y1="0"
+        x2="0"
+        y2={upper}
+        stroke={c}
+        strokeWidth={stroke}
+        strokeLinecap="round"
+      />
+      <g transform={`translate(0 ${upper})`}>
+        <g style={joint(elbow)}>
+          {/* lower segment + hand/foot */}
+          <line
+            x1="0"
+            y1="0"
+            x2="0"
+            y2={lower}
+            stroke={c}
+            strokeWidth={stroke}
+            strokeLinecap="round"
+          />
+          <circle cx="0" cy={lower + 0.6} r="1.3" fill={c} stroke="none" />
+        </g>
+      </g>
+    </React.Fragment>
+  );
 
   return (
     <div
@@ -211,259 +324,262 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
           </div>
         )}
 
-        {/* SVG stick figure */}
-        <svg
-          width={dim}
-          height={dim}
-          viewBox="0 0 40 48"
-          className={`${animClass} ${className}`}
-          style={{
-            filter: `drop-shadow(0 0 8px ${c}40)`,
-            transformOrigin: state === "falling" ? "20px 40px" : "center",
-          }}
+        {/* Jointed stick figure */}
+        <div
+          style={
+            flip
+              ? { transform: "scaleX(-1)", display: "inline-block" }
+              : undefined
+          }
         >
-          {/* Head */}
-          <circle
-            cx="20"
-            cy="10"
-            r="6"
-            fill="none"
-            stroke={c}
-            strokeWidth={stroke}
-            strokeLinecap="round"
-          />
+          <svg
+            width={dim}
+            height={dim}
+            viewBox="-4 -4 48 56"
+            className={`${animClass} ${className}`}
+            style={{
+              overflow: "visible",
+              filter: `drop-shadow(0 0 8px ${c}40)`,
+            }}
+          >
+            {/* Whole figure rotates around the hips */}
+            <g
+              style={{
+                transform: `rotate(${p.body}deg)`,
+                transformOrigin: "20px 32px",
+                transformBox: "view-box",
+                transition: TRANSITION,
+              }}
+            >
+              {/* Torso */}
+              <line
+                x1="20"
+                y1="15"
+                x2="20"
+                y2="32"
+                stroke={c}
+                strokeWidth={stroke}
+                strokeLinecap="round"
+              />
 
-          {/* Eyes */}
-          {expression.eyes === "happy" && (
-            <>
-              <path
-                d="M 17 9 Q 18 7 19 9"
-                fill="none"
-                stroke={c}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <path
-                d="M 21 9 Q 22 7 23 9"
-                fill="none"
-                stroke={c}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </>
-          )}
-          {expression.eyes === "dazed" && (
-            <>
-              <line
-                x1="16"
-                y1="9"
-                x2="18"
-                y2="11"
-                stroke={c}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <line
-                x1="18"
-                y1="9"
-                x2="16"
-                y2="11"
-                stroke={c}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <line
-                x1="22"
-                y1="9"
-                x2="24"
-                y2="11"
-                stroke={c}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-              <line
-                x1="24"
-                y1="9"
-                x2="22"
-                y2="11"
-                stroke={c}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </>
-          )}
-          {expression.eyes === "thinking" && (
-            <>
-              <line
-                x1="17"
-                y1="9"
-                x2="18"
-                y2="9"
-                stroke={c}
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-              <line
-                x1="22"
-                y1="9"
-                x2="23"
-                y2="9"
-                stroke={c}
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </>
-          )}
-          {expression.eyes === "neutral" && (
-            <>
-              <circle cx="17.5" cy="9" r="1" fill={c} />
-              <circle cx="22.5" cy="9" r="1" fill={c} />
-            </>
-          )}
+              {/* Head, tilting at the neck */}
+              <g transform="translate(20 15)">
+                <g style={joint(p.head)}>
+                  <circle
+                    cx="0"
+                    cy="-6"
+                    r="6"
+                    fill={c}
+                    fillOpacity={0.14}
+                    stroke={c}
+                    strokeWidth={stroke}
+                    strokeLinecap="round"
+                  />
+                  {/* Identity marks */}
+                  {color === "you" && (
+                    <path
+                      d="M -4.6 -9.6 Q 0 -13 4.6 -9.6"
+                      fill="none"
+                      stroke={c}
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  )}
+                  {color === "opponent" && (
+                    <path
+                      d="M 1 -11.6 Q 3 -14 4.4 -11.2"
+                      fill="none"
+                      stroke={c}
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                    />
+                  )}
+                  {/* Eyes */}
+                  {eyes === "happy" && (
+                    <>
+                      <path
+                        d="M -3 -7 Q -2 -9 -1 -7"
+                        fill="none"
+                        stroke={c}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                      <path
+                        d="M 1 -7 Q 2 -9 3 -7"
+                        fill="none"
+                        stroke={c}
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  )}
+                  {eyes === "wide" && (
+                    <>
+                      <circle cx="-2.5" cy="-7" r="1.7" fill={c} />
+                      <circle cx="2.5" cy="-7" r="1.7" fill={c} />
+                    </>
+                  )}
+                  {eyes === "dazed" && (
+                    <>
+                      <line
+                        x1="-3.5"
+                        y1="-8"
+                        x2="-1.5"
+                        y2="-6"
+                        stroke={c}
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="-1.5"
+                        y1="-8"
+                        x2="-3.5"
+                        y2="-6"
+                        stroke={c}
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="1.5"
+                        y1="-8"
+                        x2="3.5"
+                        y2="-6"
+                        stroke={c}
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="3.5"
+                        y1="-8"
+                        x2="1.5"
+                        y2="-6"
+                        stroke={c}
+                        strokeWidth="1.4"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  )}
+                  {eyes === "thinking" && (
+                    <>
+                      <line
+                        x1="-3.5"
+                        y1="-7"
+                        x2="-1.5"
+                        y2="-7"
+                        stroke={c}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1="1.5"
+                        y1="-7"
+                        x2="3.5"
+                        y2="-7"
+                        stroke={c}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </>
+                  )}
+                  {eyes === "neutral" && (
+                    <>
+                      <circle cx="-2.5" cy="-7" r="1" fill={c} />
+                      <circle cx="2.5" cy="-7" r="1" fill={c} />
+                    </>
+                  )}
+                  {/* Mouth */}
+                  {mouth === "smile" && (
+                    <path
+                      d="M -3 -3.6 Q 0 -1.8 3 -3.6"
+                      fill="none"
+                      stroke={c}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  )}
+                  {mouth === "o" && (
+                    <circle
+                      cx="0"
+                      cy="-3.2"
+                      r="1.5"
+                      fill="none"
+                      stroke={c}
+                      strokeWidth="1.2"
+                    />
+                  )}
+                  {mouth === "flat" && (
+                    <line
+                      x1="-2"
+                      y1="-3.2"
+                      x2="2"
+                      y2="-3.2"
+                      stroke={c}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  )}
+                  {mouth === "neutral" && (
+                    <path
+                      d="M -2 -3.4 Q 0 -2.9 2 -3.4"
+                      fill="none"
+                      stroke={c}
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                    />
+                  )}
+                </g>
+              </g>
 
-          {/* Mouth */}
-          {expression.mouth === "smile" && (
-            <path
-              d="M 17 12 Q 20 14 23 12"
-              fill="none"
-              stroke={c}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          )}
-          {expression.mouth === "o" && (
-            <circle
-              cx="20"
-              cy="12.5"
-              r="1.5"
-              fill="none"
-              stroke={c}
-              strokeWidth="1.2"
-            />
-          )}
-          {expression.mouth === "flat" && (
-            <line
-              x1="18"
-              y1="12.5"
-              x2="22"
-              y2="12.5"
-              stroke={c}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          )}
-          {expression.mouth === "neutral" && (
-            <path
-              d="M 18 12 Q 20 12.5 22 12"
-              fill="none"
-              stroke={c}
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-          )}
+              {/* Arms, shouldering from mid-torso */}
+              <g transform="translate(20 21)">
+                <g style={joint(p.lS)}>{limb(p.lE, 6.5, 6.5)}</g>
+              </g>
+              <g transform="translate(20 21)">
+                <g style={joint(p.rS)}>{limb(p.rE, 6.5, 6.5)}</g>
+              </g>
 
-          {/* Body */}
-          <g transform={bodyTransform}>
-            <line
-              x1="20"
-              y1="16"
-              x2="20"
-              y2="32"
-              stroke={c}
-              strokeWidth={stroke}
-              strokeLinecap="round"
-            />
+              {/* Legs, hinging at the hips */}
+              <g transform="translate(20 32)">
+                <g style={joint(p.lH)}>{limb(p.lK, 6.5, 5.5)}</g>
+              </g>
+              <g transform="translate(20 32)">
+                <g style={joint(p.rH)}>{limb(p.rK, 6.5, 5.5)}</g>
+              </g>
+            </g>
 
-            {/* Arms */}
-            <line
-              x1="20"
-              y1="22"
-              x2={arms.leftX}
-              y2={arms.leftY}
-              stroke={c}
-              strokeWidth={stroke}
-              strokeLinecap="round"
-            />
-            <line
-              x1="20"
-              y1="22"
-              x2={arms.rightX}
-              y2={arms.rightY}
-              stroke={c}
-              strokeWidth={stroke}
-              strokeLinecap="round"
-            />
-
-            {/* Legs */}
-            {state === "impact" ? (
-              // Squashed legs
-              <>
-                <line
-                  x1="20"
-                  y1="32"
-                  x2="14"
-                  y2="36"
-                  stroke={c}
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
+            {/* Impact dust puffs */}
+            {state === "impact" && (
+              <g>
+                <circle
+                  className="tf-dust"
+                  cx="5"
+                  cy="47"
+                  r="2.6"
+                  fill={c}
+                  fillOpacity={0.5}
                 />
-                <line
-                  x1="20"
-                  y1="32"
-                  x2="26"
-                  y2="36"
-                  stroke={c}
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
+                <circle
+                  className="tf-dust"
+                  cx="20"
+                  cy="48"
+                  r="3.4"
+                  fill={c}
+                  fillOpacity={0.5}
+                  style={{ animationDelay: "0.12s" }}
                 />
-              </>
-            ) : state === "celebrating" ? (
-              // Jumping pose
-              <>
-                <line
-                  x1="20"
-                  y1="32"
-                  x2="14"
-                  y2="44"
-                  stroke={c}
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
+                <circle
+                  className="tf-dust"
+                  cx="35"
+                  cy="47"
+                  r="2.6"
+                  fill={c}
+                  fillOpacity={0.5}
+                  style={{ animationDelay: "0.24s" }}
                 />
-                <line
-                  x1="20"
-                  y1="32"
-                  x2="26"
-                  y2="44"
-                  stroke={c}
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
-                />
-              </>
-            ) : (
-              // Normal standing
-              <>
-                <line
-                  x1="20"
-                  y1="32"
-                  x2="14"
-                  y2="44"
-                  stroke={c}
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
-                />
-                <line
-                  x1="20"
-                  y1="32"
-                  x2="26"
-                  y2="44"
-                  stroke={c}
-                  strokeWidth={stroke}
-                  strokeLinecap="round"
-                />
-              </>
+              </g>
             )}
-          </g>
-        </svg>
+          </svg>
+        </div>
       </div>
 
       {/* Label */}
