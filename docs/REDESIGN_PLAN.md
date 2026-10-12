@@ -353,6 +353,12 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 
 ### Phase 2 — The story
 
+> **Status: complete (2026-10-12).** B3, B4, A2 and A3 are all shipped on
+> `redesign`. Phase 3 starts at A4 (the Learn journey).
+>
+> Every PR so far has run the full gate: build, lint, design:check,
+> check:hidden-moves, shots at 390 and 1440.
+
 **B3 · The trust lean scene** (L) — Dev B. _The most important ticket._
 
 - Files: `src/components/visual/TrustStage.tsx`,
