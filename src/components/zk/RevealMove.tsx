@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
+import { VerifiedOnChainCard } from "./VerifiedOnChainCard";
 
 interface RevealMoveProps {
   gameId: number;
@@ -27,6 +28,16 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
   const [revealNonce, setRevealNonce] = useState<string>("");
   const [selectedMove, setSelectedMove] = useState<GameMove | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
+  const [justRevealed, setJustRevealed] = useState(false);
+  const [revealTxHash, setRevealTxHash] = useState<string | null>(null);
+  const revealTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (revealTimer.current) window.clearTimeout(revealTimer.current);
+    },
+    [],
+  );
 
   // Auto-fill nonce and move from storage (set during commit step)
   // Check localStorage first (survives browser close), then sessionStorage
@@ -87,8 +98,13 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
         return;
       }
 
-      await revealMove(gameId, selectedMove, nonceBigInt);
-      onRevealed();
+      const { hash } = await revealMove(gameId, selectedMove, nonceBigInt);
+      setRevealTxHash(hash ?? null);
+      setJustRevealed(true);
+      revealTimer.current = window.setTimeout(() => {
+        setJustRevealed(false);
+        onRevealed();
+      }, 1_800);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setTxError(message);
@@ -113,14 +129,25 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
     );
   }
 
+  if (justRevealed) {
+    return (
+      <VerifiedOnChainCard
+        hash={revealTxHash}
+        label="🎉 Sealed move opened"
+        sublabel="The contract checked your reveal against your commitment — math, not trust."
+      />
+    );
+  }
+
   if (bothRevealed) {
     return (
       <div
+        className="tf-fade-in-up"
         style={{
-          background: "rgba(16, 185, 129, 0.05)",
+          background: "rgba(16, 185, 129, 0.08)",
           borderRadius: "12px",
           padding: "24px",
-          border: "1px solid rgba(16, 185, 129, 0.2)",
+          border: "1px solid rgba(16, 185, 129, 0.35)",
           fontFamily: "var(--font-body)",
           textAlign: "center",
         }}

@@ -166,12 +166,29 @@ function createClient(): ZkDilemmaClient {
   });
 }
 
+/** Minimal shape of the SDK's SentTransaction returned by signAndSend() */
+interface SentLike {
+  result: unknown;
+  sendTransactionResponse?: { hash?: string };
+}
+
 interface Signable {
   signAndSend: (opts: {
     signTransaction: NonNullable<
       ReturnType<typeof import("./useWallet").useWallet>["signTransaction"]
     >;
-  }) => Promise<unknown>;
+  }) => Promise<SentLike>;
+}
+
+/** Decoded on-chain result plus the tx hash of a signed & sent transaction */
+export interface SendResult<T = unknown> {
+  value: T;
+  hash?: string;
+}
+
+/** Minimal shape of a view call — reads simulate without signing/sending */
+interface Readable {
+  simulate: () => Promise<{ result: unknown }>;
 }
 
 // ============================================================================
@@ -187,14 +204,24 @@ export function useZKDilemma() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  /** Sign & send wrapper */
+  /** Sign & send wrapper — unwraps the SDK's SentTransaction into {value, hash} */
   const sas = useCallback(
-    async (tx: Signable): Promise<unknown> => {
+    async (tx: Signable): Promise<SendResult> => {
       if (!signTransaction) throw new Error("Wallet not connected");
-      return await tx.signAndSend({ signTransaction });
+      const sent = await tx.signAndSend({ signTransaction });
+      return {
+        value: sent.result,
+        hash: sent.sendTransactionResponse?.hash,
+      };
     },
     [signTransaction],
   );
+
+  /** Read-only call wrapper — view functions simulate, never sign/send */
+  const read = useCallback(async (tx: Readable): Promise<unknown> => {
+    const res = await tx.simulate();
+    return res.result;
+  }, []);
 
   /**
    * Fetch game details from the contract.
@@ -204,17 +231,16 @@ export function useZKDilemma() {
       try {
         const client = createClient();
         const tx = await client.get_game({ game_id: BigInt(gameId) });
-        const raw: Record<string, unknown> | null = (await sas(tx)) as Record<
-          string,
-          unknown
-        > | null;
-        return parseGame(raw);
+        const raw = (await read(tx)) as Record<string, unknown> | null;
+        const parsed = parseGame(raw);
+        if (parsed) setCurrentGame(parsed);
+        return parsed;
       } catch (err) {
         console.error(`[useZKDilemma] fetchGame(${gameId}) failed:`, err);
         return null;
       }
     },
-    [sas],
+    [read],
   );
 
   /**
@@ -226,13 +252,13 @@ export function useZKDilemma() {
     try {
       const client = createClient();
       const countTx = await client.get_game_count();
-      const count = Number(((await sas(countTx)) as number) ?? 0);
+      const count = Number(((await read(countTx)) as number) ?? 0);
 
       const gameList: GameListItem[] = [];
       for (let i = 1; i <= count; i++) {
         try {
           const tx = await client.get_game({ game_id: BigInt(i) });
-          const raw: unknown = await sas(tx);
+          const raw: unknown = await read(tx);
           const parsed = parseGame(raw as Record<string, unknown> | null);
           if (parsed) {
             gameList.push({
@@ -255,7 +281,7 @@ export function useZKDilemma() {
     } finally {
       setIsLoading(false);
     }
-  }, [sas]);
+  }, [read]);
 
   /**
    * Get current game count from the contract.
@@ -263,8 +289,8 @@ export function useZKDilemma() {
   const getGameCount = useCallback(async (): Promise<number> => {
     const client = createClient();
     const tx = await client.get_game_count();
-    return Number(((await sas(tx)) as number) ?? 0);
-  }, [sas]);
+    return Number(((await read(tx)) as number) ?? 0);
+  }, [read]);
 
   /**
    * Create a new game.
@@ -274,7 +300,7 @@ export function useZKDilemma() {
       commitmentHex: string,
       proofHex: string,
       stakeStroops: string,
-    ): Promise<number> => {
+    ): Promise<{ gameId: number; hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -289,10 +315,10 @@ export function useZKDilemma() {
           proof,
           stake: BigInt(stakeStroops),
         });
-        const result = await sas(tx);
-        const gameId = Number(result ?? 0);
+        const res = await sas(tx);
+        const gameId = Number(res.value ?? 0);
         await fetchGames();
-        return gameId;
+        return { gameId, hash: res.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to create game: ${message}`);
@@ -312,7 +338,7 @@ export function useZKDilemma() {
       gameId: number,
       commitmentHex: string,
       proofHex: string,
-    ): Promise<void> => {
+    ): Promise<{ hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -327,9 +353,10 @@ export function useZKDilemma() {
           commitment,
           proof,
         });
-        await sas(tx);
-        await fetchGame(gameId).then(setCurrentGame);
+        const res = await sas(tx);
+        await fetchGame(gameId);
         await fetchGames();
+        return { hash: res.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to join game: ${message}`);
@@ -345,7 +372,11 @@ export function useZKDilemma() {
    * Reveal move for a committed game.
    */
   const revealMove = useCallback(
-    async (gameId: number, move: GameMove, nonce: bigint): Promise<void> => {
+    async (
+      gameId: number,
+      move: GameMove,
+      nonce: bigint,
+    ): Promise<{ hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -358,8 +389,9 @@ export function useZKDilemma() {
           move_: move,
           nonce,
         });
-        await sas(tx);
-        await fetchGame(gameId).then(setCurrentGame);
+        const res = await sas(tx);
+        await fetchGame(gameId);
+        return { hash: res.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to reveal move: ${message}`);
@@ -382,9 +414,11 @@ export function useZKDilemma() {
       try {
         const client = createClient();
         const tx = await client.resolve_game({ game_id: BigInt(gameId) });
-        const result = (await sas(tx)) as readonly [bigint, bigint] | null;
+        const result = (await sas(tx)).value as
+          | readonly [bigint, bigint]
+          | null;
         const [payout1, payout2] = result ?? [BigInt(0), BigInt(0)];
-        await fetchGame(gameId).then(setCurrentGame);
+        await fetchGame(gameId);
         return { payout1, payout2 };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -413,7 +447,7 @@ export function useZKDilemma() {
           game_id: BigInt(gameId),
         });
         await sas(tx);
-        await fetchGame(gameId).then(setCurrentGame);
+        await fetchGame(gameId);
         await fetchGames();
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -442,7 +476,7 @@ export function useZKDilemma() {
           game_id: BigInt(gameId),
         });
         await sas(tx);
-        await fetchGame(gameId).then(setCurrentGame);
+        await fetchGame(gameId);
         await fetchGames();
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -467,7 +501,7 @@ export function useZKDilemma() {
         const client = createClient();
         const tx = await client.claim_refund({ game_id: BigInt(gameId) });
         await sas(tx);
-        await fetchGame(gameId).then(setCurrentGame);
+        await fetchGame(gameId);
         await fetchGames();
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -494,10 +528,7 @@ export function useZKDilemma() {
       try {
         const client = createClient();
         const tx = await client.get_match({ match_id: BigInt(matchId) });
-        const raw: Record<string, unknown> | null = (await sas(tx)) as Record<
-          string,
-          unknown
-        > | null;
+        const raw = (await read(tx)) as Record<string, unknown> | null;
         const parsed = parseMatch(raw as Match | null);
         setCurrentMatch(parsed);
         return parsed;
@@ -506,7 +537,7 @@ export function useZKDilemma() {
         return null;
       }
     },
-    [sas],
+    [read],
   );
 
   /**
@@ -518,13 +549,13 @@ export function useZKDilemma() {
     try {
       const client = createClient();
       const countTx = await client.get_match_count();
-      const count = Number(((await sas(countTx)) as number) ?? 0);
+      const count = Number(((await read(countTx)) as number) ?? 0);
 
       const matchList: MatchListItem[] = [];
       for (let i = 1; i <= count; i++) {
         try {
           const tx = await client.get_match({ match_id: BigInt(i) });
-          const raw: unknown = await sas(tx);
+          const raw: unknown = await read(tx);
           const parsed = parseMatch(raw as Match | null);
           if (parsed) {
             matchList.push({
@@ -549,7 +580,7 @@ export function useZKDilemma() {
     } finally {
       setIsLoading(false);
     }
-  }, [sas]);
+  }, [read]);
 
   /**
    * Get current match count from the contract.
@@ -557,8 +588,8 @@ export function useZKDilemma() {
   const getMatchCount = useCallback(async (): Promise<number> => {
     const client = createClient();
     const tx = await client.get_match_count();
-    return Number(((await sas(tx)) as number) ?? 0);
-  }, [sas]);
+    return Number(((await read(tx)) as number) ?? 0);
+  }, [read]);
 
   /**
    * Create a new multi-round match.
@@ -569,7 +600,7 @@ export function useZKDilemma() {
       proof: Buffer,
       stake: string,
       bestOf: number,
-    ): Promise<{ matchId: number; gameId: number }> => {
+    ): Promise<{ matchId: number; gameId: number; hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -583,12 +614,14 @@ export function useZKDilemma() {
           stake: BigInt(stake),
           best_of: bestOf,
         });
-        const result = (await sas(tx)) as readonly [bigint, bigint] | null;
+        const res = await sas(tx);
+        const result = res.value as readonly [bigint, bigint] | null;
         const [matchId, gameId] = result ?? [BigInt(0), BigInt(0)];
         await fetchMatches();
         return {
           matchId: Number(matchId),
           gameId: Number(gameId),
+          hash: res.hash,
         };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -609,7 +642,7 @@ export function useZKDilemma() {
       matchId: number,
       commitment: Buffer,
       proof: Buffer,
-    ): Promise<void> => {
+    ): Promise<{ hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -622,9 +655,10 @@ export function useZKDilemma() {
           commitment,
           proof,
         });
-        await sas(tx);
+        const res = await sas(tx);
         await fetchMatch(matchId);
         await fetchMatches();
+        return { hash: res.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to join match: ${message}`);
@@ -645,7 +679,7 @@ export function useZKDilemma() {
       matchId: number,
       commitment: Buffer,
       proof: Buffer,
-    ): Promise<number> => {
+    ): Promise<{ gameId: number; hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -658,10 +692,10 @@ export function useZKDilemma() {
           commitment,
           proof,
         });
-        const result = (await sas(tx)) as bigint | null;
-        const newGameId = Number(result ?? 0);
+        const res = await sas(tx);
+        const newGameId = Number((res.value as bigint | null) ?? 0);
         await fetchMatch(matchId);
-        return newGameId;
+        return { gameId: newGameId, hash: res.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to start next round: ${message}`);
@@ -715,7 +749,7 @@ export function useZKDilemma() {
       oldMatchId: number,
       commitment: Buffer,
       proof: Buffer,
-    ): Promise<{ matchId: number; gameId: number }> => {
+    ): Promise<{ matchId: number; gameId: number; hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -728,12 +762,14 @@ export function useZKDilemma() {
           commitment,
           proof,
         });
-        const result = (await sas(tx)) as readonly [bigint, bigint] | null;
+        const res = await sas(tx);
+        const result = res.value as readonly [bigint, bigint] | null;
         const [matchId, gameId] = result ?? [BigInt(0), BigInt(0)];
         await fetchMatches();
         return {
           matchId: Number(matchId),
           gameId: Number(gameId),
+          hash: res.hash,
         };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -888,7 +924,7 @@ export function useZKDilemma() {
       merkleRoot: Uint8Array,
       nullifier: Uint8Array,
       gameId: number,
-    ): Promise<void> => {
+    ): Promise<{ hash?: string }> => {
       if (!address) throw new Error("Wallet not connected");
       setIsLoading(true);
       setError(null);
@@ -902,7 +938,8 @@ export function useZKDilemma() {
           nullifier: Buffer.from(nullifier),
           game_id: BigInt(gameId),
         });
-        await sas(tx);
+        const res = await sas(tx);
+        return { hash: res.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to verify accreditation: ${message}`);

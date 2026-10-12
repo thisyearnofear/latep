@@ -51,6 +51,7 @@ export const OnboardingOverlay: React.FC = () => {
 
   return (
     <div
+      className="tf-bg-in"
       style={{
         position: "fixed",
         top: 0,
@@ -69,6 +70,7 @@ export const OnboardingOverlay: React.FC = () => {
     >
       <div
         onClick={(e) => e.stopPropagation()}
+        className="tf-pop-in"
         style={{
           background: "var(--bg-glass)",
           backdropFilter: "blur(24px) saturate(180%)",
@@ -81,38 +83,40 @@ export const OnboardingOverlay: React.FC = () => {
           boxShadow: "var(--shadow-lg), var(--shadow-glow-violet)",
         }}
       >
-        <div
-          style={{
-            fontSize: "56px",
-            marginBottom: "16px",
-            filter: "drop-shadow(0 0 24px rgba(102,126,234,0.3))",
-          }}
-        >
-          {current.icon}
+        <div key={step} className="tf-fade-in-up">
+          <div
+            style={{
+              fontSize: "56px",
+              marginBottom: "16px",
+              filter: "drop-shadow(0 0 24px rgba(102,126,234,0.3))",
+            }}
+          >
+            {current.icon}
+          </div>
+
+          <h3
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "var(--text-2xl)",
+              margin: "0 0 12px",
+              color: "var(--text-primary)",
+            }}
+          >
+            {current.title}
+          </h3>
+
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--text-sm)",
+              color: "var(--text-secondary)",
+              lineHeight: 1.6,
+              margin: "0 0 28px",
+            }}
+          >
+            {current.body}
+          </p>
         </div>
-
-        <h3
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--text-2xl)",
-            margin: "0 0 12px",
-            color: "var(--text-primary)",
-          }}
-        >
-          {current.title}
-        </h3>
-
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            color: "var(--text-secondary)",
-            lineHeight: 1.6,
-            margin: "0 0 28px",
-          }}
-        >
-          {current.body}
-        </p>
 
         {/* Step indicator */}
         <div
