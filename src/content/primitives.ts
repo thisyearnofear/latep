@@ -60,7 +60,10 @@ export const PRIMITIVES: readonly Primitive[] = [
     oneLine: "Prove you belong without saying who you are.",
     whatItIs: "ZK allowlist membership + nullifier",
     everyday: "Members-only drops, age checks, accredited access",
-    meetItAt: "/real-life",
+    // The accreditation panel on the ZK lobby, not /real-life — this page is
+    // itself the collection of everything you've already met, so linking here
+    // would be circular.
+    meetItAt: "/play",
   },
 ] as const;
 

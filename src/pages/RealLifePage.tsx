@@ -1,237 +1,142 @@
 /**
- * RealLifePage — the bridge between the game and the player's life.
+ * Everyday — the collection of everything you've already met.
  *
- * Every mechanic the player just experienced maps to an everyday trust
- * problem: sealed votes, group-buy deposits, members-only access, and
- * agreements that can't be quietly rewritten. Copy is grounded in the
- * same honest scope as the epilogue lesson (moves + membership, not
- * balances or full identity privacy).
+ * Four receipts, one per primitive, each with its mark, the everyday problem
+ * it solves, what the mathematics actually adds, and a link to the round where
+ * you already felt it. Rebuilt from `content/primitives.ts` (ticket B5): the
+ * primitive list is the single source of truth, so this page can never drift
+ * from the marks or the wording used on Home and in the epilogue.
  */
 import React from "react";
 import { Link } from "react-router-dom";
-import { TrustFallCharacter } from "../components/TrustFallCharacter";
+import { MARKS } from "../components/marks";
+import { Receipt, ReceiptLine, Takeaway } from "../components/receipt";
+import { PRIMITIVES, type PrimitiveId } from "../content/primitives";
+import "../styles/everyday.css";
 
-interface Scenario {
-  emoji: string;
-  title: string;
+/**
+ * The everyday story attached to each primitive. The copy here is the
+ * page's own; the names, marks and one-liners come from `primitives.ts`.
+ */
+interface Everyday {
+  id: PrimitiveId;
+  /** The situation someone has actually been in. */
+  situation: string;
+  /** What goes wrong without it. */
   problem: string;
-  mechanic: string;
-  how: string;
-  state: "standing" | "caught" | "thinking" | "celebrating";
-  color: "you" | "opponent";
+  /** What the mathematics adds — and, honestly, what it doesn't. */
+  adds: string;
+  /** Where you already felt this. */
+  tryHref: string;
+  tryLabel: string;
 }
 
-const SCENARIOS: Scenario[] = [
+const EVERYDAY: Everyday[] = [
   {
-    emoji: "🗳️",
-    title: "Class & community votes",
+    id: "seal",
+    situation: "Class and community votes",
     problem:
-      "Once you see who voted what, the popular option snowballs — and people vote to please, not to choose.",
-    mechanic: "The sealed choice",
-    how: "Everyone commits a hash of their ballot first, reveals after voting closes. No one can see — or change — a vote before the count.",
-    state: "thinking",
-    color: "opponent",
+      "Once you see who voted what, the popular option snowballs — and people vote to please rather than to choose.",
+    adds: "Everyone commits a hash of their ballot first and reveals after voting closes. No vote can be changed, and none can be seen, before the count.",
+    tryHref: "/",
+    tryLabel: "Play the round again",
   },
   {
-    emoji: "🛒",
-    title: "Group buys & shared deposits",
+    id: "handshake",
+    situation: "Deals with strangers online",
     problem:
-      "Twenty people send money to one organizer for a group order. The order goes wrong; who guarantees the refund?",
-    mechanic: "The enforced catch",
-    how: "The contract holds the pot and releases it only on agreed conditions. Nobody has to be the trustworthy hero — the settlement is automatic.",
-    state: "caught",
-    color: "you",
+      "You agree on a price, they deliver, you ghost the payment — or the terms quietly “shift” after you've already committed.",
+    adds: "Both sides bind to their move with a proof before revealing it. Once you let go, the arithmetic holds you to it. No take-backs.",
+    tryHref: "/learn/play",
+    tryLabel: "Practise the handshake",
   },
   {
-    emoji: "🎟️",
-    title: "Members-only drops & doors",
+    id: "net",
+    situation: "Group buys and shared deposits",
     problem:
-      "Airdrops, private sales, club lists: proving you belong usually means doxxing yourself to a stranger on the internet.",
-    mechanic: "Proven membership",
-    how: "A ZK membership proof says \"I'm on the list\" without saying which entry is mine. Eligibility without exposure — this app's accreditation panel already runs it on-chain.",
-    state: "standing",
-    color: "you",
+      "Twenty people send money to one organiser for a group order. The order goes wrong — who guarantees the refund?",
+    adds: "The contract holds the pot and releases it on agreed conditions. Nobody has to be the trustworthy hero; the settlement is automatic.",
+    tryHref: "/play",
+    tryLabel: "See it settle on-chain",
   },
   {
-    emoji: "🤝",
-    title: "Deals with strangers online",
+    id: "pass",
+    situation: "Members-only drops and doors",
     problem:
-      'You agree on a price, they deliver, you ghost the payment — or the terms "shift" after you\'ve already committed.',
-    mechanic: "No take-backs",
-    how: "Both sides bind to their move with a proof before revealing it. The fall you just played is the deal: once you let go, the math holds you to it.",
-    state: "celebrating",
-    color: "opponent",
+      "Airdrops, private sales, club lists: proving you belong usually means handing your identity to a stranger on the internet.",
+    adds: "A zero-knowledge membership proof says “I'm on the list” without saying which entry is yours. Eligibility without exposure — this is the accreditation panel, running on-chain.",
+    tryHref: "/play",
+    tryLabel: "See the accreditation panel",
   },
 ];
 
-const Card: React.FC<{ scenario: Scenario }> = ({ scenario: s }) => (
-  <div
-    className="glass-panel"
-    style={{
-      padding: "24px",
-      borderRadius: "var(--radius-lg, 16px)",
-      display: "flex",
-      gap: "18px",
-      alignItems: "flex-start",
-    }}
-  >
-    <div style={{ flexShrink: 0, paddingTop: "4px" }}>
-      <TrustFallCharacter state={s.state} color={s.color} size="lg" />
-    </div>
-    <div>
-      <h3
-        style={{
-          margin: "0 0 4px",
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-lg, 20px)",
-          color: "var(--text-primary)",
-        }}
-      >
-        {s.emoji} {s.title}
-      </h3>
-      <div
-        style={{
-          display: "inline-block",
-          fontSize: "11px",
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          color: "var(--accent-violet)",
-          margin: "0 0 10px",
-        }}
-      >
-        You already played: {s.mechanic}
-      </div>
-      <p
-        style={{
-          margin: "0 0 8px",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          color: "var(--text-secondary)",
-          lineHeight: 1.6,
-        }}
-      >
-        <strong style={{ color: "var(--text-primary)" }}>The problem — </strong>
-        {s.problem}
-      </p>
-      <p
-        style={{
-          margin: 0,
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          color: "var(--text-secondary)",
-          lineHeight: 1.6,
-        }}
-      >
-        <strong style={{ color: "var(--accent-cooperate)" }}>
-          What the math adds —{" "}
-        </strong>
-        {s.how}
-      </p>
-    </div>
-  </div>
-);
-
 export const RealLifePage: React.FC = () => (
-  <div
-    className="tf-fade-in-up"
-    style={{
-      maxWidth: "760px",
-      margin: "0 auto",
-      padding: "32px 24px 56px",
-    }}
-  >
-    <div style={{ textAlign: "center", marginBottom: "32px" }}>
-      <div style={{ marginBottom: "12px" }}>
-        <TrustFallCharacter state="caught" color="you" size="xl" />
-      </div>
-      <h1
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-3xl, 30px)",
-          margin: "0 0 10px",
-          color: "var(--text-primary)",
-        }}
-      >
-        That wasn&apos;t just a game
-      </h1>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base, 16px)",
-          color: "var(--text-secondary)",
-          lineHeight: 1.7,
-          margin: "0 auto",
-          maxWidth: "560px",
-        }}
-      >
-        Every choice you made — seal it, let go, catch or get caught — is a
-        trust problem you already have in real life. Here&apos;s where
-        you&apos;ll meet this again.
+  <div className="everyday">
+    <header className="everyday-opening">
+      <h1 className="everyday-title">That wasn&rsquo;t just a game</h1>
+      <p className="everyday-situation">
+        Every choice you made — lean in, hold back, held, toppled — is a trust
+        problem you already have. Here&rsquo;s where you&rsquo;ll meet these
+        four again.
       </p>
-    </div>
+    </header>
 
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "18px",
-        marginBottom: "32px",
-      }}
-    >
-      {SCENARIOS.map((s) => (
-        <Card key={s.title} scenario={s} />
-      ))}
-    </div>
+    <ul className="everyday-list">
+      {EVERYDAY.map((item) => {
+        const primitive = PRIMITIVES.find((p) => p.id === item.id);
+        if (!primitive) return null;
+        const Mark = MARKS[primitive.mark];
+        return (
+          <li key={item.id}>
+            <Receipt
+              wide
+              className="everyday-receipt"
+              title={primitive.name}
+              footer={
+                <Takeaway
+                  Mark={Mark}
+                  used={primitive.name}
+                  line={primitive.oneLine}
+                  where={primitive.everyday}
+                  href={item.tryHref}
+                  linkLabel={item.tryLabel}
+                />
+              }
+            >
+              <ReceiptLine label="Where you meet it" value={item.situation} />
+              <p className="everyday-problem">{item.problem}</p>
+              <p className="everyday-adds">{item.adds}</p>
+            </Receipt>
+          </li>
+        );
+      })}
+    </ul>
 
-    <div
-      className="glass-panel"
-      style={{
-        padding: "18px 24px",
-        borderRadius: "var(--radius-lg, 16px)",
-        fontFamily: "var(--font-body)",
-        fontSize: "var(--text-xs, 12px)",
-        color: "var(--text-muted)",
-        lineHeight: 1.6,
-        marginBottom: "28px",
-      }}
-    >
-      Honest scope: this demo proves <em>moves</em> and <em>list membership</em>{" "}
-      — not balances or full identity privacy. Stellar is a transparent ledger;
-      the stakes here are testnet play money, but the same commit-reveal and
-      proof-checking flow works for real coffee-money or contract money.
-    </div>
-
-    <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
-      <Link
-        to="/play"
-        style={{
-          background: "var(--accent-violet)",
-          color: "white",
-          border: "none",
-          borderRadius: "var(--radius-sm)",
-          padding: "10px 20px",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          fontWeight: 600,
-          textDecoration: "none",
-        }}
+    {/* The honest scope, as a small receipt footer. */}
+    <div className="everyday-scope">
+      <Receipt
+        full
+        title="Honest scope"
+        footer={
+          <p className="everyday-scope-text">
+            Stellar is a transparent ledger. This demo proves <em>moves</em> and{" "}
+            <em>list membership</em> — not balances, and not full identity
+            privacy. The stakes are testnet play money; the same commit-reveal
+            and proof-checking flow works for real money.
+          </p>
+        }
       >
-        Play it with a friend →
+        <p className="everyday-scope-text">
+          Every claim on this page is one the app can actually show you.
+        </p>
+      </Receipt>
+    </div>
+
+    <div className="everyday-actions">
+      <Link to="/play" className="everyday-primary">
+        Play it with a friend
       </Link>
-      <Link
-        to="/learn"
-        style={{
-          background: "transparent",
-          color: "var(--text-secondary)",
-          border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-sm)",
-          padding: "10px 20px",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          textDecoration: "none",
-        }}
-      >
+      <Link to="/learn" className="everyday-secondary">
         Learn the mechanics
       </Link>
     </div>
