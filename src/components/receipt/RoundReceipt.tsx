@@ -55,6 +55,8 @@ export interface RoundReceiptProps {
   primitiveId: PrimitiveId;
   /** "Where this shows up" link. */
   learnHref?: string;
+  /** Play the stepped feed-out — the one orchestrated moment. */
+  feeding?: boolean;
   children?: ReactNode;
 }
 
@@ -74,6 +76,7 @@ export function RoundReceipt({
   settlementLabel,
   primitiveId,
   learnHref,
+  feeding,
   children,
 }: RoundReceiptProps) {
   const outcome = getOutcome(you, partner);
@@ -89,6 +92,7 @@ export function RoundReceipt({
     <Receipt
       title={`Round ${roundNumber}`}
       time={time}
+      feeding={feeding}
       footer={
         <Takeaway
           Mark={Mark}

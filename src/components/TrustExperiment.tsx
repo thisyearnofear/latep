@@ -2,6 +2,9 @@ import { useEffect, useReducer, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Howl } from "howler";
 import { TrustStage, type TrustStageState } from "./visual/TrustStage";
+import { RoundReceipt } from "./receipt/RoundReceipt";
+import { primitiveForRound } from "./receipt/helpers";
+import { MOVE_HELPER, MOVE_LABEL } from "../content/vocabulary";
 import { calculatePayoff, NC_DEFAULT, type GameMove } from "../util/strategies";
 import "../styles/trust-experiment.css";
 
@@ -59,11 +62,15 @@ function roundReducer(state: RoundState, action: RoundAction): RoundState {
   }
 }
 
+/**
+ * The result headline, in the locked vocabulary (design.md §7). The words on
+ * the receipt are the canonical ones; these are just the sentence above it.
+ */
 const RESULT_TITLE: Record<string, string> = {
-  CC: "You caught each other.",
-  DC: "You stepped aside.",
-  CD: "Your partner stepped aside.",
-  DD: "Nobody offered a catch.",
+  CC: "You held each other up.",
+  DC: "You took it. They leaned for nothing.",
+  CD: "You toppled. They took the reward.",
+  DD: "Nobody leaned in.",
 };
 
 const points = new Intl.NumberFormat("en-US", {
@@ -234,9 +241,9 @@ export function TrustExperiment() {
                   aria-pressed={state.move === "C"}
                   onClick={() => dispatch({ type: "choose", move: "C" })}
                 >
-                  Cooperate
+                  {MOVE_LABEL.C}
                 </button>
-                <span className="trust-choice-note">Offer a catch</span>
+                <span className="trust-choice-note">{MOVE_HELPER.C}</span>
               </div>
               <div className="trust-choice">
                 <button
@@ -246,9 +253,9 @@ export function TrustExperiment() {
                   aria-pressed={state.move === "D"}
                   onClick={() => dispatch({ type: "choose", move: "D" })}
                 >
-                  Defect
+                  {MOVE_LABEL.D}
                 </button>
-                <span className="trust-choice-note">Step aside</span>
+                <span className="trust-choice-note">{MOVE_HELPER.D}</span>
               </div>
             </div>
             {state.phase === "sealed" && (
@@ -269,18 +276,28 @@ export function TrustExperiment() {
           </>
         ) : (
           <div className="trust-result">
+            {state.move && payoff && (
+              <RoundReceipt
+                roundNumber={state.round}
+                mode="practice"
+                you={state.move}
+                partner={state.opponent}
+                pointsYou={payoff.playerPayout}
+                pointsPartner={payoff.aiPayout}
+                trustTwists={state.trustAltitude}
+                primitiveId={primitiveForRound(state.round, "practice")}
+                learnHref="/learn/play"
+                feeding
+              />
+            )}
             <h3 ref={outcomeRef} tabIndex={-1} className="trust-result-title">
               {resultKey ? RESULT_TITLE[resultKey] : ""}
             </h3>
-            {payoff && (
+            {payoff && state.move && (
               <p className="trust-result-line">
-                You{" "}
-                <strong>{state.move === "C" ? "Cooperate" : "Defect"}</strong> ·
-                Partner{" "}
-                <strong>
-                  {state.opponent === "C" ? "Cooperate" : "Defect"}
-                </strong>{" "}
-                — {points.format(payoff.playerPayout)} :{" "}
+                You <strong>{MOVE_LABEL[state.move]}</strong> · Partner{" "}
+                <strong>{MOVE_LABEL[state.opponent]}</strong> —{" "}
+                {points.format(payoff.playerPayout)} :{" "}
                 {points.format(payoff.aiPayout)}
               </p>
             )}

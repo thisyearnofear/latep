@@ -1,0 +1,257 @@
+/* ============================================================================
+ * Home — design.md §2, story-page family.
+ *
+ * Stage-led, left-biased. The content never centres except the move buttons
+ * under the scene, and the max width is the shared --layout-max.
+ * ========================================================================== */
+
+.home {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
+/* --- 1. the opening ------------------------------------------------------- */
+
+.home-opening {
+  max-width: var(--measure-prose);
+}
+
+/* Display tracking, roman, never italic. */
+.home-title {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-stretch: 80%; /* the condensed width, for the story hero */
+  line-height: 1.05;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-counter-text);
+  overflow-wrap: anywhere;
+}
+
+.home-situation {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+/* --- shared section heading ----------------------------------------------- */
+
+.home-section-heading {
+  margin: 0 0 var(--space-sm);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-counter-muted);
+}
+
+/* --- 4. the four primitives, as stubs ------------------------------------- */
+
+.home-primitives {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-primitive-row {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--space-2xs);
+}
+
+.home-primitive {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  height: 100%;
+  padding: var(--space-sm);
+  text-decoration: none;
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+  border: 1px dashed var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.home-primitive:hover {
+  background: var(--color-receipt-2);
+}
+
+.home-primitive:active {
+  transform: translate(1px, 1px);
+}
+
+.home-primitive:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.home-primitive-mark {
+  color: var(--color-receipt-ink);
+  margin-bottom: var(--space-3xs);
+}
+
+.home-primitive-name {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+}
+
+.home-primitive-line {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+}
+
+/* --- 5. where next -------------------------------------------------------- */
+
+.home-next {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-next-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-counter-rule);
+}
+
+.home-next-row {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-2xs);
+  text-decoration: none;
+  color: var(--color-counter-text);
+  border-bottom: 1px solid var(--color-counter-rule);
+  transition: background var(--dur-short) var(--ease-out);
+}
+
+.home-next-row:hover {
+  background: var(--color-counter-2);
+}
+
+.home-next-row:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.home-next-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-counter-text);
+}
+
+.home-next-line {
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+.home-next-go {
+  color: var(--color-you);
+}
+
+/* --- the nudge, the optional actions, the credit ------------------------- */
+
+.home-nudge {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-width: var(--measure-prose);
+}
+
+.home-nudge-text {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+.home-optional {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2xs) var(--space-sm);
+}
+
+.home-quiet-button {
+  padding: var(--space-3xs) 0;
+  border: none;
+  background: transparent;
+  color: var(--color-counter-text-2);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.home-quiet-button:hover {
+  color: var(--color-counter-text);
+}
+
+.home-quiet-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.home-profile {
+  font-size: var(--text-sm);
+  color: var(--color-counter-muted);
+}
+
+.home-profile strong {
+  color: var(--color-you);
+}
+
+.home-fineprint,
+.home-credit {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-counter-muted);
+}
+
+.home-credit {
+  margin-top: var(--space-sm);
+}
+
+/* --- narrow --------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  .home {
+    padding-top: var(--space-lg);
+    gap: var(--space-lg);
+  }
+
+  .home-title {
+    font-size: var(--text-2xl);
+  }
+
+  /* The explanation drops under the title rather than squeezing beside it. */
+  .home-next-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: var(--space-3xs);
+  }
+
+  .home-next-line {
+    grid-column: 1 / -1;
+  }
+}
