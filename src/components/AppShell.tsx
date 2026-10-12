@@ -1,272 +1,188 @@
 /**
- * AppShell — Unified application shell
+ * AppShell — the persistent top strip.
  *
- * Persistent top navigation with three sections (Learn / Tournament / Play),
- * wallet connection, audio controls, custom cursor, and topographic background.
- * Replaces the Stellar Layout.Header with a cohesive design-token-driven shell
- * that shares the glassmorphism visual language across all surfaces.
+ * A counter strip: wordmark left, four links, wallet right. Never two rows
+ * (design.md §10). Under 768px it collapses to the wordmark plus a Menu
+ * button, because four links and a wallet cannot share one row at 320px
+ * without the labels wrapping.
  */
 
 import React, { useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { Volume2, VolumeX } from "lucide-react";
 import ConnectAccount from "./ConnectAccount.tsx";
-import { TopographicBackground } from "./visual/TopographicBackground";
-import { CustomCursor } from "./ui/CustomCursor";
 import { useAudioSettings } from "../hooks/useAudioSettings";
 import { TrustFallCharacter } from "./TrustFallCharacter";
+import "../styles/shell.css";
 
-interface NavItem {
-  to: string;
-  label: string;
-  icon: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { to: "/learn", label: "Learn", icon: "🤝" },
-  { to: "/real-life", label: "Real life", icon: "🌍" },
-  { to: "/tournament", label: "Tournament", icon: "🏆" },
-  { to: "/play", label: "Play", icon: "🔒" },
-];
+/**
+ * Nav labels are Decision 2 in REDESIGN_PLAN §9: plain language over jargon.
+ * `/real-life` is _Everyday_ and `/play` is _Play with a friend_ — the latter
+ * is also the only label that can hint at the stake without promising it.
+ */
+const NAV_ITEMS = [
+  { to: "/learn", label: "Learn" },
+  { to: "/tournament", label: "Tournament" },
+  { to: "/real-life", label: "Everyday" },
+  { to: "/play", label: "Play with a friend" },
+] as const;
 
 const AppShell: React.FC = () => {
   const pathname = useLocation().pathname;
-  const isHome = pathname === "/";
-  const isLearning = pathname === "/learn" || pathname === "/learn/play";
   const isLesson = pathname === "/learn";
   const audioManager = useAudioSettings();
   const [audioOpen, setAudioOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const audioButtonRef = React.useRef<HTMLButtonElement>(null);
+  const menuButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  const closeMenus = () => {
+    setAudioOpen(false);
+    setMenuOpen(false);
+  };
 
   return (
     <>
-      {!isHome && !isLearning && <CustomCursor />}
-      {!isHome && !isLearning && <TopographicBackground />}
+      {/*
+        CustomCursor and TopographicBackground are deliberately NOT rendered.
+        design.md §6 rules out custom cursors and §1 builds the look from SVG
+        and CSS rather than WebGL. The files stay on disk until the B9
+        deletion list is signed off.
+      */}
 
-      {/* Top navigation */}
-      <header
-        className="shell-header"
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "64px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "0 24px",
-          background: "rgba(10, 14, 26, 0.7)",
-          backdropFilter: "blur(20px) saturate(160%)",
-          WebkitBackdropFilter: "blur(20px) saturate(160%)",
-          borderBottom: "1px solid var(--border-glass)",
-          zIndex: 100,
-        }}
-      >
-        {/* Logo / brand */}
-        <NavLink
-          to="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            textDecoration: "none",
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--text-xl)",
-            color: "var(--text-primary)",
-            letterSpacing: "-0.02em",
-          }}
-        >
-          <span
-            style={{ filter: "drop-shadow(0 0 8px rgba(102, 126, 234, 0.3))" }}
-          >
-            <TrustFallCharacter state="standing" color="you" size="sm" />
-          </span>
+      <header className="shell-header">
+        {/* Wordmark */}
+        <NavLink to="/" className="shell-wordmark" onClick={closeMenus}>
+          <TrustFallCharacter state="standing" color="you" size="sm" />
           <span>Latep</span>
         </NavLink>
 
-        {/* Center nav */}
-        <nav
-          className="shell-nav"
-          style={{
-            display: "flex",
-            gap: "4px",
-            alignItems: "center",
-          }}
-        >
+        {/* Desktop nav */}
+        <nav className="shell-nav" aria-label="Main">
           {NAV_ITEMS.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              className="shell-nav-link"
-              style={({ isActive }) => ({
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 16px",
-                borderRadius: "var(--radius-sm)",
-                border: "none",
-                background: isActive
-                  ? "rgba(102, 126, 234, 0.2)"
-                  : "transparent",
-                color: isActive
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                fontWeight: isActive ? 600 : 400,
-                textDecoration: "none",
-                transition: "all var(--duration-fast) var(--ease-out)",
-              })}
+              className={({ isActive }) =>
+                isActive ? "shell-nav-link is-active" : "shell-nav-link"
+              }
             >
-              <span style={{ fontSize: "1rem" }}>{item.icon}</span>
-              <span>{item.label}</span>
+              {item.label}
             </NavLink>
           ))}
         </nav>
 
-        {/* Right: audio + wallet */}
-        <div
-          className="shell-actions"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
-          {isHome ? (
-            <NavLink
-              to="/play"
-              className="shell-nav-link"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "8px 16px",
-                borderRadius: "var(--radius-sm)",
-                border: "1px solid var(--border-glass)",
-                color: "var(--text-secondary)",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
+        <div className="shell-actions">
+          {/* Under 768px the links move into this sheet. */}
+          <button
+            type="button"
+            ref={menuButtonRef}
+            className="shell-menu-button"
+            onClick={() => {
+              setMenuOpen((o) => !o);
+              setAudioOpen(false);
+            }}
+            aria-expanded={menuOpen}
+            aria-controls="shell-menu"
+          >
+            Menu
+          </button>
+
+          {/* Audio toggle */}
+          <div className="shell-audio">
+            <button
+              type="button"
+              ref={audioButtonRef}
+              className="shell-icon-button"
+              onClick={() => {
+                setAudioOpen((o) => !o);
+                setMenuOpen(false);
               }}
+              aria-label="Audio settings"
+              aria-expanded={audioOpen}
+              aria-controls="shell-audio-settings"
+              title="Audio settings"
             >
-              ZK multiplayer
-            </NavLink>
-          ) : (
-            <>
-              {/* Audio toggle */}
-              <div style={{ position: "relative" }}>
+              {audioManager.isMusicEnabled ? (
+                <Volume2 size={18} strokeWidth={2} aria-hidden="true" />
+              ) : (
+                <VolumeX size={18} strokeWidth={2} aria-hidden="true" />
+              )}
+            </button>
+
+            {audioOpen && (
+              <div
+                className="shell-menu-panel"
+                id="shell-audio-settings"
+                role="group"
+                aria-label="Sound settings"
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setAudioOpen(false);
+                    audioButtonRef.current?.focus();
+                  }
+                }}
+              >
                 <button
                   type="button"
-                  ref={audioButtonRef}
-                  onClick={() => setAudioOpen(!audioOpen)}
-                  aria-label="Audio settings"
-                  aria-expanded={audioOpen}
-                  aria-controls="shell-audio-settings"
-                  style={{
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    border: "1px solid var(--border-glass)",
-                    background: "var(--bg-glass-light)",
-                    color: "var(--text-secondary)",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: "all var(--duration-fast) var(--ease-out)",
-                  }}
-                  title="Audio settings"
+                  className="shell-menu-item"
+                  onClick={() => audioManager.toggleMusic()}
+                  aria-pressed={audioManager.isMusicEnabled}
                 >
-                  {audioManager.isMusicEnabled ? "🎵" : "🔇"}
+                  {audioManager.isMusicEnabled ? (
+                    <Volume2 size={18} strokeWidth={2} aria-hidden="true" />
+                  ) : (
+                    <VolumeX size={18} strokeWidth={2} aria-hidden="true" />
+                  )}
+                  Music
                 </button>
-                {audioOpen && (
-                  <div
-                    className="glass-panel"
-                    id="shell-audio-settings"
-                    role="group"
-                    aria-label="Sound settings"
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") {
-                        setAudioOpen(false);
-                        audioButtonRef.current?.focus();
-                      }
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "44px",
-                      right: 0,
-                      padding: "12px",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "8px",
-                      minWidth: "160px",
-                      zIndex: 200,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => audioManager.toggleMusic()}
-                      aria-pressed={audioManager.isMusicEnabled}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "6px 10px",
-                        borderRadius: "var(--radius-sm)",
-                        border: "none",
-                        background: "transparent",
-                        color: "var(--text-primary)",
-                        fontFamily: "var(--font-body)",
-                        fontSize: "var(--text-sm)",
-                        cursor: "pointer",
-                        textAlign: "left",
-                      }}
-                    >
-                      {audioManager.isMusicEnabled ? "🎵" : "🔇"} Music
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => audioManager.toggleSFX()}
-                      aria-pressed={audioManager.isSFXEnabled}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding: "6px 10px",
-                        borderRadius: "var(--radius-sm)",
-                        border: "none",
-                        background: "transparent",
-                        color: "var(--text-primary)",
-                        fontFamily: "var(--font-body)",
-                        fontSize: "var(--text-sm)",
-                        cursor: "pointer",
-                        textAlign: "left",
-                      }}
-                    >
-                      {audioManager.isSFXEnabled ? "🔊" : "🔈"} Sound Effects
-                    </button>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  className="shell-menu-item"
+                  onClick={() => audioManager.toggleSFX()}
+                  aria-pressed={audioManager.isSFXEnabled}
+                >
+                  Sound Effects
+                </button>
               </div>
+            )}
+          </div>
 
-              <ConnectAccount />
-            </>
-          )}
+          <ConnectAccount />
         </div>
       </header>
 
-      {/* Page content */}
+      {/* The sheet. One nav, so a keyboard user tabs the links once. */}
+      {menuOpen && (
+        <div
+          className="shell-sheet"
+          id="shell-menu"
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setMenuOpen(false);
+              menuButtonRef.current?.focus();
+            }
+          }}
+        >
+          <nav aria-label="Main, condensed">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  isActive ? "shell-sheet-link is-active" : "shell-sheet-link"
+                }
+                onClick={closeMenus}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+      )}
+
       <main
         className={`shell-content${isLesson ? " shell-content-lesson" : ""}`}
-        style={{
-          paddingTop: "64px",
-          minHeight: isLesson ? "0" : "100vh",
-          position: "relative",
-          zIndex: 1,
-        }}
       >
         <Outlet />
       </main>
