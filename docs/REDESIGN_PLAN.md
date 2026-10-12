@@ -188,7 +188,14 @@ them, per `AGENTS.md`). Uses Playwright with `channel: "chrome"` so no browser
 download is needed.
 
 **Every PR runs:** `npm run build`, `npm run lint`, `npm run design:check`,
-`npm run shots`.
+`npm run check:hidden-moves`, `npm run shots`.
+
+**`npm run check:hidden-moves`** (`scripts/check-hidden-moves.cjs`) walks the
+DOM of every stage on every route that has one, and fails if a move value
+appears before the reveal — as text, as an attribute, or in the accessibility
+tree. It is the automated half of the hidden-move rule, and it is what proves
+B3's "inspect the DOM in the sealed phase" done-criterion rather than trusting
+a human to remember. Needs a running `npm run dev`.
 
 ---
 
@@ -369,6 +376,20 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Done: all 4 outcomes plus a noise flip, in screenshots and a short screen
   recording; reduced motion jumps straight to the final state; the hidden-move
   rule still holds (inspect the DOM in the "sealed" phase: no move value).
+- **Shipped 2026-10-12.** Notes for A3:
+  1. The scene is a **wide `Receipt`**, so it brings its own torn edges and
+     stock. Anything placed on top of it is receipt content, not a panel — no
+     nesting a panel inside it.
+  2. `onRevealComplete` is a new **optional** prop, so the nine existing
+     callers are unaffected. It carries no authority: a receipt fed by it
+     still only prints what app state confirms.
+  3. The scene needs a `min-height` below 700px of container width. Squeezed to
+     the 800/300 aspect ratio it is only ~150px tall, which is not enough for a
+     sealed stub, a standing figure and a label — the stub ends up covering the
+     figure's head.
+  4. Below 460px the stub **captions are hidden** and only the `SEALED` stamp
+     shows; the actor labels already say which seal is whose, and two long
+     captions side by side overflow the receipt.
 
 **B4 · Round receipt and takeaway** (S) — Dev B
 
@@ -382,8 +403,14 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Feeds out with `--dur-print` / `--ease-feed`; reduced motion just fades in.
 - Which primitive to show: practice rounds 1–2 → The Seal; round 3+ → The
   Handshake. ZK result → The Net (on confirmed settlement) or The Pass (after
-  an accreditation proof). Document this mapping in the file.
+  an accreditation proof). That mapping is `primitiveForRound` in
+  `receipt/helpers.ts`; the caller passes the result in as `primitiveId`.
 - Done: renders for all 4 outcomes, both modes, with focus-visible on the link.
+- **Shipped 2026-10-12.** `RoundReceipt` takes every value as a prop and never
+  computes an outcome or a payoff — it maps an already-revealed pair to the
+  wording via `getOutcome`. A pending or unconfirmed transaction always prints
+  `PENDING`; `explorerUrl` is only called when `confirmed` is true, so there is
+  no path that renders a link to a transaction that hasn't landed.
 
 **A2 · App shell** (M) — Dev A
 
