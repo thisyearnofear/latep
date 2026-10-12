@@ -382,7 +382,7 @@ export function TrustStage({
               <TrustFallCharacter
                 state={poses.you}
                 color="you"
-                size={compact ? "lg" : "xl"}
+                size={compact ? "lg" : "2xl"}
                 facing="right"
               />
             </div>
@@ -393,7 +393,7 @@ export function TrustStage({
               <TrustFallCharacter
                 state={poses.partner}
                 color="opponent"
-                size={compact ? "lg" : "xl"}
+                size={compact ? "lg" : "2xl"}
                 facing="left"
               />
             </div>

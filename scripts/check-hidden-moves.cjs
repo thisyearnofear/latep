@@ -26,6 +26,14 @@ const NEEDLES = [
   "celebrating",
 ];
 
+// This runs in a pre-commit hook and in CI, where stdout can be closed early
+// (piped to `head`, or a runner that stops reading). An EPIPE here is not a
+// failure of the check, so exit quietly rather than crash.
+process.stdout.on("error", (e) => {
+  if (e && e.code === "EPIPE") process.exit(0);
+  throw e;
+});
+
 (async () => {
   const base = "http://localhost:5173";
   const browser = await chromium.launch({ channel: "chrome" });
