@@ -196,11 +196,11 @@
 }
 
 .trust-actor-you {
-  left: 26%;
+  left: 33%;
 }
 
 .trust-actor-partner {
-  left: 74%;
+  left: 67%;
 }
 
 .trust-actor-inner {
@@ -224,24 +224,25 @@
 }
 
 .trust-actor-label-you {
-  left: 26%;
+  left: 33%;
   color: var(--color-you-print);
 }
 
 .trust-actor-label-partner {
-  left: 74%;
+  left: 67%;
   color: var(--color-partner-print);
 }
 
 /* --- the thread ------------------------------------------------------------ */
 
-/* Between the two hands, not above the heads and not on the labels. The actors
-   stand on bottom:22%, so their hands land around half way down the scene. */
+/* The thread hangs from the hands, not from head height. Measured against the
+   rig: the figures stand on bottom:20% and a 96px figure is 47% of the way
+   down its own box at the hand, so the hands sit near 61% of the scene. */
 .trust-thread {
   position: absolute;
-  left: 31%;
-  width: 38%;
-  top: 50%;
+  left: 30%;
+  width: 40%;
+  top: 61%;
   transform-origin: 50% 50%;
 }
 
@@ -281,13 +282,13 @@
    them off. Positioned by side, not by sibling order: `:nth-of-type` counts
    every div, and the actors are divs too. */
 .trust-seal-stub-you {
-  left: 26%;
+  left: 33%;
   top: 3%;
   transform: translateX(-50%);
 }
 
 .trust-seal-stub-partner {
-  left: 74%;
+  left: 67%;
   top: 3%;
   transform: translateX(-50%);
 }
@@ -482,7 +483,7 @@
   }
 
   .trust-thread {
-    top: 48%;
+    top: 60%;
   }
 }
 
@@ -512,7 +513,7 @@
   }
 
   .trust-thread {
-    top: 48%;
+    top: 60%;
   }
 }
 
