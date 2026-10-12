@@ -3,9 +3,20 @@ import { Button, Text, Modal, Profile } from "@stellar/design-system";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 
+const WALLET_NAMES: Record<string, string> = {
+  freighter: "Freighter",
+  xbull: "xBull",
+  albedo: "Albedo",
+  rabet: "Rabet",
+  lobstr: "Lobstr",
+  hana: "Hana",
+  hotwallet: "Hot Wallet",
+  klever: "Klever",
+};
+
 export const WalletButton = () => {
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
-  const { address, isPending, connect, disconnect } = useWallet();
+  const { address, walletId, isPending, connect, disconnect } = useWallet();
   const { xlm, ...balance } = useWalletBalance();
   const buttonLabel = isPending ? "Loading..." : "Connect";
 
@@ -28,7 +39,8 @@ export const WalletButton = () => {
       }}
     >
       <Text as="div" size="sm">
-        Wallet Balance: {xlm} XLM
+        {walletId ? `${WALLET_NAMES[walletId] ?? walletId} · ` : ""}Wallet
+        Balance: {xlm} XLM
       </Text>
 
       <div id="modalContainer">

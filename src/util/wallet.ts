@@ -13,6 +13,10 @@ import {
   ISupportedWallet,
 } from "@creit.tech/stellar-wallets-kit";
 import { Transaction, FeeBumpTransaction } from "@stellar/stellar-sdk";
+import { networkPassphrase as appNetworkPassphrase } from "../contracts/util";
+
+export const WALLET_ID_STORAGE_KEY = "walletId";
+export { FREIGHTER_ID };
 
 export interface Balance {
   asset_type: string;
@@ -33,10 +37,13 @@ const state: WalletState = {
   networkPassphrase: null,
 };
 
-// Initialize kit with Freighter as default (required by kit, but won't be used until user selects)
+// Build the kit targeting the wallet the user last selected (persisted at
+// connect time), falling back to Freighter for first-time users.
 const initializeKit = () => {
   if (!state.kit) {
     try {
+      const storedWalletId =
+        localStorage.getItem(WALLET_ID_STORAGE_KEY) || FREIGHTER_ID;
       state.kit = new StellarWalletsKit({
         network: WalletNetwork.TESTNET,
         modules: [
@@ -49,7 +56,7 @@ const initializeKit = () => {
           new HotWalletModule(),
           new KleverModule(),
         ],
-        selectedWalletId: FREIGHTER_ID, // Kit requires this, but we override in connect flow
+        selectedWalletId: storedWalletId,
       });
     } catch (error) {
       console.error("Error initializing wallet kit:", error);
@@ -105,8 +112,7 @@ export const wallet = {
         typeof transaction === "string" ? transaction : transaction.toXDR();
 
       const result = await kit.signTransaction(transactionXdr, {
-        networkPassphrase:
-          state.networkPassphrase || "Test SDF Network ; September 2015",
+        networkPassphrase: state.networkPassphrase || appNetworkPassphrase,
         address: state.address,
       });
       return result;
@@ -127,8 +133,9 @@ export const connectWallet = async () => {
         onWalletSelected: (option: ISupportedWallet) => {
           void (async () => {
             try {
-              // Set the selected wallet in the kit
+              // Set the selected wallet in the kit and remember it for reloads
               kit.setWallet(option.id);
+              localStorage.setItem(WALLET_ID_STORAGE_KEY, option.id);
 
               // Get address and network info
               const [{ address }, network] = await Promise.all([
@@ -142,6 +149,7 @@ export const connectWallet = async () => {
               state.networkPassphrase = network.networkPassphrase;
 
               resolve({
+                walletId: option.id,
                 address,
                 network: network.network,
                 networkPassphrase: network.networkPassphrase,
@@ -171,6 +179,7 @@ export const disconnectWallet = () => {
   state.network = null;
   state.networkPassphrase = null;
   state.kit = null;
+  localStorage.removeItem(WALLET_ID_STORAGE_KEY);
 };
 
 export const fetchBalance = async (address: string): Promise<Balance[]> => {
