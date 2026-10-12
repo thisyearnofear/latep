@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
 import {
@@ -6,6 +6,10 @@ import {
   generateNonce,
   generateProof,
 } from "../../services/noirProofService";
+import { persistSecrets } from "../../services/localSecretStore";
+import { NonceCard } from "./NonceCard";
+import { PayoffMatrixReminder } from "./PayoffMatrixReminder";
+import { VerifiedOnChainCard } from "./VerifiedOnChainCard";
 
 interface MatchCommitMoveProps {
   /** Which match phase we're committing for. */
@@ -51,30 +55,34 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
   } = useZKDilemma();
 
   const [selectedMove, setSelectedMove] = useState<GameMove | null>(null);
-  const [status, setStatus] = useState<"choose" | "generating" | "submitting">(
-    "choose",
-  );
+  const [status, setStatus] = useState<
+    "choose" | "generating" | "submitting" | "verified"
+  >("choose");
   const [txError, setTxError] = useState<string | null>(null);
   const [debug, setDebug] = useState<string>("");
   const [showTech, setShowTech] = useState(false);
   const [savedNonce, setSavedNonce] = useState<bigint | null>(null);
+  const [verifiedTxHash, setVerifiedTxHash] = useState<string | null>(null);
+  const verifyTimer = useRef<number | null>(null);
 
-  // Persist nonce + move for the reveal step (keyed by predicted/known game id)
-  useEffect(() => {
-    if (savedNonce && selectedMove && knownGameId) {
-      const nonceKey = `zk_nonce_game_${knownGameId}`;
-      const moveKey = `zk_move_game_${knownGameId}`;
-      try {
-        localStorage.setItem(nonceKey, savedNonce.toString());
-        localStorage.setItem(moveKey, selectedMove);
-      } catch {
-        sessionStorage.setItem(nonceKey, savedNonce.toString());
-        sessionStorage.setItem(moveKey, selectedMove);
-      }
-    }
-  }, [savedNonce, selectedMove, knownGameId]);
+  useEffect(
+    () => () => {
+      if (verifyTimer.current) window.clearTimeout(verifyTimer.current);
+    },
+    [],
+  );
 
-  const isLoadingState = status === "generating" || status === "submitting";
+  /** On-chain celebration beat, then hand off to the parent view */
+  const celebrate = (newGameId: number, newMatchId?: number) => {
+    setStatus("verified");
+    verifyTimer.current = window.setTimeout(
+      () => onComplete(newGameId, newMatchId),
+      2_000,
+    );
+  };
+
+  const isLoadingState =
+    status === "generating" || status === "submitting" || status === "verified";
 
   const phaseLabel: Record<MatchCommitMoveProps["phase"], string> = {
     create: "Create Match — Round 1",
@@ -112,6 +120,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
           targetGameId = knownGameId ?? 0;
           setDebug(`Using known game_id=${targetGameId}`);
         }
+        persistSecrets(targetGameId, nonce, selectedMove);
 
         setDebug(`Computing commitment for ${selectedMove}...`);
         const commitmentBytes = computeCommitment({
@@ -145,69 +154,42 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
           const stakeStroops = BigInt(
             Math.floor(parseFloat(stakeXlm) * 10_000_000),
           ).toString();
-          if (phase === "create") {
-            const result = await createMatch(
-              commitment,
-              proof,
-              stakeStroops,
-              bestOf,
-            );
-            setDebug(
-              `Match #${result.matchId} created, game #${result.gameId}!`,
-            );
-            // Persist nonce for the actual game id returned
-            try {
-              localStorage.setItem(
-                `zk_nonce_game_${result.gameId}`,
-                nonce.toString(),
-              );
-              localStorage.setItem(
-                `zk_move_game_${result.gameId}`,
-                selectedMove,
-              );
-            } catch {
-              /* ignore */
-            }
-            onComplete(result.gameId, result.matchId);
-          } else {
-            // rematch
-            const result = await rematch(matchId, commitment, proof);
-            setDebug(`Rematch #${result.matchId}, game #${result.gameId}!`);
-            try {
-              localStorage.setItem(
-                `zk_nonce_game_${result.gameId}`,
-                nonce.toString(),
-              );
-              localStorage.setItem(
-                `zk_move_game_${result.gameId}`,
-                selectedMove,
-              );
-            } catch {
-              /* ignore */
-            }
-            onComplete(result.gameId, result.matchId);
+          const result =
+            phase === "create"
+              ? await createMatch(commitment, proof, stakeStroops, bestOf)
+              : await rematch(matchId, commitment, proof);
+          if (result.gameId !== targetGameId) {
+            persistSecrets(result.gameId, nonce, selectedMove);
           }
+          setVerifiedTxHash(result.hash ?? null);
+          setDebug(
+            phase === "create"
+              ? `Match #${result.matchId} created, game #${result.gameId}!`
+              : `Rematch #${result.matchId}, game #${result.gameId}!`,
+          );
+          celebrate(result.gameId, result.matchId);
         } else if (phase === "join") {
-          await joinMatch(matchId, commitment, proof);
+          const { hash } = await joinMatch(matchId, commitment, proof);
+          setVerifiedTxHash(hash ?? null);
           setDebug(`Joined match #${matchId}!`);
-          onComplete(knownGameId ?? 0);
+          celebrate(knownGameId ?? 0);
         } else if (phase === "startNext") {
-          const newGameId = await startNextRound(matchId, commitment, proof);
-          setDebug(`Next round started, game #${newGameId}!`);
-          try {
-            localStorage.setItem(
-              `zk_nonce_game_${newGameId}`,
-              nonce.toString(),
-            );
-            localStorage.setItem(`zk_move_game_${newGameId}`, selectedMove);
-          } catch {
-            /* ignore */
+          const { gameId: newGameId, hash } = await startNextRound(
+            matchId,
+            commitment,
+            proof,
+          );
+          if (newGameId !== targetGameId) {
+            persistSecrets(newGameId, nonce, selectedMove);
           }
-          onComplete(newGameId);
+          setVerifiedTxHash(hash ?? null);
+          setDebug(`Next round started, game #${newGameId}!`);
+          celebrate(newGameId);
         } else if (phase === "joinNext") {
           await joinNextRound(matchId, commitment, proof);
+          setVerifiedTxHash(null);
           setDebug(`Joined next round of match #${matchId}!`);
-          onComplete(knownGameId ?? 0);
+          celebrate(knownGameId ?? 0);
         }
         return; // success
       } catch (err) {
@@ -235,7 +217,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
         <p
           style={{
             fontFamily: "var(--font-body)",
-            color: "rgba(20, 26, 46, 0.45)",
+            color: "var(--text-secondary)",
           }}
         >
           Connect your wallet to commit a move
@@ -256,7 +238,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
         style={{
           background: "none",
           border: "none",
-          color: "rgba(20, 26, 46, 0.35)",
+          color: "var(--text-muted)",
           cursor: isLoadingState ? "not-allowed" : "pointer",
           fontFamily: "var(--font-body)",
           fontSize: "16px",
@@ -272,7 +254,6 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
         className="glass-panel"
         style={{
           padding: "24px",
-          borderColor: "rgba(102,126,234,0.2)",
         }}
       >
         <h3
@@ -293,7 +274,8 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
             fontFamily: "var(--font-body)",
           }}
         >
-          Choose your move. A ZK proof binds you — no take-backs.
+          Choose your move. When you let go, a ZK proof binds you — no
+          take-backs.
         </p>
 
         {/* Move selection */}
@@ -316,7 +298,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                 borderRadius: "12px",
                 border:
                   selectedMove === "C"
-                    ? "3px solid #4CAF50"
+                    ? "3px solid var(--accent-cooperate)"
                     : "2px solid var(--border-glass)",
                 background:
                   selectedMove === "C"
@@ -327,16 +309,35 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                 fontFamily: "var(--font-body)",
                 opacity: isLoadingState ? 0.6 : 1,
               }}
+              onMouseEnter={(e) => {
+                if (!isLoadingState)
+                  e.currentTarget.style.transform =
+                    "translateY(-4px) rotate(-3deg)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "";
+              }}
             >
               <div style={{ fontSize: "32px", marginBottom: "8px" }}>🤝</div>
               <div
                 style={{
                   fontWeight: "bold",
                   color:
-                    selectedMove === "C" ? "#4CAF50" : "var(--text-primary)",
+                    selectedMove === "C"
+                      ? "var(--accent-cooperate)"
+                      : "var(--text-primary)",
                 }}
               >
                 Cooperate
+              </div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--text-secondary)",
+                  marginTop: "4px",
+                }}
+              >
+                You'll catch them
               </div>
             </button>
             <button
@@ -349,7 +350,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                 borderRadius: "12px",
                 border:
                   selectedMove === "D"
-                    ? "3px solid #F44336"
+                    ? "3px solid var(--accent-defect)"
                     : "2px solid var(--border-glass)",
                 background:
                   selectedMove === "D"
@@ -360,26 +361,52 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                 fontFamily: "var(--font-body)",
                 opacity: isLoadingState ? 0.6 : 1,
               }}
+              onMouseEnter={(e) => {
+                if (!isLoadingState)
+                  e.currentTarget.style.transform =
+                    "translateY(4px) rotate(3deg)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "";
+              }}
             >
               <div style={{ fontSize: "32px", marginBottom: "8px" }}>⚔️</div>
               <div
                 style={{
                   fontWeight: "bold",
                   color:
-                    selectedMove === "D" ? "#F44336" : "var(--text-primary)",
+                    selectedMove === "D"
+                      ? "var(--accent-defect)"
+                      : "var(--text-primary)",
                 }}
               >
                 Defect
+              </div>
+              <div
+                style={{
+                  fontSize: "12px",
+                  color: "var(--text-secondary)",
+                  marginTop: "4px",
+                }}
+              >
+                You'll step aside
               </div>
             </button>
           </div>
         </div>
 
+        <PayoffMatrixReminder />
+
+        <NonceCard nonce={savedNonce} />
+
+        {/* On-chain celebration beat */}
+        {status === "verified" && <VerifiedOnChainCard hash={verifiedTxHash} />}
+
         {/* Status / debug */}
-        {status !== "choose" && (
+        {status !== "choose" && status !== "verified" && (
           <div
             style={{
-              background: "rgba(102, 126, 234, 0.06)",
+              background: "var(--bg-glass-light)",
               borderRadius: "8px",
               padding: "16px",
               marginBottom: "16px",
@@ -402,9 +429,13 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                   🧍
                 </div>
                 <div
-                  style={{ fontFamily: "var(--font-body)", fontSize: "14px" }}
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "14px",
+                    color: "var(--text-secondary)",
+                  }}
                 >
-                  Generating ZK proof...
+                  You're falling... your ZK proof is binding your move.
                 </div>
                 <div
                   style={{
@@ -414,8 +445,8 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                     marginTop: "4px",
                   }}
                 >
-                  Creating a proof that your move is valid — this takes a few
-                  seconds.
+                  Creating a zero-knowledge proof that your move is valid — this
+                  takes a few seconds.
                 </div>
               </div>
             )}
@@ -432,9 +463,13 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
                   🕳️
                 </div>
                 <div
-                  style={{ fontFamily: "var(--font-body)", fontSize: "14px" }}
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "14px",
+                    color: "var(--text-secondary)",
+                  }}
                 >
-                  Submitting to the blockchain...
+                  Suspended in the air — committing to the blockchain...
                 </div>
               </div>
             )}
@@ -444,7 +479,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
           </div>
         )}
 
-        {status !== "choose" && (
+        {status !== "choose" && status !== "verified" && (
           <label
             style={{
               display: "flex",
@@ -470,7 +505,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
         {txError && (
           <p
             style={{
-              color: "#F44336",
+              color: "var(--accent-defect, #F44336)",
               marginBottom: "16px",
               textAlign: "center",
               fontFamily: "var(--font-body)",
@@ -482,7 +517,7 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
         {error && (
           <p
             style={{
-              color: "#F44336",
+              color: "var(--accent-defect, #F44336)",
               marginBottom: "16px",
               textAlign: "center",
               fontFamily: "var(--font-body)",
@@ -511,7 +546,9 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
           {isLoadingState
             ? status === "generating"
               ? " Falling..."
-              : " Committing..."
+              : status === "submitting"
+                ? " Committing..."
+                : " Verified!"
             : "✋ Let go"}
         </button>
       </div>

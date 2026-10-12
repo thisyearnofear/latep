@@ -86,3 +86,17 @@ export const network: Network = {
   rpcUrl: rpcUrl,
   horizonUrl: horizonUrl,
 };
+
+/** Public explorer URL for a transaction hash (stellar.expert, lab fallback for local) */
+export const txExplorerUrl = (hash: string): string => {
+  switch (network.id) {
+    case "mainnet":
+      return `https://stellar.expert/explorer/public/tx/${hash}`;
+    case "testnet":
+      return `https://stellar.expert/explorer/testnet/tx/${hash}`;
+    case "futurenet":
+      return `https://stellar.expert/explorer/futurenet/tx/${hash}`;
+    default:
+      return `${labPrefix()}${hash}`;
+  }
+};

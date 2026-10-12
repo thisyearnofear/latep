@@ -312,7 +312,7 @@ export const ZKGamePage: React.FC = () => {
     // Show game result view if resolved or both revealed
     if (isResolved) {
       return (
-        <div style={{ padding: "24px" }}>
+        <div className="tf-fade-in-up" style={{ padding: "24px" }}>
           <GameResult
             gameId={view.gameId}
             gameState={currentGame}
@@ -326,7 +326,7 @@ export const ZKGamePage: React.FC = () => {
 
     return (
       <div
-        className="zk-page-container"
+        className="zk-page-container tf-fade-in-up"
         style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}
       >
         {/* Unified header + step indicator */}
@@ -813,7 +813,7 @@ export const ZKGamePage: React.FC = () => {
   // Match setup flow
   if (view.type === "matchSetup") {
     return (
-      <div style={{ padding: "24px" }}>
+      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
         <MatchSetup
           onCreateMatch={handleMatchSetupConfirm}
           onBack={handleMatchSetupBack}
@@ -836,7 +836,7 @@ export const ZKGamePage: React.FC = () => {
               ? "create"
               : "join";
     return (
-      <div style={{ padding: "24px" }}>
+      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
         <MatchCommitMove
           phase={phase}
           matchId={view.matchId}
@@ -869,7 +869,7 @@ export const ZKGamePage: React.FC = () => {
 
     return (
       <div
-        className="zk-page-container"
+        className="zk-page-container tf-fade-in-up"
         style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}
       >
         {/* Unified header + step indicator for current round */}
@@ -1149,7 +1149,7 @@ export const ZKGamePage: React.FC = () => {
     // If we came from MatchSetup, use the match commit flow instead.
     if (pendingMatchSetup) {
       return (
-        <div style={{ padding: "24px" }}>
+        <div className="tf-fade-in-up" style={{ padding: "24px" }}>
           <MatchCommitMove
             phase="create"
             matchId={0}
@@ -1178,7 +1178,7 @@ export const ZKGamePage: React.FC = () => {
       );
     }
     return (
-      <div style={{ padding: "24px" }}>
+      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
         <ZKStepIndicator
           step="commit"
           onBack={handleBackToLobby}
@@ -1196,7 +1196,7 @@ export const ZKGamePage: React.FC = () => {
   // Join game flow
   if (view.type === "join") {
     return (
-      <div style={{ padding: "24px" }}>
+      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
         <ZKStepIndicator
           step="commit"
           gameId={view.gameId}
@@ -1218,7 +1218,7 @@ export const ZKGamePage: React.FC = () => {
   // Lobby
   return (
     <div
-      className="zk-page-container"
+      className="zk-page-container tf-fade-in-up"
       style={{
         padding: "24px",
         minHeight: "calc(100vh - 80px)",

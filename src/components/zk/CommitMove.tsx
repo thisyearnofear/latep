@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Input } from "@stellar/design-system";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
@@ -8,7 +8,10 @@ import {
   generateProof,
 } from "../../services/noirProofService";
 import { ShimmerButton } from "../ui/ShimmerButton";
-import { TrustFallCharacter } from "../TrustFallCharacter";
+import { VerifiedOnChainCard } from "./VerifiedOnChainCard";
+import { NonceCard } from "./NonceCard";
+import { PayoffMatrixReminder } from "./PayoffMatrixReminder";
+import { persistSecrets } from "../../services/localSecretStore";
 
 /** Stake preset options for quick selection */
 const STAKE_PRESETS = ["1", "5", "10"] as const;
@@ -55,31 +58,27 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
   const [selectedMove, setSelectedMove] = useState<GameMove | null>(null);
   const [stake, setStake] = useState(initialStake || RECOMMENDED_STAKE);
   const [showCustomStake, setShowCustomStake] = useState(false);
-  const [status, setStatus] = useState<"choose" | "generating" | "submitting">(
-    "choose",
-  );
+  const [status, setStatus] = useState<
+    "choose" | "generating" | "submitting" | "verified"
+  >("choose");
   const [txError, setTxError] = useState<string | null>(null);
   const [commitDebug, setCommitDebug] = useState<string>("");
   const [showTech, setShowTech] = useState(false);
   const [savedNonce, setSavedNonce] = useState<bigint | null>(null);
+  const [verifiedTxHash, setVerifiedTxHash] = useState<string | null>(null);
+  const verifyTimer = useRef<number | null>(null);
 
-  // Persist nonce and move for the reveal step
-  // Use localStorage (survives browser close) with sessionStorage as fallback
-  useEffect(() => {
-    if (savedNonce && selectedMove) {
-      const storageKey = `zk_nonce_${mode === "create" ? "new" : `game_${gameId}`}`;
-      const moveKey = `zk_move_${mode === "create" ? "new" : `game_${gameId}`}`;
-      const nonceStr = savedNonce.toString();
-      const moveStr = selectedMove;
-      try {
-        localStorage.setItem(storageKey, nonceStr);
-        localStorage.setItem(moveKey, moveStr);
-      } catch {
-        sessionStorage.setItem(storageKey, nonceStr);
-        sessionStorage.setItem(moveKey, moveStr);
-      }
-    }
-  }, [savedNonce, selectedMove, mode, gameId]);
+  useEffect(
+    () => () => {
+      if (verifyTimer.current) window.clearTimeout(verifyTimer.current);
+    },
+    [],
+  );
+
+  const celebrate = (gameId: number) => {
+    setStatus("verified");
+    verifyTimer.current = window.setTimeout(() => onComplete(gameId), 2_000);
+  };
 
   const canSubmit = selectedMove !== null && !isLoading;
 
@@ -110,6 +109,7 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
         } else {
           targetGameId = gameId ?? 0;
         }
+        persistSecrets(targetGameId, nonce, selectedMove);
 
         // Compute commitment hash (keccak256 of move + nonce + game_id)
         setCommitDebug(`Computing commitment for ${selectedMove}...`);
@@ -146,17 +146,22 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
           const stakeStroops = BigInt(
             Math.floor(parseFloat(stake) * 10_000_000),
           ).toString();
-          const newGameId = await createGame(
+          const { gameId: newGameId, hash } = await createGame(
             commitmentHex,
             proofHex,
             stakeStroops,
           );
+          if (newGameId !== targetGameId) {
+            persistSecrets(newGameId, nonce, selectedMove);
+          }
+          setVerifiedTxHash(hash ?? null);
           setCommitDebug(`Game #${newGameId} created!`);
-          onComplete(newGameId);
+          celebrate(newGameId);
         } else if (mode === "join" && gameId) {
-          await joinGame(gameId, commitmentHex, proofHex);
+          const { hash } = await joinGame(gameId, commitmentHex, proofHex);
+          setVerifiedTxHash(hash ?? null);
           setCommitDebug(`Joined game #${gameId}!`);
-          onComplete(gameId);
+          celebrate(gameId);
         }
         return; // Success — exit retry loop
       } catch (err) {
@@ -197,7 +202,8 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
     );
   }
 
-  const isLoadingState = status === "generating" || status === "submitting";
+  const isLoadingState =
+    status === "generating" || status === "submitting" || status === "verified";
 
   return (
     <div
@@ -529,187 +535,15 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
           </div>
         )}
 
-        {/* Payoff reminder — high contrast, no glass-on-glass */}
-        <div
-          style={{
-            marginBottom: "24px",
-            background: "rgba(10, 14, 26, 0.85)",
-            border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-md)",
-            padding: "16px",
-          }}
-        >
-          <p
-            style={{
-              margin: "0 0 12px",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-secondary)",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              fontWeight: 600,
-              textAlign: "center",
-            }}
-          >
-            Payoff Matrix
-          </p>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "auto 1fr 1fr",
-              gap: "6px",
-              textAlign: "center",
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            <div />
-            <div
-              style={{
-                fontWeight: 700,
-                color: "var(--accent-cooperate)",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              🤝 They C
-            </div>
-            <div
-              style={{
-                fontWeight: 700,
-                color: "var(--accent-defect)",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              ⚔️ They D
-            </div>
-            <div
-              style={{
-                fontWeight: 700,
-                color: "var(--accent-cooperate)",
-                fontSize: "var(--text-sm)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                paddingRight: "6px",
-                gap: "4px",
-              }}
-            >
-              You C
-              <TrustFallCharacter
-                state="standing"
-                color="cooperator"
-                size="sm"
-              />
-            </div>
-            <div
-              style={{
-                color: "#4ade80",
-                fontWeight: 700,
-                fontSize: "var(--text-base)",
-              }}
-            >
-              +2 / +2
-            </div>
-            <div
-              style={{
-                color: "#f87171",
-                fontWeight: 700,
-                fontSize: "var(--text-base)",
-              }}
-            >
-              0 / +3
-            </div>
-            <div
-              style={{
-                fontWeight: 700,
-                color: "var(--accent-defect)",
-                fontSize: "var(--text-sm)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                paddingRight: "6px",
-                gap: "4px",
-              }}
-            >
-              You D
-              <TrustFallCharacter state="standing" color="defector" size="sm" />
-            </div>
-            <div
-              style={{
-                color: "#fbbf24",
-                fontWeight: 700,
-                fontSize: "var(--text-base)",
-              }}
-            >
-              +3 / 0
-            </div>
-            <div
-              style={{
-                color: "#ef4444",
-                fontWeight: 700,
-                fontSize: "var(--text-base)",
-              }}
-            >
-              0 / 0
-            </div>
-          </div>
-        </div>
+        <PayoffMatrixReminder />
 
-        {/* Nonce display */}
-        {savedNonce && (
-          <div
-            style={{
-              background: "var(--bg-glass-light)",
-              borderRadius: "8px",
-              padding: "12px",
-              marginBottom: "16px",
-              border: "1px solid var(--border-glass)",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            <p
-              style={{
-                margin: "0 0 4px",
-                fontWeight: "bold",
-                fontSize: "13px",
-              }}
-            >
-              🔑 Your secret code
-            </p>
-            <p
-              style={{
-                margin: "0 0 4px",
-                fontSize: "12px",
-                color: "var(--text-secondary)",
-              }}
-            >
-              Needed to reveal your move. Saved automatically in this browser —
-              write it down as a backup in case you switch device.
-            </p>
-            <p
-              style={{
-                margin: 0,
-                fontFamily: "monospace",
-                fontSize: "14px",
-                color: "#f57f17",
-                fontWeight: "bold",
-                wordBreak: "break-all",
-              }}
-            >
-              {savedNonce.toString()}
-            </p>
-            <p
-              style={{
-                margin: "4px 0 0",
-                fontSize: "11px",
-                color: "var(--text-muted)",
-              }}
-            >
-              (It reappears automatically when you reveal)
-            </p>
-          </div>
-        )}
+        <NonceCard nonce={savedNonce} />
+
+        {/* On-chain celebration beat */}
+        {status === "verified" && <VerifiedOnChainCard hash={verifiedTxHash} />}
 
         {/* Status / Debug info */}
-        {status !== "choose" && (
+        {status !== "choose" && status !== "verified" && (
           <div
             style={{
               background: "var(--bg-glass-light)",
@@ -788,7 +622,7 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
           </div>
         )}
 
-        {status !== "choose" && (
+        {status !== "choose" && status !== "verified" && (
           <label
             style={{
               display: "flex",
@@ -857,7 +691,9 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
           {isLoadingState
             ? status === "generating"
               ? " Falling..."
-              : " Committing..."
+              : status === "submitting"
+                ? " Committing..."
+                : "✓ Verified!"
             : "✋ Let go"}
         </button>
       </CardDiv>
