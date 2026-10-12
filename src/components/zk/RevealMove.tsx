@@ -172,8 +172,18 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
         }}
       >
         <p style={{ color: "#3b82f6", margin: 0, fontWeight: "bold" }}>
-          ✅ You've revealed your move. Waiting for{" "}
-          {opponentRevealed ? "resolution..." : "your opponent to reveal..."}
+          ✅ Your turn is done — your move is revealed.
+        </p>
+        <p
+          style={{
+            color: "var(--text-secondary)",
+            margin: "8px 0 0",
+            fontSize: "14px",
+          }}
+        >
+          {opponentRevealed
+            ? "Both hands are showing — press Resolve next."
+            : "⏳ Waiting for your opponent to show their hand…"}
         </p>
         {!opponentRevealed && timeRemaining > 0 && (
           <p style={{ color: "var(--text-secondary)", marginTop: "8px" }}>
@@ -231,6 +241,18 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
       >
         🙋 Show Your Hand
       </h4>
+
+      <p
+        style={{
+          margin: "-8px 0 16px 0",
+          color: "var(--text-secondary)",
+          textAlign: "center",
+          fontSize: "var(--text-sm)",
+        }}
+      >
+        You both reveal your own move. Your secret is already filled in — just
+        press the button.
+      </p>
 
       {/* Timer */}
       {timeRemaining > 0 && (
@@ -399,6 +421,7 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
 
       <button
         type="button"
+        className="tf-cta-pulse"
         onClick={() => void handleReveal()}
         disabled={!selectedMove || !revealNonce || isLoading}
         style={{
@@ -406,9 +429,10 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
           color: "white",
           border: "none",
           borderRadius: "var(--radius-sm)",
-          padding: "8px 16px",
+          padding: "12px 16px",
           fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
+          fontSize: "var(--text-base)",
+          fontWeight: 700,
           cursor: "pointer",
           width: "100%",
         }}

@@ -491,23 +491,25 @@ export const TutorialSandbox: React.FC = () => {
         </div>
         <p className="tutorial-selection" aria-live="polite">
           {move
-            ? `Selected: ${move === "cooperate" ? "Cooperate" : "Defect"}`
-            : "Select a move, then play the round."}
+            ? `Selected: ${move === "cooperate" ? "Cooperate" : "Defect"} — now press Play round below.`
+            : "Select a move first."}
         </p>
 
         {/* Action buttons */}
         <div className="learning-actions" style={{ marginBottom: "20px" }}>
           <button
             type="button"
-            className="learning-button learning-button-primary"
+            className={`learning-button learning-button-primary${
+              move && !loading ? " tf-cta-pulse" : ""
+            }`}
             onClick={() => void playRound()}
             disabled={!move || loading}
           >
             {loading
               ? "Playing..."
-              : rounds.length === 0
-                ? "Play Round"
-                : "Play Next Round"}
+              : !move
+                ? "Select a move first"
+                : `▶ Play round · ${move === "cooperate" ? "Cooperate" : "Defect"}`}
           </button>
           {rounds.length > 0 && (
             <>
