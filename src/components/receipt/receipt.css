@@ -157,6 +157,25 @@
   overflow-wrap: anywhere;
 }
 
+/* Text links on a receipt: the current text colour with a rule underneath
+   (design.md §9). Without this the UA default link blue lands on receipt
+   stock, which is the one surface where it has no contrast story. */
+.receipt a {
+  color: var(--color-receipt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.receipt a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.receipt a:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .receipt-line--total {
   font-weight: 600;
   border-top: 1px dashed var(--color-receipt-rule);

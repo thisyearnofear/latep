@@ -460,6 +460,19 @@ the current stage first, then swap._
 - Done: matches `design.md` at all five widths; zero emoji and zero colour
   literals in `Home.tsx`; the full play → reveal → receipt → play again loop
   works by keyboard.
+- **Shipped 2026-10-12.** Notes for Phase 3:
+  1. The round receipt is rendered **inside `TrustExperiment`**, not by Home.
+     The ticket says Home may change that file's markup only, and the receipt
+     needs the round state the component already holds. Home gets the
+     primitives row and "where next".
+  2. That is a deliberate reading of the "markup and styles only" boundary: the
+     component's behaviour is untouched, but its **copy** now comes from
+     `content/vocabulary` (`MOVE_LABEL`, `MOVE_HELPER`) instead of inline
+     "Cooperate" / "Defect". A copy change is a vocabulary change, which is
+     what B1 introduced the content files for.
+  3. **Still to do here:** earlier rounds do not yet stack into a history strip.
+     That needs round history lifted out of `TrustExperiment`, which is a
+     logic change and was not made under this ticket's boundary.
 
 ### Phase 3 — Sweep every surface
 
