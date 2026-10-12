@@ -27,6 +27,8 @@ interface ZKStepIndicatorProps {
   gameId?: number;
   /** Back button handler (optional — if provided, shows ← Lobby) */
   onBack?: () => void;
+  /** The concrete action the user should take now, e.g. "press Show My Hand" */
+  nextAction?: string;
 }
 
 const STEPS: {
@@ -51,6 +53,7 @@ export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
   detail,
   gameId,
   onBack,
+  nextAction,
 }) => {
   const currentIndex = STEPS.findIndex((s) => s.key === step);
 
@@ -194,6 +197,7 @@ export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
                     }}
                   >
                     {s.label}
+                    {isActive && nextAction ? " ↓" : ""}
                   </span>
                 </div>
 
@@ -258,6 +262,22 @@ export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
           }}
         >
           {detail}
+        </div>
+      )}
+
+      {/* Explicit next action — answers "what do I click now?" */}
+      {nextAction && (
+        <div
+          style={{
+            marginTop: "8px",
+            fontSize: "var(--text-sm)",
+            fontWeight: 600,
+            color: "var(--text-primary)",
+            textAlign: "center",
+          }}
+        >
+          <span style={{ color: "var(--accent-violet)" }}>Next ▸ </span>
+          {nextAction}
         </div>
       )}
     </div>

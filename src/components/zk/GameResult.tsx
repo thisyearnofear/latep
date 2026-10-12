@@ -605,25 +605,38 @@ export const GameResult: React.FC<GameResultProps> = ({
           }}
         >
           {canResolve && (
-            <button
-              type="button"
-              onClick={() => void handleResolve()}
-              disabled={isLoading}
-              style={{
-                background: "var(--accent-violet)",
-                color: "white",
-                border: "none",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-                flex: 1,
-                minWidth: 200,
-              }}
-            >
-              {isLoading ? "⏳ Landing..." : "🪙 Resolve the Landing"}
-            </button>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <button
+                type="button"
+                className="tf-cta-pulse"
+                onClick={() => void handleResolve()}
+                disabled={isLoading}
+                style={{
+                  background: "var(--accent-violet)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "var(--radius-sm)",
+                  padding: "10px 16px",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-sm)",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  width: "100%",
+                }}
+              >
+                {isLoading ? "⏳ Landing..." : "🪙 Resolve the Landing"}
+              </button>
+              <p
+                style={{
+                  margin: "6px 0 0",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-secondary)",
+                  textAlign: "center",
+                }}
+              >
+                The contract verifies both proofs and pays out — press to settle
+              </p>
+            </div>
           )}
 
           {canClaimForfeit && (

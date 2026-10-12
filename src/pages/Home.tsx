@@ -66,10 +66,65 @@ const CARDS: HubCard[] = [
   },
 ];
 
+const HintBanner: React.FC<{
+  icon: string;
+  text: string;
+  cta: string;
+  route: string;
+}> = ({ icon, text, cta, route }) => {
+  const navigate = useNavigate();
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "14px 20px",
+        borderRadius: "var(--radius-md)",
+        background: "rgba(102, 126, 234, 0.08)",
+        border: "1px solid rgba(102, 126, 234, 0.25)",
+        maxWidth: "640px",
+        margin: "0 auto",
+        fontFamily: "var(--font-body)",
+      }}
+    >
+      <span style={{ fontSize: "20px", flexShrink: 0 }}>{icon}</span>
+      <span
+        style={{
+          flex: 1,
+          fontSize: "var(--text-sm)",
+          color: "var(--text-secondary)",
+        }}
+      >
+        {text}
+      </span>
+      <button
+        type="button"
+        onClick={() => void navigate(route)}
+        style={{
+          flexShrink: 0,
+          background: "var(--accent-violet)",
+          color: "white",
+          border: "none",
+          borderRadius: "var(--radius-sm)",
+          padding: "6px 14px",
+          fontFamily: "var(--font-body)",
+          fontSize: "var(--text-sm)",
+          fontWeight: 600,
+          cursor: "pointer",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {cta} →
+      </button>
+    </div>
+  );
+};
+
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { address } = useWallet();
-  const { unlock, milestones } = useFirstRun();
+  const { unlock, milestones, stage } = useFirstRun();
   const profile = getStoredProfile();
   const { react } = useMascot();
   const greetedRef = useRef(false);
@@ -232,127 +287,156 @@ const Home: React.FC = () => {
         ))}
       </div>
 
+      {/* What's next: one stage-aware recommendation; everything else disclosed */}
       <div
         style={{
+          marginTop: "28px",
+          width: "100%",
+          maxWidth: "640px",
           display: "flex",
-          gap: "12px",
-          marginTop: "24px",
-          flexWrap: "wrap",
-          justifyContent: "center",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "8px",
         }}
       >
-        <button
-          type="button"
-          onClick={() => setIntro("welcome")}
-          style={{
-            padding: "8px 16px",
-            borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--border-glass)",
-            background: "transparent",
-            color: "var(--text-secondary)",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            cursor: "pointer",
-          }}
-        >
-          Getting started
-        </button>
-        <button
-          type="button"
-          onClick={() => setIntro("quiz")}
-          style={{
-            padding: "8px 16px",
-            borderRadius: "var(--radius-sm)",
-            border: "1px solid var(--border-glass)",
-            background: "transparent",
-            color: "var(--text-secondary)",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            cursor: "pointer",
-          }}
-        >
-          Discover your trust style
-        </button>
+        {stage === "new" || stage === "complete" ? (
+          <HintBanner
+            icon={stage === "new" ? "👋" : "🏆"}
+            text={
+              stage === "new"
+                ? "New here? Play a practice round above, then take the guided journey."
+                : "You've been through it all — take it on-chain with a friend."
+            }
+            cta={stage === "new" ? "Take the journey" : "ZK lobby"}
+            route={stage === "new" ? "/learn" : "/play"}
+          />
+        ) : (
+          <NextStepHint />
+        )}
+
+        <details>
+          <summary
+            style={{
+              cursor: "pointer",
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--text-sm)",
+              color: "var(--text-muted)",
+            }}
+          >
+            More options
+          </summary>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "12px",
+              marginTop: "14px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
+                justifyContent: "center",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setIntro("welcome")}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border-glass)",
+                  background: "transparent",
+                  color: "var(--text-secondary)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-sm)",
+                  cursor: "pointer",
+                }}
+              >
+                Getting started
+              </button>
+              <button
+                type="button"
+                onClick={() => setIntro("quiz")}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "var(--radius-sm)",
+                  border: "1px solid var(--border-glass)",
+                  background: "transparent",
+                  color: "var(--text-secondary)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-sm)",
+                  cursor: "pointer",
+                }}
+              >
+                Discover your trust style
+              </button>
+            </div>
+            {!address && (
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-xs)",
+                  color: "var(--text-muted)",
+                  margin: 0,
+                  textAlign: "center",
+                }}
+              >
+                ZK multiplayer uses a Stellar wallet — you can connect one in
+                the lobby.
+              </p>
+            )}
+            {profile && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 16px",
+                  borderRadius: "99px",
+                  background: "rgba(102, 126, 234, 0.08)",
+                  border: "1px solid rgba(102, 126, 234, 0.2)",
+                  fontFamily: "var(--font-body)",
+                  fontSize: "var(--text-sm)",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <span>Your trust profile:</span>
+                <span
+                  style={{ fontWeight: 700, color: "var(--accent-violet)" }}
+                >
+                  {profile === "cooperator"
+                    ? "🤝 Cooperator"
+                    : profile === "strategist"
+                      ? "🧠 Strategist"
+                      : profile === "survivor"
+                        ? "🛡️ Survivor"
+                        : "🎲 Wildcard"}
+                </span>
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => void navigate("/learn")}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "var(--radius-sm)",
+                border: "1px solid var(--border-glass)",
+                background: "transparent",
+                color: "var(--text-secondary)",
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--text-sm)",
+                cursor: "pointer",
+              }}
+            >
+              📖 Take the full guided journey →
+            </button>
+          </div>
+        </details>
       </div>
-
-      {/* Next step hint for returning users */}
-      <div style={{ marginTop: "24px", width: "100%", maxWidth: "640px" }}>
-        <NextStepHint />
-      </div>
-
-      {/* Wallet hint for Play card */}
-      {!address && (
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-xs)",
-            color: "var(--text-muted)",
-            marginTop: "24px",
-            textAlign: "center",
-          }}
-        >
-          ZK multiplayer uses a Stellar wallet — you can connect one in the
-          lobby.
-        </p>
-      )}
-
-      {/* Trust profile badge (if quiz completed) */}
-      {profile && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            marginTop: "24px",
-            padding: "8px 16px",
-            borderRadius: "99px",
-            background: "rgba(102, 126, 234, 0.08)",
-            border: "1px solid rgba(102, 126, 234, 0.2)",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          <span>Your trust profile:</span>
-          <span style={{ fontWeight: 700, color: "var(--accent-violet)" }}>
-            {profile === "cooperator"
-              ? "🤝 Cooperator"
-              : profile === "strategist"
-                ? "🧠 Strategist"
-                : profile === "survivor"
-                  ? "🛡️ Survivor"
-                  : "🎲 Wildcard"}
-          </span>
-        </div>
-      )}
-
-      {/* Guided journey link */}
-      <button
-        type="button"
-        onClick={() => void navigate("/learn")}
-        style={{
-          marginTop: "40px",
-          padding: "10px 24px",
-          borderRadius: "var(--radius-sm)",
-          border: "1px solid var(--border-glass)",
-          background: "transparent",
-          color: "var(--text-secondary)",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          cursor: "pointer",
-          transition: "all var(--duration-fast) var(--ease-out)",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = "var(--bg-glass-light)";
-          e.currentTarget.style.color = "var(--text-primary)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = "transparent";
-          e.currentTarget.style.color = "var(--text-secondary)";
-        }}
-      >
-        📖 Prefer the guided narrative? Take the full journey →
-      </button>
 
       <p
         style={{

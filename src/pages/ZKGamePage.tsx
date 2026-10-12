@@ -81,6 +81,23 @@ export const ZKGamePage: React.FC = () => {
   const prevAchievementsRef = useRef<string[]>(getUnlockedAchievements());
   const { toastElement, showAchievement } = useAchievementToast();
 
+  // Bring the reveal card into view once per game when both commits land
+  const revealCardRef = useRef<HTMLDivElement | null>(null);
+  const revealScrolledFor = useRef<number | null>(null);
+  useEffect(() => {
+    if (
+      view.type === "game" &&
+      currentGame?.status === "BothCommitted" &&
+      revealScrolledFor.current !== view.gameId
+    ) {
+      revealScrolledFor.current = view.gameId;
+      revealCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [view, currentGame?.status]);
+
   // Pending match setup params (bestOf, stake) captured from MatchSetup,
   // passed through to the CommitMove flow which submits the first round.
   const [pendingMatchSetup, setPendingMatchSetup] = useState<{
@@ -308,6 +325,21 @@ export const ZKGamePage: React.FC = () => {
       currentGame.status === "Resolved" ||
       currentGame.status === "Forfeited" ||
       currentGame.status === "Cancelled";
+    const myCommitDone =
+      address === currentGame.player1
+        ? currentGame.move1 !== null || currentGame.status === "BothCommitted"
+        : currentGame.move2 !== null || currentGame.status === "BothCommitted";
+    const step = deriveZKStep(currentGame.status, myCommitDone, bothRevealed);
+    const nextAction =
+      step === "commit"
+        ? "pick your move below, then press Let go — your proof seals it"
+        : step === "waiting"
+          ? "nothing to press — your opponent is still committing"
+          : step === "reveal"
+            ? "press Show My Hand below — your secret is already filled in"
+            : bothRevealed
+              ? "press Resolve the Landing to settle the payout"
+              : undefined;
 
     // Show game result view if resolved or both revealed
     if (isResolved) {
@@ -331,15 +363,8 @@ export const ZKGamePage: React.FC = () => {
       >
         {/* Unified header + step indicator */}
         <ZKStepIndicator
-          step={deriveZKStep(
-            currentGame.status,
-            address === currentGame.player1
-              ? currentGame.move1 !== null ||
-                  currentGame.status === "BothCommitted"
-              : currentGame.move2 !== null ||
-                  currentGame.status === "BothCommitted",
-            bothRevealed,
-          )}
+          step={step}
+          nextAction={nextAction}
           gameId={view.gameId}
           onBack={handleBackToLobby}
           detail={
@@ -353,15 +378,7 @@ export const ZKGamePage: React.FC = () => {
 
         {/* Stick-man visualization */}
         <StickManScene
-          step={deriveZKStep(
-            currentGame.status,
-            address === currentGame.player1
-              ? currentGame.move1 !== null ||
-                  currentGame.status === "BothCommitted"
-              : currentGame.move2 !== null ||
-                  currentGame.status === "BothCommitted",
-            bothRevealed,
-          )}
+          step={step}
           stake={Number(currentGame.stake) / 10_000_000}
         />
 
@@ -471,13 +488,15 @@ export const ZKGamePage: React.FC = () => {
 
         {/* Reveal move section (when BothCommitted) */}
         {currentGame.status === "BothCommitted" && (
-          <RevealMove
-            gameId={view.gameId}
-            gameState={currentGame}
-            onRevealed={() => {
-              void fetchGame(view.gameId);
-            }}
-          />
+          <div ref={revealCardRef}>
+            <RevealMove
+              gameId={view.gameId}
+              gameState={currentGame}
+              onRevealed={() => {
+                void fetchGame(view.gameId);
+              }}
+            />
+          </div>
         )}
 
         {/* Refund option when both players timeout on reveal */}
@@ -867,6 +886,28 @@ export const ZKGamePage: React.FC = () => {
     const awaitingNextRound =
       currentMatch.status === "AwaitingNextRound" && isRoundResolved;
 
+    const roundStep = currentGame
+      ? deriveZKStep(
+          currentGame.status,
+          address === currentGame.player1
+            ? currentGame.move1 !== null ||
+                currentGame.status === "BothCommitted"
+            : currentGame.move2 !== null ||
+                currentGame.status === "BothCommitted",
+          bothRevealed,
+        )
+      : "commit";
+    const roundNextAction =
+      roundStep === "commit"
+        ? "pick your move below, then press Let go — your proof seals it"
+        : roundStep === "waiting"
+          ? "nothing to press — your opponent is still committing"
+          : roundStep === "reveal"
+            ? "press Show My Hand below — your secret is already filled in"
+            : roundStep === "resolve"
+              ? "press Resolve the Landing to settle the payout"
+              : undefined;
+
     return (
       <div
         className="zk-page-container tf-fade-in-up"
@@ -875,15 +916,8 @@ export const ZKGamePage: React.FC = () => {
         {/* Unified header + step indicator for current round */}
         {currentGame && !matchCompleted && !matchCancelled ? (
           <ZKStepIndicator
-            step={deriveZKStep(
-              currentGame.status,
-              address === currentGame.player1
-                ? currentGame.move1 !== null ||
-                    currentGame.status === "BothCommitted"
-                : currentGame.move2 !== null ||
-                    currentGame.status === "BothCommitted",
-              bothRevealed,
-            )}
+            step={roundStep}
+            nextAction={roundNextAction}
             gameId={view.matchId}
             onBack={handleBackToLobby}
             detail={
@@ -1182,7 +1216,7 @@ export const ZKGamePage: React.FC = () => {
         <ZKStepIndicator
           step="commit"
           onBack={handleBackToLobby}
-          detail="Choose your move and generate a ZK proof"
+          nextAction="pick your move below, then press Let go — your proof seals it"
         />
         <CommitMove
           mode="create"
@@ -1201,7 +1235,7 @@ export const ZKGamePage: React.FC = () => {
           step="commit"
           gameId={view.gameId}
           onBack={handleBackToLobby}
-          detail="Choose your move and generate a ZK proof"
+          nextAction="pick your move below, then press Let go — your proof seals it"
         />
         <CommitMove
           mode="join"

@@ -66,13 +66,6 @@ const RESULT_TITLE: Record<string, string> = {
   DD: "Nobody offered a catch.",
 };
 
-const RESULT_EXPLANATION: Record<string, string> = {
-  CC: "Cooperation gave both of you a reward.",
-  DC: "You gained more this round. Your partner paid the price.",
-  CD: "You offered trust, but your partner did not return it.",
-  DD: "Neither of you gained anything.",
-};
-
 const points = new Intl.NumberFormat("en-US", {
   signDisplay: "exceptZero",
   maximumFractionDigits: 0,
@@ -105,9 +98,7 @@ export function TrustExperiment() {
         ? "Both choices are sealed. Ready to reveal?"
         : state.phase === "revealing"
           ? "Opening both choices…"
-          : resultKey
-            ? RESULT_TITLE[resultKey]
-            : "";
+          : "";
 
   const stageState: TrustStageState =
     state.move && (state.phase === "revealing" || state.phase === "outcome")
@@ -264,7 +255,7 @@ export function TrustExperiment() {
               <button
                 type="button"
                 ref={revealRef}
-                className="trust-btn trust-btn-primary trust-reveal"
+                className="trust-btn trust-btn-primary trust-reveal tf-cta-pulse"
                 onClick={() => dispatch({ type: "reveal" })}
               >
                 Reveal both choices
@@ -281,30 +272,26 @@ export function TrustExperiment() {
             <h3 ref={outcomeRef} tabIndex={-1} className="trust-result-title">
               {resultKey ? RESULT_TITLE[resultKey] : ""}
             </h3>
-            <p className="trust-result-explanation">
-              {resultKey ? RESULT_EXPLANATION[resultKey] : ""}
-            </p>
-            <p className="trust-result-moves">
-              You chose {state.move === "C" ? "Cooperate" : "Defect"}. Your
-              partner chose {state.opponent === "C" ? "Cooperate" : "Defect"}.
-            </p>
             {payoff && (
-              <dl className="trust-score">
-                <div className="trust-score-row">
-                  <dt>You</dt>
-                  <dd>{points.format(payoff.playerPayout)} points</dd>
-                </div>
-                <div className="trust-score-row">
-                  <dt>Partner</dt>
-                  <dd>{points.format(payoff.aiPayout)} points</dd>
-                </div>
-              </dl>
+              <p className="trust-result-line">
+                You{" "}
+                <strong>{state.move === "C" ? "Cooperate" : "Defect"}</strong> ·
+                Partner{" "}
+                <strong>
+                  {state.opponent === "C" ? "Cooperate" : "Defect"}
+                </strong>{" "}
+                — {points.format(payoff.playerPayout)} :{" "}
+                {points.format(payoff.aiPayout)}
+              </p>
             )}
-            <p className="trust-result-strategy">
-              This partner starts by cooperating, then copies your previous
-              choice. Try another round to see how trust changes.{" "}
-              <Link to="/learn/play">Explore more strategies</Link>
-            </p>
+            <details className="trust-details">
+              <summary>About this partner</summary>
+              <p>
+                This partner starts by cooperating, then copies your previous
+                choice. Try another round to see how trust changes.{" "}
+                <Link to="/learn/play">Explore more strategies</Link>
+              </p>
+            </details>
             <button
               type="button"
               className="trust-btn trust-btn-primary"

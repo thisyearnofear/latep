@@ -586,6 +586,21 @@ p {
   animation: tf-waiting-dot 1.4s ease-in-out infinite;
 }
 
+/* Next-action call-to-action breathing glow */
+@keyframes tf-cta-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 18px 5px rgba(102, 126, 234, 0.55);
+  }
+}
+
+.tf-cta-pulse {
+  animation: tf-cta-pulse 1.6s ease-in-out infinite;
+}
+
 /* Opponent-joined celebratory flash */
 @keyframes tf-joined-glow {
   0% {
