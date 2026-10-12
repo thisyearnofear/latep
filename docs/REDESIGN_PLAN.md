@@ -297,6 +297,20 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - The kit is presentational only: it never computes outcomes.
 - Done: a debug preview shows a receipt with every line type, every stamp,
   a stub with tear line, and every thread state, at 390 and 1440.
+- **Shipped 2026-10-12.** Three things the next tickets need to know:
+  1. **The tear is a `border-image`, not a mask.** Two bands must be removed
+     from opposite edges; multi-layer mask compositing has no portable
+     spelling (Safari has only `-webkit-mask-composite`, and the obvious
+     `intersect` erases the receipt between the bands). The tile bakes in
+     `#f7f5ef` because a data URI can't read a custom property — `receipt.css`
+     is the second file exempt from the colour-literal check, and only for
+     that. Each wedge must stay bounded to its own band or the two union into
+     a solid rectangle.
+  2. **`background-clip: padding-box` must come after the `background`
+     shorthand.** The shorthand resets it to `border-box`, and that reset is
+     exactly what fills the tear back in. Same trap in any rule that sets both.
+  3. **`Thread` draws 0 twists as loose.** A `twisted` state with zero twists
+     renders the untwisted picture, not a flat braid.
 
 **B2 · Rig poses for the lean** (M) — Dev B
 
