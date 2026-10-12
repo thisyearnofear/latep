@@ -59,7 +59,7 @@
   max-width: 1000px;
   width: 100%;
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-xl);
+  border-radius: var(--legacy-radius-xl);
   background: linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 38%);
   overflow: clip;
   padding: clamp(16px, 3vw, 32px);
@@ -89,13 +89,14 @@
   display: inline-flex;
   align-items: center;
   min-height: 30px;
-  padding: 4px 12px;
-  border: 1px solid var(--border-glass);
-  border-radius: 999px;
-  background: var(--bg-glass-light);
-  color: var(--text-secondary);
+  padding: 4px 10px;
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-counter-text-2);
   font-size: var(--text-xs);
-  font-family: var(--font-body);
+  font-family: var(--font-print);
+  letter-spacing: var(--tracking-print-label);
 }
 
 .trust-sound-toggle {
@@ -343,9 +344,17 @@
   transition: opacity var(--duration-fast) var(--ease-out);
 }
 
+/* A primary button is a receipt-stock tile with ink text (design.md §9).
+   It must NOT be a thread colour: blue means "you", and a button is not you. */
 .trust-btn-primary {
-  background: color-mix(in srgb, var(--accent-violet) 82%, white);
-  color: var(--bg-deep);
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+  border-color: var(--color-receipt-ink);
+  border-width: 2px;
+}
+
+.trust-btn-primary:not(:disabled):hover {
+  background: var(--color-receipt-2);
 }
 
 .trust-btn-secondary {

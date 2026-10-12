@@ -210,7 +210,7 @@ export const DemoRound: React.FC<{ size?: "sm" | "md" | "lg" }> = ({
         padding: "24px",
         background: "rgba(10, 14, 26, 0.6)",
         border: "1px solid var(--border-glass)",
-        borderRadius: "var(--radius-lg)",
+        borderRadius: "var(--legacy-radius-lg)",
         textAlign: "center",
       }}
     >

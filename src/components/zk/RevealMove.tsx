@@ -421,7 +421,6 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
 
       <button
         type="button"
-        className="tf-cta-pulse"
         onClick={() => void handleReveal()}
         disabled={!selectedMove || !revealNonce || isLoading}
         style={{

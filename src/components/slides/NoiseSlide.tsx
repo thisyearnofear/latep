@@ -133,7 +133,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           padding: "16px",
           background: "rgba(10, 14, 26, 0.85)",
           border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-lg)",
+          borderRadius: "var(--legacy-radius-lg)",
         }}
       >
         <div
@@ -223,7 +223,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
                   ? "rgba(240,160,32,0.3)"
                   : "rgba(248,113,113,0.3)"
             }`,
-            borderRadius: "var(--radius-lg)",
+            borderRadius: "var(--legacy-radius-lg)",
           }}
         >
           <div

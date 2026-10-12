@@ -499,9 +499,7 @@ export const TutorialSandbox: React.FC = () => {
         <div className="learning-actions" style={{ marginBottom: "20px" }}>
           <button
             type="button"
-            className={`learning-button learning-button-primary${
-              move && !loading ? " tf-cta-pulse" : ""
-            }`}
+            className="learning-button learning-button-primary"
             onClick={() => void playRound()}
             disabled={!move || loading}
           >

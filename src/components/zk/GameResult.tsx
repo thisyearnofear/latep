@@ -36,7 +36,7 @@ const CardDiv: React.FC<{
       background: "var(--bg-glass)",
       backdropFilter: "blur(16px) saturate(160%)",
       border: "1px solid var(--border-glass)",
-      borderRadius: "var(--radius-md)",
+      borderRadius: "var(--legacy-radius-md)",
       padding: "24px",
       boxShadow: "var(--shadow-md)",
       fontFamily: "var(--font-body)",
@@ -608,7 +608,6 @@ export const GameResult: React.FC<GameResultProps> = ({
             <div style={{ flex: 1, minWidth: 200 }}>
               <button
                 type="button"
-                className="tf-cta-pulse"
                 onClick={() => void handleResolve()}
                 disabled={isLoading}
                 style={{
@@ -697,7 +696,7 @@ export const GameResult: React.FC<GameResultProps> = ({
                 width: "100%",
                 boxSizing: "border-box",
                 padding: "14px 18px",
-                borderRadius: "var(--radius-md)",
+                borderRadius: "var(--legacy-radius-md)",
                 border: "1px solid var(--border-glass)",
                 background: "var(--bg-glass, rgba(255,255,255,0.04))",
                 fontFamily: "var(--font-body)",

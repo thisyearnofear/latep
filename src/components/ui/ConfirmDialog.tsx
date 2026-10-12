@@ -59,7 +59,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           width: "calc(100% - 32px)",
           background: "var(--bg-glass)",
           border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-lg)",
+          borderRadius: "var(--legacy-radius-lg)",
           boxShadow: "var(--shadow-md)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",

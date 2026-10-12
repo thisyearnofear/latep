@@ -262,7 +262,7 @@ export function TrustExperiment() {
               <button
                 type="button"
                 ref={revealRef}
-                className="trust-btn trust-btn-primary trust-reveal tf-cta-pulse"
+                className="trust-btn trust-btn-primary trust-reveal"
                 onClick={() => dispatch({ type: "reveal" })}
               >
                 Reveal both choices

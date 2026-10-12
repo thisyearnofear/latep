@@ -410,7 +410,7 @@ export const ZKGamePage: React.FC = () => {
                 textAlign: "center",
                 marginBottom: "16px",
                 padding: "10px",
-                borderRadius: "var(--radius-md)",
+                borderRadius: "var(--legacy-radius-md)",
                 background: "rgba(74, 222, 128, 0.12)",
                 border: "1px solid rgba(74, 222, 128, 0.3)",
                 fontFamily: "var(--font-body)",
@@ -609,7 +609,7 @@ export const ZKGamePage: React.FC = () => {
                   style={{
                     margin: "0 0 16px",
                     padding: "12px",
-                    borderRadius: "var(--radius-md)",
+                    borderRadius: "var(--legacy-radius-md)",
                     background: "var(--bg-glass-light)",
                     border: "1px solid var(--border-glass)",
                   }}
@@ -1304,7 +1304,7 @@ export const ZKGamePage: React.FC = () => {
             fontFamily: "var(--font-body)",
             fontSize: "var(--text-sm)",
             padding: "8px 16px",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             transition: "all 0.3s var(--ease-out)",
           }}
         >

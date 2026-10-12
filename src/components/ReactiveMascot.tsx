@@ -58,7 +58,7 @@ export const ReactiveMascot: React.FC = () => {
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
             border: `1px solid ${color === "you" ? "rgba(102, 126, 234, 0.3)" : "rgba(240, 160, 32, 0.3)"}`,
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             padding: "12px 16px",
             maxWidth: "280px",
             marginRight: "12px",

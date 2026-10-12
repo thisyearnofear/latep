@@ -9,8 +9,7 @@
  */
 import React from "react";
 import { Link } from "react-router-dom";
-import { MARKS } from "../components/marks";
-import { Receipt, ReceiptLine, Takeaway } from "../components/receipt";
+import { Receipt } from "../components/receipt";
 import { PRIMITIVES, type PrimitiveId } from "../content/primitives";
 import "../styles/everyday.css";
 
@@ -85,7 +84,6 @@ export const RealLifePage: React.FC = () => (
       {EVERYDAY.map((item) => {
         const primitive = PRIMITIVES.find((p) => p.id === item.id);
         if (!primitive) return null;
-        const Mark = MARKS[primitive.mark];
         return (
           <li key={item.id}>
             <Receipt
@@ -93,17 +91,13 @@ export const RealLifePage: React.FC = () => (
               className="everyday-receipt"
               title={primitive.name}
               footer={
-                <Takeaway
-                  Mark={Mark}
-                  used={primitive.name}
-                  line={primitive.oneLine}
-                  where={primitive.everyday}
-                  href={item.tryHref}
-                  linkLabel={item.tryLabel}
-                />
+                <p className="everyday-try">
+                  {primitive.everyday}.{" "}
+                  <Link to={item.tryHref}>{item.tryLabel} &rarr;</Link>
+                </p>
               }
             >
-              <ReceiptLine label="Where you meet it" value={item.situation} />
+              <h3 className="everyday-situation-title">{item.situation}</h3>
               <p className="everyday-problem">{item.problem}</p>
               <p className="everyday-adds">{item.adds}</p>
             </Receipt>

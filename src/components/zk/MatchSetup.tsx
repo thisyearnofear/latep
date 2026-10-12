@@ -105,7 +105,7 @@ export const MatchSetup: React.FC<MatchSetupProps> = ({
               style={{
                 flex: 1,
                 padding: "24px 16px",
-                borderRadius: "var(--radius-md)",
+                borderRadius: "var(--legacy-radius-md)",
                 border:
                   bestOf === 3
                     ? "2px solid var(--accent-violet)"
@@ -159,7 +159,7 @@ export const MatchSetup: React.FC<MatchSetupProps> = ({
               style={{
                 flex: 1,
                 padding: "24px 16px",
-                borderRadius: "var(--radius-md)",
+                borderRadius: "var(--legacy-radius-md)",
                 border:
                   bestOf === 5
                     ? "2px solid var(--accent-violet)"
@@ -272,7 +272,7 @@ export const MatchSetup: React.FC<MatchSetupProps> = ({
           style={{
             width: "100%",
             padding: "14px",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             border: "1px solid var(--accent-violet)",
             background: canSubmit
               ? "linear-gradient(135deg, var(--accent-violet), #8b5cf6)"

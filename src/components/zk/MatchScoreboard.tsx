@@ -304,7 +304,7 @@ export const MatchScoreboard: React.FC<MatchScoreboardProps> = ({
             marginTop: "18px",
             textAlign: "center",
             padding: "14px",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             background: youWon
               ? "linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(74, 222, 128, 0.08))"
               : "linear-gradient(135deg, rgba(239, 68, 68, 0.14), rgba(100, 116, 139, 0.08))",
@@ -341,7 +341,7 @@ export const MatchScoreboard: React.FC<MatchScoreboardProps> = ({
             marginTop: "18px",
             textAlign: "center",
             padding: "12px",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             background: "rgba(239, 68, 68, 0.08)",
             border: "1px solid rgba(239, 68, 68, 0.2)",
             fontFamily: "var(--font-body)",
@@ -366,7 +366,7 @@ export const MatchScoreboard: React.FC<MatchScoreboardProps> = ({
             marginTop: "18px",
             textAlign: "center",
             padding: "14px",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             background: "rgba(139, 92, 246, 0.08)",
             border: "1px solid rgba(139, 92, 246, 0.25)",
             fontFamily: "var(--font-body)",

@@ -25,7 +25,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         padding: "48px 32px",
         background: "var(--bg-glass)",
         border: "1px solid var(--border-glass)",
-        borderRadius: "var(--radius-lg)",
+        borderRadius: "var(--legacy-radius-lg)",
         boxShadow: "var(--shadow-md)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",

@@ -62,7 +62,7 @@
   /* The torn edge, declared before the background on purpose: the
      `background` shorthand resets `background-clip` to border-box, and that
      reset is exactly what fills the tear back in. */
-  border: var(--tear-depth) solid transparent;
+  border: var(--tear-depth) 0 var(--tear-depth) 0 solid transparent;
   border-image-source: var(--tear-tile);
   border-image-slice: 10 0 10 0;
   border-image-width: var(--tear-depth) 0 var(--tear-depth) 0;
