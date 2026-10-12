@@ -177,7 +177,7 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats }) => {
               ? `${Math.round((s.wins / s.totalGames) * 100)}%`
               : "—"
           }
-          accent="#667eea"
+          accent="var(--color-you)"
         />
       </div>
     </div>

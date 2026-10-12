@@ -25,7 +25,11 @@ interface ElectricButtonProps {
 }
 
 const COLOR_MAP = {
-  violet: { stroke: "#667eea", glow: "#8b9dfc", bg: "#0a0e1a" },
+  violet: {
+    stroke: "var(--color-you)",
+    glow: "var(--color-you)",
+    bg: "var(--color-counter)",
+  },
   warm: { stroke: "#f0a020", glow: "#ffc04a", bg: "#1a1208" },
   cooperate: { stroke: "#4ade80", glow: "#6ff89f", bg: "#0a1a10" },
   defect: { stroke: "#f87171", glow: "#fc9999", bg: "#1a0a0a" },

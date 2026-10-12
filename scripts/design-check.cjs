@@ -88,6 +88,21 @@ const METRICS = [
     files: () => true,
     count: (text) => matchAll(text, /glass-panel/g),
   },
+  {
+    key: "retiredPalette",
+    label: "retired-palette literals (invisible on the counter)",
+    target: 0,
+    files: (f) => f.endsWith(".tsx") || f.endsWith(".ts"),
+    // rgba(20,26,46,x) is the OLD dark navy at low alpha. On the new counter
+    // it is not a low-contrast token, it is invisible text - it shipped as
+    // three unreadable labels on the tournament page. Same for the old
+    // purple, and the near-black drop-shadows the retire pass removed.
+    count: (text) =>
+      matchAll(
+        text,
+        /rgba\(\s*20\s*,\s*26\s*,\s*46\s*,|rgba\(10,\s*14,\s*26|#667eea|#764ba2/gi,
+      ),
+  },
 ];
 
 function matchAll(text, re) {

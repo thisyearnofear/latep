@@ -42,10 +42,10 @@ const COLOR_MAP = {
     bg: "#1a0a0a",
   },
   violet: {
-    stripe: "#667eea",
+    stripe: "var(--color-you)",
     glow: "rgba(102,126,234,0.4)",
     text: "#a0b4ff",
-    bg: "#0a0e1a",
+    bg: "var(--color-counter)",
   },
   warm: {
     stripe: "#f0a020",

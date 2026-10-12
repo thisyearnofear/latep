@@ -325,7 +325,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                     <p
                       style={{
                         margin: 0,
-                        color: "#667eea",
+                        color: "var(--color-you)",
                         fontWeight: "bold",
                         fontSize: "14px",
                         fontFamily: "var(--font-body)",
@@ -505,7 +505,7 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                     <p
                       style={{
                         margin: 0,
-                        color: "#667eea",
+                        color: "var(--color-you)",
                         fontWeight: "bold",
                         fontSize: "14px",
                       }}

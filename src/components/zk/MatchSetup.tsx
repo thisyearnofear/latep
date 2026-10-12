@@ -39,7 +39,7 @@ export const MatchSetup: React.FC<MatchSetupProps> = ({
         style={{
           background: "none",
           border: "none",
-          color: "rgba(20, 26, 46, 0.35)",
+          color: "var(--color-counter-muted)",
           cursor: "pointer",
           fontFamily: "var(--font-body)",
           fontSize: "16px",

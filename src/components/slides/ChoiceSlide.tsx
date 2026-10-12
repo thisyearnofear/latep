@@ -187,7 +187,7 @@ const PayoffMatrix: React.FC<PayoffMatrixProps> = ({ hoveredChoice }) => {
       style={{
         padding: "24px",
         marginBottom: "32px",
-        background: "rgba(10, 14, 26, 0.85)",
+        background: "var(--color-counter)",
         border: "1px solid var(--border-glass)",
         borderRadius: "var(--legacy-radius-lg)",
       }}

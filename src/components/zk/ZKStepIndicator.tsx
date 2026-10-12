@@ -71,7 +71,7 @@ export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
           alignItems: "center",
           gap: "16px",
           padding: "12px 20px",
-          background: "rgba(10, 14, 26, 0.6)",
+          background: "var(--color-counter)",
           border: "1px solid var(--border-glass)",
           borderRadius: "var(--legacy-radius-md)",
           backdropFilter: "blur(12px)",

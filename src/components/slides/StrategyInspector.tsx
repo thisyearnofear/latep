@@ -276,7 +276,7 @@ export const StrategyInspector: React.FC<StrategyInspectorProps> = ({
         <p
           style={{
             fontFamily: "var(--font-body)",
-            color: "#667eea",
+            color: "var(--color-you)",
             margin: "0 0 4px 0",
             fontSize: "0.75rem",
             fontWeight: "bold",

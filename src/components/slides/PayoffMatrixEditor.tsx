@@ -35,7 +35,7 @@ export const PayoffMatrixEditor: React.FC<PayoffMatrixEditorProps> = ({
   const dilemmaType = (() => {
     const { T, R, P, S } = payoffs;
     if (T > R && R > P && P > S && 2 * R > T + S)
-      return { name: "Prisoner's Dilemma", color: "#667eea" };
+      return { name: "Prisoner's Dilemma", color: "var(--color-you)" };
     if (R > T && R > S && R > P)
       return { name: "Harmony Game", color: "#4CAF50" };
     if (R > T && T > P && P > S) return { name: "Stag Hunt", color: "#FF9800" };
@@ -59,7 +59,7 @@ export const PayoffMatrixEditor: React.FC<PayoffMatrixEditorProps> = ({
     border: "1px solid rgba(255,255,255,0.2)",
     borderRadius: "4px",
     background: "rgba(255,255,255,0.05)",
-    color: "rgba(20, 26, 46, 0.55)",
+    color: "var(--color-counter-muted)",
     fontFamily: "var(--font-body)",
     fontSize: "0.85rem",
   };
@@ -76,7 +76,7 @@ export const PayoffMatrixEditor: React.FC<PayoffMatrixEditorProps> = ({
       <p
         style={{
           fontFamily: "var(--font-body)",
-          color: "rgba(20, 26, 46, 0.35)",
+          color: "var(--color-counter-muted)",
           margin: "0 0 10px 0",
           fontSize: "0.85rem",
           textAlign: "left",
@@ -104,13 +104,13 @@ export const PayoffMatrixEditor: React.FC<PayoffMatrixEditorProps> = ({
               borderRadius: "6px",
               border:
                 selectedPreset === preset.id
-                  ? "1px solid #667eea"
+                  ? "1px solid var(--color-you)"
                   : "1px solid rgba(255,255,255,0.15)",
               background:
                 selectedPreset === preset.id
                   ? "rgba(102, 126, 234, 0.2)"
                   : "transparent",
-              color: "rgba(20, 26, 46, 0.35)",
+              color: "var(--color-counter-muted)",
               fontFamily: "var(--font-body)",
               fontSize: "0.75rem",
               cursor: "pointer",

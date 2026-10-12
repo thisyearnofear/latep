@@ -469,7 +469,13 @@ export const ZKGamePage: React.FC = () => {
               <p style={{ margin: "0 0 2px", color: "var(--text-secondary)" }}>
                 Stake
               </p>
-              <p style={{ margin: 0, fontWeight: "bold", color: "#667eea" }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontWeight: "bold",
+                  color: "var(--color-you)",
+                }}
+              >
                 {(BigInt(currentGame.stake) / BigInt(10_000_000)).toString()}{" "}
                 XLM
               </p>

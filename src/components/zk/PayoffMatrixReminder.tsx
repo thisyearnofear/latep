@@ -6,7 +6,7 @@ export const PayoffMatrixReminder: React.FC = () => (
   <div
     style={{
       marginBottom: "24px",
-      background: "rgba(10, 14, 26, 0.85)",
+      background: "var(--color-counter)",
       border: "1px solid var(--border-glass)",
       borderRadius: "var(--legacy-radius-md)",
       padding: "16px",
