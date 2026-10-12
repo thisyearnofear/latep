@@ -1,17 +1,16 @@
 /**
  * StickManScene — a visual representation of the trust fall at each
- * stage of the ZK game flow, using the unified TrustFallCharacter.
+ * stage of the ZK game flow, using the jointed TrustFallCharacter rig.
  *
- * The scene shows two stick figures (you + opponent) on a platform.
- * The visual changes based on the current ZK step:
+ * Each player stands on a raised platform edge. When a move is committed
+ * the figure topples (rig rotation) and physically plunges off its platform
+ * — the fall distance scales with the stake, so "the fall" is the proof wait.
+ * Resolve lands them: caught (cradled above the ground) or impact (flat, dust).
  *
- *   commit:   Both standing at the edge, facing each other
- *   waiting:  You've committed — you're falling, opponent still standing
- *   reveal:   Both falling — the moment of truth
- *   resolve:  Outcome — caught (both happy), or someone hit the ground
- *
- * The stick figures are consistent across ALL stages — same SVG character,
- * different states. This is the key visual identity of the app.
+ *   commit:   Both standing on their platforms, facing each other
+ *   waiting:  You've committed — you plunge off your edge, opponent waits
+ *   reveal:   Both falling
+ *   resolve:  caught / betrayed / exploited / mutual outcome poses
  */
 import React from "react";
 import { TrustFallCharacter, type CharacterState } from "../TrustFallCharacter";
@@ -25,6 +24,35 @@ interface StickManSceneProps {
   stake?: number;
 }
 
+const PLATFORM_H = 34;
+
+interface SlotLayout {
+  bottom: number;
+  offsetX: number;
+  plungeFrom?: number;
+  platform: boolean;
+}
+
+function layoutFor(state: CharacterState, fallHeight: number): SlotLayout {
+  switch (state) {
+    case "falling":
+      return {
+        bottom: 10,
+        offsetX: 0,
+        plungeFrom: fallHeight,
+        platform: true,
+      };
+    case "caught":
+      return { bottom: 26, offsetX: 0, platform: false };
+    case "impact":
+      return { bottom: 6, offsetX: 0, platform: false };
+    case "celebrating":
+      return { bottom: 8, offsetX: 0, platform: false };
+    default:
+      return { bottom: 8 + PLATFORM_H, offsetX: 0, platform: true };
+  }
+}
+
 export const StickManScene: React.FC<StickManSceneProps> = ({
   step,
   outcome,
@@ -32,7 +60,6 @@ export const StickManScene: React.FC<StickManSceneProps> = ({
 }) => {
   const fallHeight = Math.min(120, Math.max(60, stake * 8));
 
-  // Determine character states for each step
   const getStates = (): { you: CharacterState; opponent: CharacterState } => {
     switch (step) {
       case "commit":
@@ -85,8 +112,22 @@ export const StickManScene: React.FC<StickManSceneProps> = ({
 
   const speech = getSpeech();
 
-  // For falling states, position the character at the top of the fall area
-  const isFalling = (state: CharacterState) => state === "falling";
+  const slots: Array<{
+    key: string;
+    state: CharacterState;
+    color: "you" | "opponent";
+    speech?: string;
+    lean: number;
+  }> = [
+    { key: "you", state: you, color: "you", speech: speech.you, lean: 22 },
+    {
+      key: "opponent",
+      state: opponent,
+      color: "opponent",
+      speech: speech.opponent,
+      lean: -22,
+    },
+  ];
 
   return (
     <div
@@ -94,76 +135,90 @@ export const StickManScene: React.FC<StickManSceneProps> = ({
         display: "flex",
         justifyContent: "center",
         alignItems: "flex-end",
-        gap: "80px",
-        height: `${fallHeight + 50}px`,
+        gap: "56px",
+        height: `${fallHeight + PLATFORM_H + 70}px`,
         marginBottom: "20px",
         position: "relative",
       }}
     >
-      {/* Platform / ground line */}
+      {/* Ground line */}
       <div
         style={{
           position: "absolute",
           bottom: "8px",
-          left: "15%",
-          right: "15%",
+          left: "8%",
+          right: "8%",
           height: "2px",
           background:
             "linear-gradient(90deg, transparent, var(--border-glass-hover) 20%, var(--border-glass-hover) 80%, transparent)",
         }}
       />
 
-      {/* You */}
-      <div
-        style={{
-          textAlign: "center",
-          position: "relative",
-          transition: "all 0.5s var(--ease-out)",
-        }}
-      >
-        <div
-          style={{
-            position: isFalling(you) ? "absolute" : "relative",
-            bottom: isFalling(you) ? `${fallHeight}px` : "auto",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          <TrustFallCharacter
-            state={you}
-            color="you"
-            size="lg"
-            speech={speech.you}
-            label="You"
-          />
-        </div>
-      </div>
+      {slots.map(({ key, state, color, speech: line, lean }) => {
+        const L = layoutFor(state, fallHeight);
+        return (
+          <div
+            key={key}
+            style={{
+              position: "relative",
+              width: "76px",
+              height: "100%",
+            }}
+          >
+            {/* Platform edge */}
+            {L.platform && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "8px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "68px",
+                  height: `${PLATFORM_H}px`,
+                  borderRadius: "6px 6px 3px 3px",
+                  background:
+                    "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 38%, rgba(10,14,26,0.55))",
+                  border: "1px solid var(--border-glass)",
+                  borderTop: "2px solid var(--border-glass-hover)",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
+                }}
+              />
+            )}
 
-      {/* Opponent */}
-      <div
-        style={{
-          textAlign: "center",
-          position: "relative",
-          transition: "all 0.5s var(--ease-out)",
-        }}
-      >
-        <div
-          style={{
-            position: isFalling(opponent) ? "absolute" : "relative",
-            bottom: isFalling(opponent) ? `${fallHeight}px` : "auto",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          <TrustFallCharacter
-            state={opponent}
-            color="opponent"
-            size="lg"
-            speech={speech.opponent}
-            label="Opponent"
-          />
-        </div>
-      </div>
+            {/* Character slot: offset toward center while airborne */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: `${L.bottom}px`,
+                left: "50%",
+                transform: `translateX(calc(-50% + ${state === "falling" ? lean : 0}px))`,
+                transition: "bottom 0.5s var(--ease-out)",
+              }}
+            >
+              {/* Inner wrapper carries the plunge so the offset transform stays put */}
+              <div
+                className={L.plungeFrom ? "tf-plunge" : undefined}
+                style={
+                  L.plungeFrom
+                    ? ({
+                        "--fall-h": `${L.plungeFrom}px`,
+                      } as React.CSSProperties)
+                    : undefined
+                }
+              >
+                <TrustFallCharacter
+                  state={state}
+                  color={color}
+                  size="lg"
+                  speech={line}
+                  flip={color === "opponent"}
+                  label={key === "you" ? "You" : "Opponent"}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

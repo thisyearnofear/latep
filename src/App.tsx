@@ -24,6 +24,11 @@ const ZKGamePage = lazy(() =>
   import("./pages/ZKGamePage.tsx").then((m) => ({ default: m.ZKGamePage })),
 );
 const Debugger = lazy(() => import("./pages/Debugger.tsx"));
+const RealLifePage = lazy(() =>
+  import("./pages/RealLifePage.tsx").then((m) => ({
+    default: m.RealLifePage,
+  })),
+);
 
 function App() {
   return (
@@ -60,6 +65,7 @@ function App() {
             <Route path="/tournament" element={<TournamentPage />} />
             <Route path="/play" element={<ZKGamePage />} />
             <Route path="/play/:gameId" element={<ZKGamePage />} />
+            <Route path="/real-life" element={<RealLifePage />} />
             <Route path="/debug" element={<Debugger />} />
             <Route path="/debug/:contractName" element={<Debugger />} />
           </Route>

@@ -534,7 +534,7 @@ p {
 
 /* Applied animation classes */
 .tf-falling {
-  animation: tf-fall 2.5s ease-in forwards;
+  animation: tf-float 1.8s ease-in-out infinite;
 }
 .tf-suspended {
   animation: tf-sway 3s ease-in-out infinite;
@@ -722,6 +722,70 @@ p {
     var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
 }
 
+/* Airborne hover — the figure drifts while the proof wait plays out */
+@keyframes tf-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+
+/* Gravity drop off the platform edge; distance comes from --fall-h */
+@keyframes tf-plunge {
+  from {
+    transform: translateY(calc(-1 * var(--fall-h, 60px)));
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.tf-plunge {
+  animation: tf-plunge 1.5s cubic-bezier(0.55, 0.05, 0.85, 0.5) both;
+}
+
+/* Celebrating bounce — distinct from the caught bloom */
+@keyframes tf-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  35% {
+    transform: translateY(-10px) scale(1.04);
+  }
+  60% {
+    transform: translateY(0) scale(0.96, 0.9);
+  }
+  80% {
+    transform: translateY(-4px) scale(1);
+  }
+}
+
+.tf-bounce {
+  animation: tf-bounce 0.9s ease-out infinite;
+}
+
+/* Landing dust puffs (SVG circles inside the figure) */
+@keyframes tf-dust {
+  from {
+    transform: scale(0.2);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+.tf-dust {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tf-dust 0.8s ease-out forwards;
+}
+
 /* Respect reduced-motion across the tf-* animation vocabulary */
 @media (prefers-reduced-motion: reduce) {
   [class^="tf-"],
@@ -730,8 +794,21 @@ p {
     transition: none !important;
   }
 
+  /* Jointed rig interpolates via inline transitions on SVG groups */
+  svg g,
+  svg path,
+  svg line,
+  svg circle {
+    transition: none !important;
+  }
+
   .tf-fade-in-up {
     opacity: 1;
+    transform: none;
+  }
+
+  .tf-plunge {
+    animation: none !important;
     transform: none;
   }
 }

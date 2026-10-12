@@ -23,6 +23,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/learn", label: "Learn", icon: "🤝" },
+  { to: "/real-life", label: "Real life", icon: "🌍" },
   { to: "/tournament", label: "Tournament", icon: "🏆" },
   { to: "/play", label: "Play", icon: "🔒" },
 ];
