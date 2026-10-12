@@ -50,6 +50,13 @@ Shared journey audio starts muted, loads existing assets on opt-in, synchronizes
 
 A fresh visitor can play without a modal or wallet; all controls work by keyboard and touch; opponent choice is not exposed before reveal; replay cannot race pending timers; reduced motion preserves the full flow; sound starts off; the stage works without WebGL; layouts remain usable at 320, 375, 414, 768, and desktop widths. No contract or proof-service changes are required for this slice.
 
+> **Caveat on the 320px claim (audited 2026-10-12).** Every media query in the
+> codebase bottoms out at `max-width: 400px`; there is no CSS below 400px. The
+> 320px floor therefore rests entirely on fluid layouts never overflowing and
+> has not been screenshot-verified at that width. The redesign retires this
+> claim one way or the other — either A8 verifies 320 in `npm run shots`, or the
+> documented floor moves to 360px (`REDESIGN_PLAN.md` A8).
+
 The historical review below is retained as context; its implementation and deployment claims are not revalidated by this visual-design work.
 
 ---
@@ -141,7 +148,7 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 **~~No mobile responsiveness.~~** ✅ **Fixed.** Responsive breakpoints added at `max-width: 640px` — 2-column grids collapse to single column, move buttons stack vertically, padding reduced.
 
-**Debug info shown to end users.** The commitment hash prefix and proof hex prefix are displayed in the status box. Non-technical users won't understand these. Should be behind a toggle or removed in production.
+**~~Debug info shown to end users.~~** ✅ **Fixed.** The commitment hash prefix and proof hex prefix are no longer visible by default; both commit components gate the hex/debug line behind a "Show technical details" checkbox.
 
 **Silent wallet disconnect.** If the wallet disconnects during a game (polling detects it), the app silently returns to "Connect Your Wallet" with no explanation. Users may think the app crashed.
 
@@ -154,7 +161,7 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 1. ~~**Auto-fill move in reveal phase**~~ ✅ Done
 2. ~~**Add responsive breakpoints**~~ ✅ Done
 3. ~~**Hide debug info behind a toggle**~~ ✅ Done — "Show technical details" checkbox gates the hex/debug line in both commit components
-4. **Add toast notification on wallet disconnect** — "Wallet disconnected. Reconnect to continue."
+4. ~~**Add toast notification on wallet disconnect**~~ ✅ Done — the poller surfaces the disconnect and persists the selected wallet instead of silently returning to "Connect Your Wallet"
 5. **Add "Last updated: 12:34:05" timestamp** in the game view polling area
 6. ~~**Show actionable buttons after deadline**~~ ✅ Done for cancel/refund; claim forfeit button still needed
 
@@ -214,9 +221,20 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 **~~Settlement funding gap (found by headless two-wallet E2E).~~** ✅ **Fixed.** `resolve_game` pays winners more than the 2×-stake escrow holds (CC pays 4×stake total, DC pays 3×), and the freshly redeployed contract account held no XLM reserve — any non-DD outcome would have trapped the payout ("balance is not sufficient to spend"). Discovered by `scripts/e2e-testnet.mjs`, which drives two friendbot-funded accounts through the full flow on testnet with real browser-flavor keccak-UltraHonk proofs (game resolved on-chain; run log with tx hashes in `docs/E2E_TESTNET_RUN.md`). Fix: the script tops up the contract's house reserve via a Soroban native-token transfer whenever it falls below `4×stake + 5 XLM`. **Any redeployment must run the script once (or send a Soroban transfer to the contract) before demoing settlement.**
 
-**Proof generation latency is unknown in-browser.** The Rust test verifies the proof, but browser WASM performance varies. The UI shows "Generating ZK proof..." but there's no timeout or progress indicator. If bb.js WASM fails to load (e.g., worker path issues), the app hangs silently. (Node-side proof generation is now measured via the E2E script; the browser path still needs the live two-wallet walkthrough in `docs/PITCH.md`.)
+**Proof generation latency is measured but not surfaced.** Node-side generation
+is measured by `scripts/e2e-testnet.mjs` (a 14,592-byte proof, browser-flavor
+keccak-UltraHonk) and the full two-wallet flow is verified on testnet — see
+`docs/E2E_TESTNET_RUN.md`. What is still missing in the UI is a progress
+indicator for the first-time ~10MB WASM download; the screen just says
+"Generating ZK proof...". The browser path is proven headlessly, not yet
+recorded in a tab.
 
-**No proof generation timeout.** If bb.js hangs (WASM init failure, browser incompatibility), the user is stuck on "Generating ZK proof..." forever. No timeout, no error, no fallback.
+**~~No proof generation timeout.~~** ✅ **Fixed.** `withTimeout`
+(`src/util/withTimeout.ts`) wraps proof generation and aborts at
+`PROOF_TIMEOUT_MS` (120s) with an error and a retry path, so a bb.js WASM
+failure surfaces instead of hanging. The 120s figure is deliberately far above
+the measured generation time — it is a hang-detector, not an expectation.
+Recovery is still a page reload.
 
 **~~Bundle size is large.~~** ✅ **Fixed.** bb.js and noir_js are now lazy-loaded via dynamic `import()`. The initial page load bundle is ~200KB; the ~10MB WASM only downloads when the user first triggers proof generation.
 
@@ -226,7 +244,7 @@ Latep now has **two distinct ZK patterns**, both verified on-chain:
 
 ### Recommendations
 
-1. **Add proof generation timeout** — 30-second timeout with error message "Proof generation timed out. Please try again."
+1. ~~**Add proof generation timeout**~~ ✅ Done — 120s hang-detector via `withTimeout`
 2. ~~**Lazy-load bb.js**~~ ✅ Done — dynamically imported on first proof generation
 3. **Show WASM download progress** — "Loading ZK engine... (4.2MB)" during first proof generation
 4. ~~**Store nonce in localStorage with game_id key**~~ ✅ Done

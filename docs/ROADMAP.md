@@ -1,8 +1,28 @@
 # Latep — Development Roadmap
 
-> **Active direction (Sept 2026):** Pattern 3 — Private Reputation — and the HackMeridian 2026 (Scale track) build. See `docs/HACKMERIDIAN.md` for the spec, pitch, and work plan.
+> **Locked 2026-10-12: the visual redesign** (Receipts + Threads). See
+> [`design.md`](../design.md) for the design system and
+> [`REDESIGN_PLAN.md`](REDESIGN_PLAN.md) for phases and tickets. `main` is
+> frozen until the Oct 13 submission; all redesign work lands on `redesign`.
+>
+> **Next after the redesign:** Pattern 3 — Private Reputation, the
+> HackMeridian 2026 build. See [`HACKMERIDIAN.md`](HACKMERIDIAN.md).
 
-## Current design priority — cohesive demo
+## Design priority — the redesign (Oct 2026)
+
+The old cohesive-demo slices below are all shipped and remain the foundation the
+redesign restyles. Two of them are superseded:
+
+- ~~Extend the vocabulary to tournament populations~~ — folded into **B6 ·
+  Tournament till roll** (till roll, printed bars, thread patterns).
+- ~~Integrate the sealed-choice object with real on-chain multiplayer states~~
+  — folded into **B3 · The trust lean scene** and **B7 · ZK reveal/result**,
+  which render the sealed stub against the real multiplayer states.
+- Optional stylized Three.js diorama — still deferred, unchanged.
+
+Ticket-by-ticket status lives in [`REDESIGN_PLAN.md`](REDESIGN_PLAN.md#6-phases-and-tickets).
+
+## Completed design slices — cohesive demo
 
 First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVIEW.md#product-direction--september-2026)):
 
@@ -56,9 +76,13 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - ✅ 3D tilt + spotlight on strategy cards
 - ✅ Directional slide transitions with parallax
 
-## 🚀 Next: two-wallet e2e, then Pattern 3
+## 🚀 Next
 
-- ⬜ End-to-end test with two wallets (last open honesty gap — see `HACKMERIDIAN.md` work plan)
+- ✅ **End-to-end test with two wallets** — headless, two independent
+  friendbot-funded accounts, real browser-flavor UltraHonk proofs, create → join
+  → reveal ×2 → escrow settlement, resolved on testnet. Run log with tx hashes:
+  [`E2E_TESTNET_RUN.md`](E2E_TESTNET_RUN.md).
+- ▶️ **Redesign execution** — `REDESIGN_PLAN.md`, starting at Phase 1 / A0.
 - ▶️ Pattern 3 (Private Reputation) spec + build — see `HACKMERIDIAN.md`
 
 ## 🔧 Technical Debt & Optimizations

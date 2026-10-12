@@ -12,6 +12,11 @@
 
 ### [0:00-0:20] Hook — "Two ZK patterns, one demo"
 
+> **Note — superseded:** this script runs accreditation first. The canonical
+> submission video (`PITCH.md` §"2:30 pitch video script") leads with
+> move-commitment binding and gives accreditation 25 seconds. Use the PITCH
+> order; this file is kept as the longer-form walkthrough.
+
 **Show:** latep.trustfall.xyz landing page
 
 **Say:**
@@ -128,6 +133,9 @@ game, generate proof, submit. Both reveal.
 - **"What verifier?"** — NethermindEth's rs-soroban-ultrahonk, UltraHonk protocol with BN254
 - **"Why Poseidon for accreditation?"** — ZK-friendly, smaller circuits, Stellar Protocol 25 has native host functions
 - **"What are the 9 strategies?"** — TFT, TF2T, Grudge, Pavlov, Prober, Generous TFT, Always Cooperate, Always Defect, Random
-- **"Known limitations?"** — accreditation demo tree is pre-computed (3 credentials), no two-wallet browser test, polling not websockets, proof-gen timeout surfaces an error but recovery is a page reload
+- **"Known limitations?"** — accreditation demo tree is pre-computed (3
+  credentials), polling not websockets, and the two-wallet proof is verified
+  headlessly rather than recorded in a browser tab; proof-gen timeout surfaces
+  an error but recovery is a page reload
 - **"How does the accreditation pattern apply to real use cases?"** — KYC/AML (prove accredited status without revealing identity), compliance-gated token offerings, access control for tokenized assets
 - **"How does commitment binding apply beyond games?"** — sealed-bid auctions, fair escrow, any commit-reveal scheme where early validation prevents griefing
