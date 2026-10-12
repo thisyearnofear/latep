@@ -20,7 +20,12 @@ const SCAN_DIR = "src";
 const SCAN_EXT = [".tsx", ".ts", ".css", ".scss"];
 const EXCLUDE = [/(^|\/)src\/contracts\//, /(^|\/)src\/debug\//];
 // The token file is the one place raw colour values are allowed to live.
-const COLOUR_FILE_EXEMPT = [/(^|\/)src\/styles\/tokens\.css$/];
+// receipt.css joins it: its tear tile is a data-URI SVG, and a data URI
+// cannot read a custom property, so the receipt stock colour must be baked in.
+const COLOUR_FILE_EXEMPT = [
+  /(^|\/)src\/styles\/tokens\.css$/,
+  /(^|\/)src\/components\/receipt\/receipt\.css$/,
+];
 
 const METRICS = [
   {
