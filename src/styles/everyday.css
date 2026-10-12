@@ -1,0 +1,151 @@
+/* ============================================================================
+ * Everyday — design.md §2, story-page family.
+ *
+ * Left-biased, stage-led. Long text lives on receipts, never on the counter
+ * (design.md §2), so each scenario is a wide receipt and the counter only
+ * carries the opening and the two actions.
+ * ========================================================================== */
+
+.everyday {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.everyday-opening {
+  max-width: var(--measure-prose);
+}
+
+.everyday-title {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-counter-text);
+  overflow-wrap: anywhere;
+}
+
+.everyday-situation {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+/* --- the receipts --------------------------------------------------------- */
+
+.everyday-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.everyday-receipt {
+  max-width: none;
+}
+
+/* The problem and the fix, read closely, so body face on receipt stock. */
+.everyday-problem,
+.everyday-adds {
+  margin: var(--space-2xs) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  max-width: var(--measure-prose);
+}
+
+.everyday-adds {
+  margin-top: var(--space-3xs);
+  padding-top: var(--space-2xs);
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+/* --- the honest scope ----------------------------------------------------- */
+
+.everyday-scope-text {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  max-width: var(--measure-prose);
+}
+
+/* --- actions -------------------------------------------------------------- */
+
+.everyday-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+/* Primary: a receipt-stock tile on the counter (design.md §9). */
+.everyday-primary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: var(--space-2xs) var(--space-md);
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+  border: 2px solid var(--color-receipt-ink);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform var(--dur-micro) var(--ease-out);
+}
+
+.everyday-primary:active {
+  transform: translateY(1px);
+}
+
+.everyday-secondary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding: var(--space-2xs) var(--space-md);
+  background: transparent;
+  color: var(--color-counter-text-2);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: background var(--dur-micro) var(--ease-out);
+}
+
+.everyday-secondary:hover {
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+}
+
+.everyday-primary:focus-visible,
+.everyday-secondary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* --- narrow --------------------------------------------------------------- */
+
+@media (max-width: 700px) {
+  .everyday {
+    padding-top: var(--space-lg);
+    gap: var(--space-md);
+  }
+
+  .everyday-title {
+    font-size: var(--text-xl);
+  }
+
+  .everyday-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
