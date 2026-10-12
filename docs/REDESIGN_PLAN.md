@@ -210,6 +210,10 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 
 ### Phase 1 — Foundation
 
+> **Status: complete (2026-10-12).** A0, A1, B1, B1b and B2 are all shipped on
+> `redesign`. The notes under each ticket below record what the next tickets
+> need to know. Phase 2 starts at B3 (the trust lean scene).
+
 **A0 · Tooling** (S) — Dev A
 
 - Create `scripts/design-check.cjs`, `scripts/design-baseline.json`,
@@ -324,6 +328,21 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Export the hand position per pose so `Thread` can attach to it.
 - Reduced motion: poses switch with no transition.
 - Done: a debug preview shows all poses in both facings, on both surfaces.
+- **Shipped 2026-10-12.** Notes for B3:
+  1. The pose table, `RIG` geometry and `getHandPosition` live in
+     `src/components/trustFallRig.ts`, not in the component file. Import
+     values from there — `TrustFallCharacter.tsx` re-exports the _types_ only,
+     because re-exporting values from a component file trips the react-refresh
+     lint rule.
+  2. `getHandPosition(state, "right", facing)` returns the anchor **in the
+     figure's own viewBox** (`-4 -4 48 56`), already mirrored for
+     `facing: "left"`. B3 maps it to screen coordinates itself.
+  3. Angle convention, now that it is written down: a limb hangs along `+y` at
+     0deg and `rotate(θ)` maps `(0, L)` to `(-L·sin θ, L·cos θ)`. So **-90deg
+     reaches forward**, +90 reaches back, and the rig's `lS`/`rS` labels are
+     from the figure's side, not the viewer's.
+  4. Reduced motion is one declaration: `--rig-transition: none` under
+     `prefers-reduced-motion`. Every joint reads it.
 
 ### Phase 2 — The story
 
