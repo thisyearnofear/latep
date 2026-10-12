@@ -73,3 +73,7 @@ src/contracts/zk_dilemma/node_modules/
 # lock files (optional: ignore if using multiple managers)
 # yarn.lock
 # pnpm-lock.yaml
+
+# Generated media — regenerable, keep out of history
+demo-video/renders/
+e2e/demo-footage/
