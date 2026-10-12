@@ -7,6 +7,7 @@ import {
 } from "../../services/accreditationProofService";
 import { getMerkleRootBytes, MERKLE_ROOT_HEX } from "../../util/merkleTree";
 import { ShimmerButton } from "../ui/ShimmerButton";
+import "../../styles/zk.css";
 
 /**
  * Accreditation Panel -- demonstrates the private allowlist membership ZK proof.
@@ -288,6 +289,18 @@ export const AccreditationPanel: React.FC = () => {
             </select>
           </div>
 
+          {/*
+            A disabled control with no stated reason is a dead end. The Everyday
+            page sends people here on the strength of "this is the
+            accreditation panel, running on-chain", so say plainly what stops
+            them.
+          */}
+          {!address && (
+            <p className="zk-gated-note">
+              Connect a Stellar wallet to generate the proof. You can read how
+              it works without one.
+            </p>
+          )}
           <ShimmerButton
             onClick={() => void handleVerify()}
             disabled={!address || generating || isLoading || verified}

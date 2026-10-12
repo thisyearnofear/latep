@@ -1,0 +1,33 @@
+/* ============================================================================
+ * The ZK screens — design.md §2, workbench family.
+ *
+ * Started in the fix-up pass with one rule, because the accreditation panel
+ * needed a static style off the inline-styles path and there was no stylesheet
+ * for these components yet. The rest of the ZK conversion (A6, B7) lands here.
+ *
+ * These screens are the ones where a receipt must never lie: every line that
+ * mentions a proof, a transaction, or a settlement is driven by app state, and
+ * the PENDING stamp is the default, not the exception.
+ * ========================================================================== */
+
+/**
+ * Why a control is disabled.
+ *
+ * A greyed-out button with no stated reason is a dead end, and this app sends
+ * people here from the Everyday page on the strength of "this is the
+ * accreditation panel, running on-chain". So say plainly what stops them —
+ * the reader can understand the whole mechanism without a wallet, and should
+ * be told that rather than left guessing.
+ */
+.zk-gated-note {
+  margin: 0 0 10px 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-counter-muted);
+  max-width: var(--measure-prose);
+}
+
+.zk-gated-note strong {
+  color: var(--color-counter-text-2);
+}

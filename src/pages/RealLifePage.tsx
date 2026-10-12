@@ -63,7 +63,7 @@ const EVERYDAY: Everyday[] = [
     situation: "Members-only drops and doors",
     problem:
       "Airdrops, private sales, club lists: proving you belong usually means handing your identity to a stranger on the internet.",
-    adds: "A zero-knowledge membership proof says “I'm on the list” without saying which entry is yours. Eligibility without exposure — this is the accreditation panel, running on-chain.",
+    adds: "A zero-knowledge membership proof says “I'm on the list” without saying which entry is yours. Eligibility without exposure. The accreditation panel on the play screen runs exactly this, on-chain; you can read it without a wallet, and connect one to generate a proof.",
     tryHref: "/play",
     tryLabel: "See the accreditation panel",
   },
