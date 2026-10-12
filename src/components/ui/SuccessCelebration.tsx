@@ -142,7 +142,7 @@ export const SuccessCelebration: React.FC<SuccessCelebrationProps> = ({
             padding: "36px 44px",
             background: "var(--bg-glass)",
             border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-lg)",
+            borderRadius: "var(--legacy-radius-lg)",
             boxShadow: "var(--shadow-md)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",

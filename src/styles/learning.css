@@ -31,9 +31,13 @@
 }
 
 .learning-button-primary {
-  background: color-mix(in srgb, var(--accent-violet) 82%, white);
-  border-color: transparent;
-  color: var(--bg-deep);
+  background: var(--color-receipt);
+  border: 2px solid var(--color-receipt-ink);
+  color: var(--color-receipt-ink);
+}
+
+.learning-button-primary:not(:disabled):hover {
+  background: var(--color-receipt-2);
 }
 
 /* --- inside the receipt -------------------------------------------------

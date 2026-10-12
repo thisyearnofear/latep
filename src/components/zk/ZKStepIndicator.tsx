@@ -73,7 +73,7 @@ export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
           padding: "12px 20px",
           background: "rgba(10, 14, 26, 0.6)",
           border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-md)",
+          borderRadius: "var(--legacy-radius-md)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
         }}

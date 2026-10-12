@@ -63,7 +63,7 @@ const Step: React.FC<StepProps> = ({
     <div
       style={{
         padding: "16px",
-        borderRadius: "var(--radius-md)",
+        borderRadius: "var(--legacy-radius-md)",
         background:
           status === "active" ? "rgba(102, 126, 234, 0.08)" : "transparent",
         border:
@@ -276,7 +276,7 @@ export const WalletSetupHelper: React.FC = () => {
             style={{
               textAlign: "center",
               padding: "16px",
-              borderRadius: "var(--radius-md)",
+              borderRadius: "var(--legacy-radius-md)",
               background: "rgba(74, 222, 128, 0.08)",
               border: "1px solid rgba(74, 222, 128, 0.2)",
               fontFamily: "var(--font-body)",

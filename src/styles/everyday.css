@@ -51,6 +51,29 @@
   max-width: none;
 }
 
+/* The situation is the heading. It was a right-aligned line item on a 1200px
+   receipt, which put the title of the story a long way from the story. */
+.everyday-situation-title {
+  margin: 0 0 var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-receipt-ink);
+}
+
+.everyday-try {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+.everyday-try a {
+  color: var(--color-receipt-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* The problem and the fix, read closely, so body face on receipt stock. */
 .everyday-problem,
 .everyday-adds {

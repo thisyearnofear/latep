@@ -65,19 +65,20 @@ const METRICS = [
     label: 'user-visible "Cooperate" / "Defect"',
     target: "glossary + inspector only",
     files: (f) => f.endsWith(".ts") || f.endsWith(".tsx"),
-    // Word-boundary "Cooperate"/"Defect" in a quoted string or JSX text node.
-    // Deliberately blunt: over-counting a handful of legitimate glossary and
-    // inspector uses is cheaper than letting a new user-visible label slip
-    // past the guard. Comments are stripped first so documentation about the
-    // vocabulary doesn't count against the metric.
+    // Word-boundary "Cooperate" / "Defect" anywhere in executable code.
+    //
+    // Comments are stripped first, so the vocabulary file's own documentation
+    // about these words does not count against the metric. Within the code, it is
+    // deliberately blunt: a phrase like "You Cooperate" in the middle of a JSX
+    // text node, or "You Defect" in a payoff-matrix header, is a real user-visible
+    // use, and an earlier version that only matched quoted strings and word-
+    // boundary text nodes silently missed both. Over-counting the glossary and the
+    // strategy inspector is the safe direction; missing a label is not.
     count: (text) => {
       const code = text
         .replace(/\/\*[\s\S]*?\*\//g, " ")
         .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
-      return matchAll(
-        code,
-        /["'`](?:[^"'`]*\b)?\b(Cooperate|Defect)\b[^"'`]*["'`]|[>"'`]\s*(Cooperate|Defect)\s*[<"'`]/g,
-      );
+      return matchAll(code, /\b(Cooperate|Defect)\b/g);
     },
   },
   {

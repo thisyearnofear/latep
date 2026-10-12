@@ -122,7 +122,7 @@ export const FirstRunWizard: React.FC<{
           backdropFilter: "blur(24px) saturate(180%)",
           WebkitBackdropFilter: "blur(24px) saturate(180%)",
           border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-xl)",
+          borderRadius: "var(--legacy-radius-xl)",
           padding: "40px",
           maxWidth: "560px",
           width: "100%",
@@ -189,7 +189,7 @@ export const FirstRunWizard: React.FC<{
                   gap: "16px",
                   alignItems: "center",
                   padding: "16px",
-                  borderRadius: "var(--radius-md)",
+                  borderRadius: "var(--legacy-radius-md)",
                   border: isActive
                     ? `1px solid ${step.color}`
                     : "1px solid var(--border-glass)",
@@ -360,7 +360,7 @@ export const NextStepHint: React.FC = () => {
         alignItems: "center",
         gap: "12px",
         padding: "14px 20px",
-        borderRadius: "var(--radius-md)",
+        borderRadius: "var(--legacy-radius-md)",
         background: "rgba(102, 126, 234, 0.08)",
         border: "1px solid rgba(102, 126, 234, 0.25)",
         maxWidth: "640px",

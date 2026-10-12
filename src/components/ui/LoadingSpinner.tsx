@@ -34,7 +34,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         padding: size === "lg" ? "40px" : "28px",
         background: "var(--bg-glass)",
         border: "1px solid var(--border-glass)",
-        borderRadius: "var(--radius-lg)",
+        borderRadius: "var(--legacy-radius-lg)",
         boxShadow: "var(--shadow-md)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",

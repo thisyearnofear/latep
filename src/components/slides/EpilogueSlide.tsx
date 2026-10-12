@@ -22,23 +22,11 @@ import { Takeaway } from "../receipt";
 import { PRIMITIVES } from "../../content/primitives";
 import { MAX_DRAWN_TWISTS } from "../../content/vocabulary";
 
-/**
- * What each chapter taught, keyed by the primitive it paid off. `primitives.ts`
- * owns the names, the marks and the everyday line; this only says which
- * chapter earned it.
- */
-const EARNED_IN: Record<string, string> = {
-  seal: "The sealed choice",
-  handshake: "No take-backs",
-  net: "The enforced catch",
-  pass: "Proven membership",
-};
-
 /** The lesson that isn't a primitive: repeated play, and why it isn't enough. */
 const REPUTATION_NOTE =
   "Reputation works when you will meet again. Most internet interactions are " +
   "one-shot with strangers whose history does not port — which is why the " +
-  "other three exist.";
+  "other primitives exist.";
 
 export const EpilogueSlide: React.FC<SlideProps> = () => {
   const navigate = useNavigate();
@@ -74,7 +62,7 @@ export const EpilogueSlide: React.FC<SlideProps> = () => {
             <li key={primitive.id}>
               <Takeaway
                 Mark={Mark}
-                used={EARNED_IN[primitive.id] ?? primitive.name}
+                used={primitive.name}
                 line={primitive.oneLine}
                 where={primitive.everyday}
                 href="/real-life"

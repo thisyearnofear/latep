@@ -16,22 +16,19 @@
 /* ============================================================================
  * LEGACY: removed in Phase 4 (ticket A7)
  *
- * These names are the old palette. Each one is an alias, so flipping a token
- * in tokens.css restyles every one of its call sites at once. Nothing new may
- * reference any name in this block.
- *
  * Two kinds of entry, and the difference matters:
  *
- *   1. Aliased names that DON'T collide with the new scale. These stay real
- *      aliases, so a change in tokens.css propagates through all ~941 inline
+ *   1. Aliased names, spelled the SAME as the new scale. These stay real
+ *      aliases, so a change in tokens.css propagates through all ~900 inline
  *      styles at once. This is the point of the exercise.
  *
- *   2. Literal values for names that DO collide — the old --space-* and
- *      --text-* steps, and --radius-md/lg/xl. Custom properties on the same
- *      element are last-declaration-wins, so aliasing --space-md to --space-sm
- *      here would resolve to *this block's* redefined --space-sm, not the
- *      token. Literals are the only safe way to preserve the old values.
- *      New code never uses these names; it uses the scale in tokens.css.
+ *   2. `--legacy-*` names. These are the old spacing and radius steps, which
+ *      would otherwise COLLIDE with the new scale: custom properties on the
+ *      same element are last-declaration-wins, so a legacy `--space-md: 16px`
+ *      here silently overrode tokens.css's 24px for every stylesheet in the
+ *      app, including the new ones. Renaming them means `--space-md` means
+ *      24px everywhere, new CSS is written against the real scale, and A7 is
+ *      just deleting this block.
  * ========================================================================== */
 
 :root {
@@ -77,22 +74,21 @@
   --duration-normal: var(--dur-long);
   --duration-slow: var(--dur-scene);
 
-  /* --- 2. Literals (names collide with the new scale) -------------------- */
+  /* --- 2. Legacy steps, renamed so they cannot shadow the new scale ----- */
 
-  /* Old spacing steps, preserved verbatim. The new scale in tokens.css is
-     offset by one step (new --space-xs is 12px, old was 4px), so these cannot
-     alias through it. */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 40px;
+  /* Old spacing steps, preserved verbatim so existing layouts don't move
+     when the new scale arrives. */
+  --legacy-space-xs: 4px;
+  --legacy-space-sm: 8px;
+  --legacy-space-md: 16px;
+  --legacy-space-lg: 24px;
+  --legacy-space-xl: 40px;
 
   /* 3px everywhere: receipts tear instead of rounding, and no pill survives
      except the network badge. */
-  --radius-md: 3px;
-  --radius-lg: 3px;
-  --radius-xl: 3px;
+  --legacy-radius-md: 3px;
+  --legacy-radius-lg: 3px;
+  --legacy-radius-xl: 3px;
 }
 
 /* ============================================================================
@@ -136,13 +132,13 @@ body {
 .slide-card {
   max-width: 900px;
   margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--legacy-space-xl) var(--legacy-space-lg);
   background: var(--bg-glass);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-xl);
-  margin-top: var(--space-lg);
+  border-radius: var(--legacy-radius-xl);
+  margin-top: var(--legacy-space-lg);
   box-shadow: var(--shadow-lg), var(--shadow-glow-violet);
   position: relative;
   z-index: 2;
@@ -228,7 +224,7 @@ p {
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
+  border-radius: var(--legacy-radius-md);
   transition: all var(--duration-normal) var(--ease-out);
 }
 
@@ -284,7 +280,7 @@ p {
   height: 72px;
   border-radius: 50%;
   display: inline-block;
-  margin: var(--space-sm);
+  margin: var(--legacy-space-sm);
   transition: transform var(--duration-normal) var(--ease-spring);
   cursor: pointer;
   position: relative;
@@ -324,14 +320,14 @@ p {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
-  gap: var(--space-sm);
+  gap: var(--legacy-space-sm);
   max-width: 400px;
-  margin: var(--space-lg) auto;
+  margin: var(--legacy-space-lg) auto;
   font-family: var(--font-body);
 }
 
 .payoff-cell {
-  padding: var(--space-md);
+  padding: var(--legacy-space-md);
   text-align: center;
   border-radius: var(--radius-sm);
   font-weight: 600;
@@ -602,21 +598,6 @@ p {
   animation: tf-waiting-dot 1.4s ease-in-out infinite;
 }
 
-/* Next-action call-to-action breathing glow */
-@keyframes tf-cta-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.45);
-  }
-  50% {
-    box-shadow: 0 0 18px 5px rgba(102, 126, 234, 0.55);
-  }
-}
-
-.tf-cta-pulse {
-  animation: tf-cta-pulse 1.6s ease-in-out infinite;
-}
-
 /* Opponent-joined celebratory flash */
 @keyframes tf-joined-glow {
   0% {
@@ -855,7 +836,7 @@ p {
 
   .zk-page-container {
     max-width: 100% !important;
-    padding: var(--space-md) !important;
+    padding: var(--legacy-space-md) !important;
   }
 
   .zk-card-container {
@@ -878,8 +859,8 @@ p {
   }
 
   .slide-card {
-    padding: var(--space-lg) var(--space-md);
-    margin-top: var(--space-md);
+    padding: var(--legacy-space-lg) var(--legacy-space-md);
+    margin-top: var(--legacy-space-md);
   }
 }
 

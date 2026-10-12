@@ -109,7 +109,7 @@ export const ShareableResult: React.FC<ShareableResultProps> = ({
           style={{
             background: "var(--bg-glass-light)",
             border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             color: copied ? "var(--accent-cooperate)" : "var(--text-secondary)",
             fontFamily: "var(--font-body)",
             fontSize: "var(--text-sm)",
@@ -126,7 +126,7 @@ export const ShareableResult: React.FC<ShareableResultProps> = ({
           style={{
             background: "var(--accent-violet)",
             border: "none",
-            borderRadius: "var(--radius-md)",
+            borderRadius: "var(--legacy-radius-md)",
             color: "white",
             fontFamily: "var(--font-body)",
             fontSize: "var(--text-sm)",

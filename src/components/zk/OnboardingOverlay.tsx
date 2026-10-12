@@ -75,7 +75,7 @@ export const OnboardingOverlay: React.FC = () => {
           background: "var(--bg-glass)",
           backdropFilter: "blur(24px) saturate(180%)",
           border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-xl)",
+          borderRadius: "var(--legacy-radius-xl)",
           padding: "40px",
           maxWidth: "440px",
           width: "100%",

@@ -22,7 +22,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         background:
           "linear-gradient(135deg, rgba(248, 113, 113, 0.12), var(--bg-glass))",
         border: "1px solid rgba(248, 113, 113, 0.35)",
-        borderRadius: "var(--radius-md)",
+        borderRadius: "var(--legacy-radius-md)",
         boxShadow: "var(--shadow-md)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
