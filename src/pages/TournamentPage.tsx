@@ -25,7 +25,7 @@ const TournamentPage: React.FC = () => {
             marginBottom: "8px",
           }}
         >
-          🏆 The Tournament
+          The Tournament
         </h2>
         <p
           style={{

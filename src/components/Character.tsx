@@ -63,7 +63,7 @@ export const Character: React.FC<CharacterProps> = ({
     cooperator: "#4CAF50",
     defector: "#F44336",
     neutral: "#9E9E9E",
-    "ai-tutor": "#667eea", // ENHANCEMENT: AI tutor color
+    "ai-tutor": "var(--color-you)", // ENHANCEMENT: AI tutor color
   };
 
   const emotionMap = {
@@ -129,7 +129,7 @@ export const Character: React.FC<CharacterProps> = ({
           borderRadius: "50%",
           background:
             type === "ai-tutor"
-              ? `linear-gradient(135deg, ${colorMap[type]} 0%, #764ba2 100%)`
+              ? `linear-gradient(135deg, ${colorMap[type]} 0%, var(--color-you) 100%)`
               : colorMap[type],
           display: "flex",
           alignItems: "center",
@@ -157,7 +157,7 @@ export const Character: React.FC<CharacterProps> = ({
               bottom: "-5px",
               left: "50%",
               transform: "translateX(-50%)",
-              background: "rgba(20, 26, 46, 0.55)",
+              background: "var(--color-counter-muted)",
               padding: "2px 6px",
               borderRadius: "10px",
               fontSize: "8px",

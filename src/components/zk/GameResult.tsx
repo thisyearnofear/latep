@@ -564,7 +564,13 @@ export const GameResult: React.FC<GameResultProps> = ({
               border: "1px solid rgba(100, 120, 160, 0.2)",
             }}
           >
-            <p style={{ margin: 0, color: "#667eea", fontWeight: "bold" }}>
+            <p
+              style={{
+                margin: 0,
+                color: "var(--color-you)",
+                fontWeight: "bold",
+              }}
+            >
               🏴 Nobody caught anyone — one player didn't show up for the reveal
             </p>
           </CardDiv>

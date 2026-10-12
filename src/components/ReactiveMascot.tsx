@@ -54,7 +54,7 @@ export const ReactiveMascot: React.FC = () => {
       {speech && (
         <div
           style={{
-            background: "rgba(20, 26, 46, 0.95)",
+            background: "var(--color-counter)",
             backdropFilter: "blur(16px)",
             WebkitBackdropFilter: "blur(16px)",
             border: `1px solid ${color === "you" ? "rgba(102, 126, 234, 0.3)" : "rgba(240, 160, 32, 0.3)"}`,
@@ -83,7 +83,7 @@ export const ReactiveMascot: React.FC = () => {
               height: 0,
               borderTop: "6px solid transparent",
               borderBottom: "6px solid transparent",
-              borderLeft: `6px solid rgba(20, 26, 46, 0.95)`,
+              borderLeft: `6px solid var(--color-counter)`,
             }}
           />
         </div>

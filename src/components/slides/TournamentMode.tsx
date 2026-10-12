@@ -169,16 +169,10 @@ export const TournamentMode: React.FC = () => {
 
   return (
     <div style={{ maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
-      {/* Header */}
-      <h3
-        style={{
-          fontFamily: "var(--font-body)",
-          color: "rgba(255,255,255,0.95)",
-          margin: "0 0 8px 0",
-        }}
-      >
-        🏆 Tournament of Trust
-      </h3>
+      {/*
+        No heading of its own: the page already says "The Tournament", and two
+        headings and two trophy emoji said the same thing twice.
+      */}
       <p
         style={{
           fontFamily: "var(--font-body)",
@@ -302,14 +296,11 @@ export const TournamentMode: React.FC = () => {
           <p
             style={{
               fontFamily: "var(--font-body)",
+              /* Never colour alone: the word beside it says the same thing. */
               color:
-                stage === "playing"
-                  ? "#667eea"
-                  : stage === "eliminating"
-                    ? "#F44336"
-                    : stage === "reproducing"
-                      ? "#4CAF50"
-                      : "rgba(20, 26, 46, 0.35)",
+                stage === "eliminating"
+                  ? "var(--color-stamp)"
+                  : "var(--color-counter-text)",
               margin: 0,
               fontWeight: "bold",
               fontSize: "1rem",
@@ -542,7 +533,7 @@ export const TournamentMode: React.FC = () => {
         <p
           style={{
             fontFamily: "var(--font-body)",
-            color: "rgba(20, 26, 46, 0.35)",
+            color: "var(--color-counter-muted)",
             margin: "0 0 12px 0",
             fontSize: "0.85rem",
             textAlign: "left",
@@ -591,7 +582,7 @@ export const TournamentMode: React.FC = () => {
               setScores([]); // Clear stale scores
             }}
             disabled={stage !== "rest"}
-            style={{ width: "100%", accentColor: "#667eea" }}
+            style={{ width: "100%", accentColor: "var(--color-you)" }}
           />
           <p
             style={{
@@ -652,7 +643,7 @@ export const TournamentMode: React.FC = () => {
               setScores([]);
             }}
             disabled={stage !== "rest"}
-            style={{ width: "100%", accentColor: "#667eea" }}
+            style={{ width: "100%", accentColor: "var(--color-you)" }}
           />
         </div>
 
@@ -696,7 +687,7 @@ export const TournamentMode: React.FC = () => {
               setScores([]);
             }}
             disabled={stage !== "rest"}
-            style={{ width: "100%", accentColor: "#667eea" }}
+            style={{ width: "100%", accentColor: "var(--color-you)" }}
           />
         </div>
 
@@ -831,7 +822,7 @@ export const TournamentMode: React.FC = () => {
           <h4
             style={{
               fontFamily: "var(--font-body)",
-              color: "rgba(20, 26, 46, 0.35)",
+              color: "var(--color-counter-muted)",
               margin: "0 0 12px 0",
               textAlign: "center",
             }}

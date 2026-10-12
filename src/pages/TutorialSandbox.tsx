@@ -81,7 +81,7 @@ export const TutorialSandbox: React.FC = () => {
     const fallback: AIPersona = {
       name: "The Tutor",
       emoji: "🎓",
-      color: "#667eea",
+      color: "var(--color-you)",
       personality: "Educational and supportive guide",
     };
     try {
@@ -99,7 +99,7 @@ export const TutorialSandbox: React.FC = () => {
         return {
           name: selected.name,
           emoji: selected.avatar,
-          color: colors[selected.id] || "#667eea",
+          color: colors[selected.id] || "var(--color-you)",
           personality: selected.personality,
         };
       }

@@ -131,7 +131,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
       <div
         style={{
           padding: "16px",
-          background: "rgba(10, 14, 26, 0.85)",
+          background: "var(--color-counter)",
           border: "1px solid var(--border-glass)",
           borderRadius: "var(--legacy-radius-lg)",
         }}
@@ -215,7 +215,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           className="lesson-result"
           style={{
             padding: "16px",
-            background: "rgba(10, 14, 26, 0.85)",
+            background: "var(--color-counter)",
             border: `1px solid ${
               coopPercent > 60
                 ? "rgba(74,222,128,0.3)"

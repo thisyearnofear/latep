@@ -177,7 +177,7 @@ export const StickManScene: React.FC<StickManSceneProps> = ({
                   height: `${PLATFORM_H}px`,
                   borderRadius: "6px 6px 3px 3px",
                   background:
-                    "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 38%, rgba(10,14,26,0.55))",
+                    "linear-gradient(180deg, var(--color-counter-2), var(--color-counter))",
                   border: "1px solid var(--border-glass)",
                   borderTop: "2px solid var(--border-glass-hover)",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
