@@ -33,7 +33,7 @@ export type {
 interface TrustFallCharacterProps {
   state?: CharacterState;
   color?: CharacterColor;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   /** Show a speech bubble with text */
   speech?: string;
   /** Label under the character */
@@ -73,6 +73,12 @@ const SIZE_MAP: Record<string, number> = {
   md: 48,
   lg: 64,
   xl: 96,
+  /**
+   * The scene size. Big enough that two figures' reaching arms can actually
+   * meet on a Held round, which a 96px figure cannot do at any sane gap
+   * (design.md §7: "Palms meet, both supported").
+   */
+  "2xl": 132,
 };
 
 const STATE_ANIMATION: Record<CharacterState, string> = {

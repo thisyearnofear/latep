@@ -142,10 +142,17 @@
 }
 
 /* The receipt that carries the scene. */
+/* The scene is capped and centred. A scene that spans the full 1200px column
+   makes the two figures tiny relative to the gap, and no amount of leaning
+   reads as contact (design.md §7 wants palms to meet). Capping the receipt
+   lets the figures be drawn at a size where the Held pose actually connects,
+   and gives the copy column the width it needs. */
 .trust-scene {
   position: relative;
   width: 100%;
-  aspect-ratio: 800 / 300;
+  max-width: 620px;
+  margin-inline: auto;
+  aspect-ratio: 620 / 320;
   max-height: 340px;
   overflow: hidden;
 }
@@ -196,11 +203,11 @@
 }
 
 .trust-actor-you {
-  left: 33%;
+  left: 36%;
 }
 
 .trust-actor-partner {
-  left: 67%;
+  left: 64%;
 }
 
 .trust-actor-inner {
@@ -224,12 +231,12 @@
 }
 
 .trust-actor-label-you {
-  left: 33%;
+  left: 36%;
   color: var(--color-you-print);
 }
 
 .trust-actor-label-partner {
-  left: 67%;
+  left: 64%;
   color: var(--color-partner-print);
 }
 
@@ -240,8 +247,8 @@
    down its own box at the hand, so the hands sit near 61% of the scene. */
 .trust-thread {
   position: absolute;
-  left: 30%;
-  width: 40%;
+  left: 33%;
+  width: 34%;
   top: 61%;
   transform-origin: 50% 50%;
 }
@@ -282,20 +289,20 @@
    them off. Positioned by side, not by sibling order: `:nth-of-type` counts
    every div, and the actors are divs too. */
 .trust-seal-stub-you {
-  left: 33%;
+  left: 36%;
   top: 3%;
   transform: translateX(-50%);
 }
 
 .trust-seal-stub-partner {
-  left: 67%;
+  left: 64%;
   top: 3%;
   transform: translateX(-50%);
 }
 
 .trust-seal-revealed {
   left: 50%;
-  top: 8%;
+  top: 3%;
   transform: translateX(-50%) rotate(-4deg);
 }
 
