@@ -18,7 +18,7 @@ import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
 import { LessonDetails } from "../learning/LessonDetails";
 import { MARKS } from "../marks";
-import { Receipt, Takeaway } from "../receipt";
+import { Takeaway } from "../receipt";
 import { PRIMITIVES } from "../../content/primitives";
 import { MAX_DRAWN_TWISTS } from "../../content/vocabulary";
 
@@ -62,28 +62,25 @@ export const EpilogueSlide: React.FC<SlideProps> = () => {
         </>
       }
     >
-      {/* The four primitives, as a recap of what the journey earned. */}
+      {/*
+        The lesson column is already the receipt, so these are NOT nested
+        receipts — they are grouped with dashed rules, which is how you group
+        inside a receipt (design.md §5, one containment layer).
+      */}
       <ul className="epilogue-primitives">
         {PRIMITIVES.map((primitive) => {
           const Mark = MARKS[primitive.mark];
           return (
             <li key={primitive.id}>
-              <Receipt
-                wide
-                title={primitive.name}
-                footer={
-                  <Takeaway
-                    Mark={Mark}
-                    used={EARNED_IN[primitive.id] ?? primitive.name}
-                    line={primitive.oneLine}
-                    where={primitive.everyday}
-                    href={`/real-life`}
-                    linkLabel="Where this shows up"
-                  />
-                }
-              >
-                <p className="epilogue-what">{primitive.whatItIs}</p>
-              </Receipt>
+              <Takeaway
+                Mark={Mark}
+                used={EARNED_IN[primitive.id] ?? primitive.name}
+                line={primitive.oneLine}
+                where={primitive.everyday}
+                href="/real-life"
+                linkLabel="Where this shows up"
+              />
+              <p className="epilogue-what">{primitive.whatItIs}</p>
             </li>
           );
         })}

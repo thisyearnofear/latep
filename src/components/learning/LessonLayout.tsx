@@ -25,7 +25,13 @@ export function LessonLayout({
       </header>
       <div className={`lesson-body ${visual ? "" : "lesson-body-wide"}`}>
         {visual && <div className="lesson-visual">{visual}</div>}
-        <div className="lesson-copy">{children}</div>
+        {/*
+          The lesson column IS the receipt (design.md §2: "the lesson printed
+          on a receipt to the right"). That means children must not be
+          receipts themselves — a receipt never sits inside a receipt. Chapters
+          group their content with dashed rules instead.
+        */}
+        <div className="lesson-copy receipt receipt-edge">{children}</div>
       </div>
     </section>
   );
