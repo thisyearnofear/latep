@@ -519,4 +519,11 @@
     animation: none !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* The rig switches pose instantly, with no transition and no tween at all
+     (design.md §8). Every joint reads --rig-transition, so one declaration
+     turns the whole figure still. */
+  :root {
+    --rig-transition: none;
+  }
 }
