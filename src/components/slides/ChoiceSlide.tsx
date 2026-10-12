@@ -25,6 +25,7 @@ import { TrustStage, type TrustStageState } from "../visual/TrustStage";
 import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
 import { LessonDetails } from "../learning/LessonDetails";
+import { MOVE_LABEL } from "../../content/vocabulary";
 
 type Outcome = "caught" | "betrayed" | "exploited" | "mutual-destruction";
 
@@ -490,8 +491,8 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
       {/* Choice buttons or result */}
       {!playerMove ? (
         <p>
-          Cooperate to offer a catch, or defect to step aside. Both choices have
-          consequences.
+          Lean in (cooperate) to offer a catch, or hold back (defect) to step
+          aside. Both choices have consequences.
         </p>
       ) : (
         <>
@@ -583,7 +584,7 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
               onFocus={() => setHoveredChoice("C")}
               onBlur={() => setHoveredChoice(null)}
             >
-              Cooperate
+              {MOVE_LABEL.C}
             </button>
           </div>
           <div
@@ -597,7 +598,7 @@ export const ChoiceSlide: React.FC<SlideProps> = ({ onNext }) => {
               onFocus={() => setHoveredChoice("D")}
               onBlur={() => setHoveredChoice(null)}
             >
-              Defect
+              {MOVE_LABEL.D}
             </button>
           </div>
         </LessonActions>

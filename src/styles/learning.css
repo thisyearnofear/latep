@@ -36,6 +36,40 @@
   color: var(--bg-deep);
 }
 
+/* --- inside the receipt -------------------------------------------------
+   A button on the counter is a receipt-stock tile; on a receipt it is the
+   inverse — an ink fill with stock text (design.md §9). */
+.lesson-copy .learning-button {
+  align-self: flex-start;
+  background: var(--color-receipt-ink);
+  border-color: var(--color-receipt-ink);
+  color: var(--color-receipt);
+}
+
+.lesson-copy .learning-button:not(:disabled):hover {
+  opacity: 0.88;
+}
+
+.lesson-copy .learning-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* A details disclosure on receipt stock: a dashed rule and receipt ink, not
+   the counter's muted grey. */
+.lesson-copy .lesson-details > summary {
+  color: var(--color-receipt-ink);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+}
+
+.lesson-copy .lesson-details > summary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
 .learning-round {
   max-width: 800px;
   width: 100%;
@@ -397,12 +431,16 @@
   min-height: 0;
 }
 
+/* The lesson column is the receipt (design.md §2). Everything below is
+   printed ON it, so it all takes receipt tokens — never a counter token, and
+   never a nested receipt. */
 .lesson-copy {
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
   min-height: 0;
+  max-width: none;
 }
 
 .lesson-copy p {
@@ -410,14 +448,57 @@
   font-size: 14px;
   line-height: 1.45;
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--color-receipt-ink);
+  max-width: var(--measure-prose);
 }
 
 .lesson-copy h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--text-xl);
-  color: var(--text-primary);
+  font-size: var(--text-lg);
+  color: var(--color-receipt-ink);
+}
+
+/* Grouping inside a receipt is dashed rules and space, never a nested box
+   (design.md §5). */
+.lesson-copy > :is(p, h3, ul, ol, .lesson-details, .epilogue-primitives) + * {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: 12px;
+  margin-top: 0;
+}
+
+.lesson-copy :is(ul, ol) {
+  margin: 0;
+  padding-left: 1.2em;
+  max-width: var(--measure-prose);
+}
+
+.lesson-copy :is(ul, ol) li {
+  margin-bottom: 6px;
+}
+
+.lesson-copy strong {
+  color: var(--color-receipt-ink);
+}
+
+.lesson-copy em {
+  color: var(--color-receipt-ink);
+}
+
+.lesson-copy a {
+  color: var(--color-receipt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.lesson-copy a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.lesson-copy :focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .lesson-visual {
@@ -604,49 +685,37 @@
 
 /* --- Epilogue: mechanic → primitive map ------------------------------------ */
 
-/* The epilogue recap: one receipt per primitive.
-   The lesson panel is a fixed-height column with a 60/40 scene/copy split, so
-   four stacked receipts overflow it. Two columns, and the receipts shrink to
-   just the takeaway — the "what it is" line is on the Everyday page. */
+/* The epilogue recap: four primitives inside the lesson receipt, grouped with
+   dashed rules rather than nested receipts. */
 .epilogue-primitives {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-2xs);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.epilogue-primitives .receipt {
-  max-width: none;
-  padding: var(--space-2xs) var(--space-sm);
-  font-size: var(--text-xs);
+.epilogue-primitives > li {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: 10px;
 }
 
-/* The tear is half the height of a small receipt; shorten it here. */
-.epilogue-primitives .receipt-edge {
-  --tear-depth: 6px;
+.epilogue-primitives > li:first-child {
+  border-top: none;
+  padding-top: 0;
 }
 
-/* Beats `.lesson-copy p`, which is a bare paragraph inside the lesson copy
-   and would otherwise paint this line in counter text on receipt stock. */
-.lesson-copy .epilogue-what {
-  font-family: var(--font-body);
+.epilogue-what {
+  margin: 6px 0 0;
   font-size: var(--text-xs);
   line-height: 1.35;
-  margin: 0;
-  color: var(--color-receipt-ink);
+  color: var(--color-receipt-faded);
 }
 
 .epilogue-reputation {
   margin: 0;
   font-size: var(--text-xs);
   line-height: 1.4;
-  color: var(--color-counter-text-2);
-}
-
-@media (max-width: 520px) {
-  .epilogue-primitives {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  color: var(--color-receipt-faded);
 }
