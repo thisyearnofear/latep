@@ -241,33 +241,39 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
           </div>
         )}
 
-        {/* Thinking bubble */}
+        {/* Thinking bubble — ellipsis, not an emoji */}
         {state === "thinking" && !speech && (
           <div
+            aria-hidden
             style={{
               position: "absolute",
               top: "-8px",
               right: "-12px",
               fontSize: "16px",
+              fontFamily: "var(--font-print, monospace)",
+              color: "var(--color-counter-muted, #888)",
               animation: "tf-sway 2s ease-in-out infinite",
             }}
           >
-            💭
+            …
           </div>
         )}
 
-        {/* Waiting indicator */}
+        {/* Waiting indicator — printed question mark */}
         {state === "waiting" && (
           <div
+            aria-hidden
             style={{
               position: "absolute",
               top: "-10px",
               right: "-8px",
               fontSize: "14px",
+              fontFamily: "var(--font-print, monospace)",
+              color: "var(--color-counter-muted, #888)",
               animation: "tf-waiting-pulse 1.5s ease-in-out infinite",
             }}
           >
-            ❓
+            ?
           </div>
         )}
 

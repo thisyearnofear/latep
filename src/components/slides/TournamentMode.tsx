@@ -164,7 +164,7 @@ export const TournamentMode: React.FC = () => {
   );
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", textAlign: "center" }}>
+    <div className="tournament-mode">
       {/*
         No heading of its own: the page already says "The Tournament", and two
         headings and two trophy emoji said the same thing twice.
@@ -269,8 +269,7 @@ export const TournamentMode: React.FC = () => {
             return (
               <span key={entry.strategyId} className="till-roll__legend-item">
                 <span
-                  className={`thread-key thread-key--${info.pattern} chart-tint-${info.tint}`}
-                  style={{ width: 18 }}
+                  className={`thread-key thread-key--legend thread-key--${info.pattern} chart-tint-${info.tint}`}
                   aria-hidden="true"
                 />
                 {info.name}

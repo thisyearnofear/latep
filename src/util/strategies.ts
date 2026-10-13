@@ -78,7 +78,6 @@ export interface AIStrategy {
   name: string;
   description: string;
   getMove: (history?: GameMove[]) => GameMove;
-  emoji: string;
 }
 
 /**
@@ -442,28 +441,24 @@ export function playRepeatedGame(
 export const RandomStrategy: AIStrategy = {
   name: "Random",
   description: "Makes random decisions",
-  emoji: "🎲",
   getMove: () => (Math.random() > 0.5 ? "C" : "D"),
 };
 
 export const AlwaysCooperateStrategy: AIStrategy = {
   name: "Always Cooperate",
   description: "Always chooses to cooperate",
-  emoji: "🤝",
   getMove: () => "C",
 };
 
 export const AlwaysDefectStrategy: AIStrategy = {
   name: "Always Defect",
   description: "Always chooses to defect",
-  emoji: "⚔️",
   getMove: () => "D",
 };
 
 export const TitForTatStrategy: AIStrategy = {
   name: "Tit-for-Tat",
   description: "Copies your last move. Starts with cooperation.",
-  emoji: "🔄",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     return history[history.length - 1];
@@ -473,7 +468,6 @@ export const TitForTatStrategy: AIStrategy = {
 export const GenerousTitForTatStrategy: AIStrategy = {
   name: "Generous Tit-for-Tat",
   description: "Mostly copies you, but forgives occasionally",
-  emoji: "🙏",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     const shouldForgive = Math.random() < 0.1;
@@ -487,7 +481,6 @@ export const GenerousTitForTatStrategy: AIStrategy = {
 export const SuspiciousTitForTatStrategy: AIStrategy = {
   name: "Suspicious Tit-for-Tat",
   description: "Assumes worst, then copies your moves",
-  emoji: "😒",
   getMove: (_history: GameMove[] = []) => {
     if (_history.length === 0) return "D";
     return _history[_history.length - 1];
@@ -497,7 +490,6 @@ export const SuspiciousTitForTatStrategy: AIStrategy = {
 export const WinStayLoseShiftStrategy: AIStrategy = {
   name: "Win-Stay, Lose-Shift",
   description: "Repeats winning moves, switches after losses",
-  emoji: "📈",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     const lastOpponentMove = history[history.length - 1];
@@ -509,7 +501,6 @@ export const WinStayLoseShiftStrategy: AIStrategy = {
 export const PavlovStrategy: AIStrategy = {
   name: "Pavlov",
   description: "Cooperates if the outcome was mutual or both defected",
-  emoji: "🔔",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     return history[history.length - 1];
@@ -519,7 +510,6 @@ export const PavlovStrategy: AIStrategy = {
 export const OccasionalDefectorStrategy: AIStrategy = {
   name: "Occasional Defector",
   description: "Usually cooperates, but randomly betrays",
-  emoji: "😈",
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getMove: (_history: GameMove[] = []) => {
     const defectionRate = 0.15;

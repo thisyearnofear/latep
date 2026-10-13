@@ -30,7 +30,7 @@ export const VerifiedOnChainCard: React.FC<Props> = ({
     {hash && (
       <p className="zk-verified__tx">
         <a href={txExplorerUrl(hash)} target="_blank" rel="noreferrer">
-          View transaction on the explorer ↗
+          View transaction on the explorer &rarr;
         </a>
       </p>
     )}

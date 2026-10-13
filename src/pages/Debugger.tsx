@@ -106,35 +106,15 @@ const Debugger: React.FC = () => {
 
       {/* Contract Selector Pills */}
       <Layout.Inset>
-        <div
-          style={{
-            display: "flex",
-            gap: "0.5rem",
-            marginBottom: "1rem",
-            marginTop: "1rem",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="debug-pills">
           {contractKeys.map((key) => (
-            <NavLink
-              key={key}
-              to={`/debug/${key}`}
-              style={{
-                textDecoration: "none",
-              }}
-            >
+            <NavLink key={key} to={`/debug/${key}`} className="debug-pill-link">
               {({ isActive }: { isActive: boolean }) => (
                 <button
                   type="button"
-                  style={{
-                    background: isActive ? "var(--color-you)" : "transparent",
-                    color: isActive ? "white" : "var(--color-counter-text-2)",
-                    border: "1px solid var(--color-counter-rule)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "4px 12px",
-                    fontSize: "var(--text-sm)",
-                    cursor: "pointer",
-                  }}
+                  className={
+                    isActive ? "debug-pill debug-pill--active" : "debug-pill"
+                  }
                 >
                   {key}
                 </button>
@@ -153,7 +133,7 @@ const Debugger: React.FC = () => {
       {selectedContract && Boolean(failedContracts[selectedContract]) && (
         <Layout.Inset>
           <h2>{selectedContract}</h2>
-          <p style={{ color: "red" }}>
+          <p className="debug-error">
             Failed to import contract: {failedContracts[selectedContract]}
           </p>
         </Layout.Inset>
@@ -162,16 +142,10 @@ const Debugger: React.FC = () => {
       {selectedContract && Boolean(contractMap[selectedContract]) && (
         <>
           <Layout.Inset>
-            <div style={{ marginTop: "0 2rem" }}>
-              <div style={{ display: "flex", flexFlow: "column", gap: "1rem" }}>
+            <div>
+              <div className="debug-stack">
                 {/* Contract detail card */}
-                <div
-                  style={{
-                    flexBasis: "30%",
-                    minWidth: "100%",
-                    alignSelf: "flex-start",
-                  }}
-                >
+                <div className="debug-detail">
                   <Card variant="primary">
                     <Box gap="md">
                       <h3>{selectedContract}</h3>
@@ -205,17 +179,7 @@ const Debugger: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsDetailExpanded(!isDetailExpanded)}
-                      style={{
-                        justifySelf: "flex-end",
-                        marginTop: "1rem",
-                        background: "transparent",
-                        color: "var(--color-counter-text-2)",
-                        border: "1px solid var(--color-counter-rule)",
-                        borderRadius: "var(--radius-sm)",
-                        padding: "4px 12px",
-                        fontSize: "var(--text-sm)",
-                        cursor: "pointer",
-                      }}
+                      className="debug-pill debug-toggle"
                     >
                       {isDetailExpanded ? "Hide Details" : "Show Details"}
                     </button>
@@ -223,7 +187,7 @@ const Debugger: React.FC = () => {
                 </div>
 
                 {/* Contract methods and interactions */}
-                <div style={{ flex: 1 }}>
+                <div className="debug-methods">
                   <ContractForm key={selectedContract} />
                 </div>
               </div>
