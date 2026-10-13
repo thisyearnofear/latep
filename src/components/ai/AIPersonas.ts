@@ -4,7 +4,6 @@ export interface AIPersona {
   name: string;
   description: string;
   personality: string;
-  avatar: string; // emoji for now, can be enhanced later
   voiceStyle: "formal" | "casual" | "wise" | "playful";
   specialties: string[];
   catchphrases: string[];
@@ -19,7 +18,6 @@ export const AI_PERSONAS: Record<string, AIPersona> = {
     description: "Strategic equilibrium in competitive games",
     personality:
       "Analytical mathematician obsessed with finding balance in conflict",
-    avatar: "🧮",
     voiceStyle: "formal",
     specialties: [
       "Nash Equilibrium",
@@ -40,7 +38,6 @@ export const AI_PERSONAS: Record<string, AIPersona> = {
     description: "Social cooperation and the collective good",
     personality:
       "Philosopher fascinated by why humans choose cooperation or defection",
-    avatar: "🤝",
     voiceStyle: "wise",
     specialties: ["Social Contract", "Cooperation", "Trust Building"],
     catchphrases: [
@@ -56,7 +53,6 @@ export const AI_PERSONAS: Record<string, AIPersona> = {
     name: "Darwin",
     description: "How strategies survive and thrive in competition",
     personality: "Naturalist who sees survival strategies everywhere",
-    avatar: "🧬",
     voiceStyle: "casual",
     specialties: ["Evolutionary Strategies", "Natural Selection", "Adaptation"],
     catchphrases: [
@@ -73,7 +69,6 @@ export const AI_PERSONAS: Record<string, AIPersona> = {
     description:
       "Optimal outcomes where none can be better off without harming others",
     personality: "Economist who seeks the most efficient distribution of gains",
-    avatar: "📊",
     voiceStyle: "formal",
     specialties: ["Pareto Efficiency", "Optimization", "Resource Allocation"],
     catchphrases: [
@@ -90,7 +85,6 @@ export const AI_PERSONAS: Record<string, AIPersona> = {
     description: "Competition and market dynamics",
     personality:
       "Economist analyzing how competitors interact and influence prices",
-    avatar: "💰",
     voiceStyle: "formal",
     specialties: [
       "Market Competition",
@@ -110,7 +104,6 @@ export const AI_PERSONAS: Record<string, AIPersona> = {
     name: "Rapoport",
     description: "How cooperation emerges over repeated interactions",
     personality: "Peace researcher studying how cooperation defeats defection",
-    avatar: "🔄",
     voiceStyle: "casual",
     specialties: ["Iterated Games", "Tit-for-Tat", "Cooperation Dynamics"],
     catchphrases: [

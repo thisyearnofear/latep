@@ -44,25 +44,8 @@ function App() {
     <MascotProvider>
       <Suspense
         fallback={
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100vh",
-              fontFamily: "Inter, sans-serif",
-              color: "rgba(255,255,255,0.6)",
-            }}
-          >
-            <div style={{ textAlign: "center" }}>
-              <div
-                style={{ fontSize: "2rem", marginBottom: "8px" }}
-                className="tf-sway"
-              >
-                🪂
-              </div>
-              <div>Loading…</div>
-            </div>
+          <div className="app-suspense">
+            <span className="tf-waiting-pulse">Loading…</span>
           </div>
         }
       >

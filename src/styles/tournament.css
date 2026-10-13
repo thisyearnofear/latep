@@ -49,6 +49,16 @@
   );
 }
 
+.thread-key--legend {
+  width: 18px;
+}
+
+.tournament-mode {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
 /* --- the till roll -------------------------------------------------------- */
 
 .till-roll {

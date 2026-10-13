@@ -30,13 +30,11 @@ export const WalletButton = () => {
 
   return (
     <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-        gap: "5px",
-        opacity: balance.isLoading ? 0.6 : 1,
-      }}
+      className={
+        balance.isLoading
+          ? "wallet-status wallet-status--loading"
+          : "wallet-status"
+      }
     >
       <Text as="div" size="sm">
         {walletId ? `${WALLET_NAMES[walletId] ?? walletId} · ` : ""}Wallet
@@ -50,9 +48,8 @@ export const WalletButton = () => {
           parentId="modalContainer"
         >
           <Modal.Heading>
-            Connected as{" "}
-            <code style={{ lineBreak: "anywhere" }}>{address}</code>. Do you
-            want to disconnect?
+            Connected as <code className="wallet-address">{address}</code>. Do
+            you want to disconnect?
           </Modal.Heading>
           <Modal.Footer itemAlignment="stack">
             <Button
