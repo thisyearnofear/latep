@@ -4,9 +4,6 @@
  * to life.
  */
 
-export { default as TrustFallFigure } from "./TrustFallFigure";
-export type { TrustFallState } from "./TrustFallFigure";
-
 export { default as StrategyCard } from "./StrategyCard";
 
 export { default as TournamentViz } from "./TournamentViz";
