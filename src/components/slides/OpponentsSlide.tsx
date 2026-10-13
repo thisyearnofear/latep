@@ -23,6 +23,7 @@ import {
   type StrategyId,
   type IteratedStrategy,
 } from "../../util/strategies";
+import { getOutcome, MOVE_LABEL } from "../../content/vocabulary";
 
 export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [selected, setSelected] = useState<StrategyId | null>(null);
@@ -62,12 +63,13 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
     setLastMoves({ player: move, opponent: aiMove });
     setTrustAltitude((h) => (move === "C" && aiMove === "C" ? h + 1 : 0));
 
-    if (move === "C" && aiMove === "C") setLastResult("🤝 Mutual trust");
-    else if (move === "C" && aiMove === "D")
-      setLastResult("💥 They stepped aside");
-    else if (move === "D" && aiMove === "C")
-      setLastResult("🏆 You exploited them");
-    else setLastResult("💀 Mutual destruction");
+    const outcome = getOutcome(move, aiMove);
+    if (outcome.id === "held") setLastResult("Held — you held each other up");
+    else if (outcome.id === "dropped")
+      setLastResult("Dropped — they stepped aside");
+    else if (outcome.id === "taken")
+      setLastResult("You took it — you held back while they leaned");
+    else setLastResult("Standoff — you both held back");
   };
 
   const matchComplete = matchRound >= 3;
@@ -111,8 +113,8 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
                 id={id}
                 name={info.name}
                 description={info.description}
-                emoji={info.emoji}
-                color={info.color}
+                pattern={info.pattern}
+                barColor={info.barColor}
                 compact
                 onClick={() => startMatch(id)}
               />
@@ -177,7 +179,6 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
                   margin: 0,
                 }}
               >
-                {getStrategyInfo(selected).emoji}{" "}
                 {getStrategyInfo(selected).name}
               </p>
             </div>
@@ -300,14 +301,14 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
             className="learning-button learning-button-primary"
             onClick={() => playMove("C")}
           >
-            Cooperate
+            {MOVE_LABEL.C}
           </button>
           <button
             type="button"
             className="learning-button"
             onClick={() => playMove("D")}
           >
-            Defect
+            {MOVE_LABEL.D}
           </button>
         </LessonActions>
       )}

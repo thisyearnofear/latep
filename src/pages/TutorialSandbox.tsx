@@ -418,7 +418,7 @@ export const TutorialSandbox: React.FC = () => {
             const info = getStrategyInfo(id);
             return (
               <option key={id} value={id}>
-                {info.emoji} {info.name} — {info.description}
+                {info.name} — {info.description}
               </option>
             );
           })}

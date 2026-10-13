@@ -9,10 +9,12 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
+import "../../styles/tournament.css";
+
 interface PopulationEntry {
   strategyId: string;
   name: string;
-  emoji: string;
+  pattern: string;
   color: string;
   count: number;
 }
@@ -175,9 +177,10 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
           {population.map((entry) => (
             <div key={entry.strategyId} style={rowStyle}>
               <div style={labelStyle}>
-                <span style={{ fontSize: compact ? "1rem" : "1.1rem" }}>
-                  {entry.emoji}
-                </span>
+                <span
+                  className={`thread-key thread-key--${entry.pattern}`}
+                  aria-hidden="true"
+                />
                 <span>{entry.name}</span>
               </div>
               <div style={trackStyle}>

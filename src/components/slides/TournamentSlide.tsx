@@ -25,7 +25,7 @@ import {
 interface PopEntry {
   strategyId: StrategyId;
   name: string;
-  emoji: string;
+  pattern: string;
   color: string;
   count: number;
 }
@@ -54,8 +54,8 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
       return {
         strategyId: id,
         name: info.name,
-        emoji: info.emoji,
-        color: info.color,
+        pattern: info.pattern,
+        color: info.barColor,
         count: 1,
       };
     }).reduce((acc, entry) => {
@@ -152,8 +152,8 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
         return {
           strategyId: id,
           name: info.name,
-          emoji: info.emoji,
-          color: info.color,
+          pattern: info.pattern,
+          color: info.barColor,
           count: 1,
         };
       }).reduce((acc, entry) => {
@@ -216,7 +216,7 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
               marginBottom: "8px",
             }}
           >
-            {dominantStrategy?.emoji} {dominantStrategy?.name} dominates
+            {dominantStrategy?.name} dominates
           </p>
           <p
             style={{

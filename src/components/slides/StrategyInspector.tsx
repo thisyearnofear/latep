@@ -130,7 +130,7 @@ export const StrategyInspector: React.FC<StrategyInspectorProps> = ({
         borderRadius: "12px",
         padding: "16px",
         textAlign: "left",
-        border: `2px solid ${info.color}40`,
+        border: `2px solid ${info.barColor}40`,
       }}
     >
       {/* Header */}
@@ -142,11 +142,14 @@ export const StrategyInspector: React.FC<StrategyInspectorProps> = ({
           marginBottom: "12px",
         }}
       >
-        <span style={{ fontSize: "24px" }}>{info.emoji}</span>
+        <span
+          className={`thread-key thread-key--${info.pattern}`}
+          aria-hidden="true"
+        />
         <h4
           style={{
             fontFamily: "var(--font-body)",
-            color: info.color,
+            color: info.barColor,
             margin: 0,
           }}
         >

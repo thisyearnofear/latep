@@ -1,3 +1,4 @@
+import "../../styles/tournament.css";
 import React, { useState, useCallback, useMemo } from "react";
 import AudioManager from "../AudioManager";
 import {
@@ -53,8 +54,8 @@ export const TournamentMode: React.FC = () => {
           return {
             strategyId: entry.strategyId,
             name: info.name,
-            emoji: info.emoji,
-            color: info.color,
+            pattern: info.pattern,
+            color: info.barColor,
             totalScore: total,
             avgScore: count > 0 ? total / count : 0,
             population: entry.count,
@@ -160,11 +161,6 @@ export const TournamentMode: React.FC = () => {
   const maxPop = useMemo(
     () => Math.max(...population.map((e) => e.count), 1),
     [population],
-  );
-
-  const maxAvgScore = useMemo(
-    () => Math.max(...scores.map((s) => s.avgScore), 1),
-    [scores],
   );
 
   return (
@@ -317,108 +313,69 @@ export const TournamentMode: React.FC = () => {
         </div>
       </div>
 
-      {/* Population visualization — bar chart */}
-      <div
-        style={{
-          background: "rgba(255,255,255,0.08)",
-          borderRadius: "12px",
-          padding: "20px",
-          marginBottom: "20px",
-          border: "1px solid rgba(255,255,255,0.1)",
-        }}
-      >
+      {/*
+        The till roll. Each generation prints as a section of a receipt:
+        receipt ink, one of four tints, and a THREAD PATTERN per strategy, so
+        the bars are told apart without nine colours (design.md §6). The
+        legend always shows names.
+      */}
+      <div className="till-roll receipt receipt-edge">
         {population.map((entry) => {
           const info = getStrategyInfo(entry.strategyId);
           const barWidth = (entry.count / maxPop) * 100;
           const isEliminated = entry.count === 0;
           const score = scores.find((s) => s.strategyId === entry.strategyId);
-          const scoreBarWidth = score
-            ? (score.avgScore / maxAvgScore) * 100
-            : 0;
 
           return (
-            <div
-              key={entry.strategyId}
-              style={{
-                marginBottom: "10px",
-                opacity: isEliminated ? 0.3 : 1,
-                transition: "opacity 0.5s",
-              }}
-            >
-              {/* Strategy label + count */}
+            <div key={entry.strategyId}>
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "4px",
-                }}
+                className={
+                  isEliminated
+                    ? "till-roll__row till-roll__row--extinct"
+                    : "till-roll__row"
+                }
               >
                 <span
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    color: isEliminated ? "rgba(255,255,255,0.3)" : info.color,
-                    fontSize: "0.8rem",
-                  }}
-                >
-                  {info.emoji} {info.name}
+                  className={`thread-key thread-key--${info.pattern}`}
+                  style={{ color: info.barColor }}
+                  aria-hidden="true"
+                />
+                <span className="till-roll__name">
+                  {info.name}
                   {isEliminated && " (extinct)"}
                 </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    color: "rgba(255,255,255,0.6)",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  {entry.count} {score && `· avg ${score.avgScore.toFixed(1)}`}
+                <span className="till-roll__count">
+                  {entry.count}
+                  {score ? ` · avg ${score.avgScore.toFixed(1)}` : ""}
                 </span>
               </div>
-              {/* Population bar */}
-              <div
-                style={{
-                  height: "16px",
-                  background: "rgba(255,255,255,0.05)",
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                  marginBottom: "3px",
-                }}
-              >
+              <div className="till-roll__track">
                 <div
-                  style={{
-                    height: "100%",
-                    width: `${barWidth}%`,
-                    background: info.color,
-                    borderRadius: "8px",
-                    transition: "width 0.6s ease",
-                    opacity: 0.85,
-                  }}
+                  className={`till-roll__fill till-roll__fill--${info.pattern}`}
+                  style={{ width: `${barWidth}%`, color: info.barColor }}
                 />
               </div>
-              {/* Score bar (only after tournament played) */}
-              {score && (
-                <div
-                  style={{
-                    height: "4px",
-                    background: "rgba(255,255,255,0.05)",
-                    borderRadius: "2px",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${scoreBarWidth}%`,
-                      background: "rgba(255,255,255,0.3)",
-                      borderRadius: "2px",
-                      transition: "width 0.6s ease",
-                    }}
-                  />
-                </div>
-              )}
             </div>
           );
         })}
+
+        {/* The legend names every strategy; a reader never has to match a
+            colour. */}
+        <div className="till-roll__legend">
+          {population.map((entry) => {
+            const info = getStrategyInfo(entry.strategyId);
+            return (
+              <span key={entry.strategyId} className="till-roll__legend-item">
+                <span
+                  className={`thread-key thread-key--${info.pattern}`}
+                  style={{ color: info.barColor, width: 18 }}
+                  aria-hidden="true"
+                />
+                {info.name}
+              </span>
+            );
+          })}
+        </div>
       </div>
 
       {/* Controls */}
@@ -779,8 +736,7 @@ export const TournamentMode: React.FC = () => {
                       textAlign: "left",
                     }}
                   >
-                    {i === 0 && "👑 "}
-                    {s.emoji} {s.name}
+                    {s.name}
                   </td>
                   <td
                     style={{ padding: "6px 4px", color: "var(--text-primary)" }}
@@ -856,7 +812,7 @@ export const TournamentMode: React.FC = () => {
                     key={e.strategyId}
                     style={{
                       height: `${(e.count / 25) * 100}%`,
-                      background: info.color,
+                      background: info.barColor,
                       opacity: 0.7,
                       minHeight: "2px",
                     }}
@@ -887,7 +843,7 @@ export const TournamentMode: React.FC = () => {
                         key={id}
                         style={{
                           height: `${(count / total) * 100}%`,
-                          background: info.color,
+                          background: info.barColor,
                           opacity: 0.7,
                           minHeight: count > 0 ? "2px" : "0",
                         }}
@@ -949,7 +905,7 @@ export const TournamentMode: React.FC = () => {
                   width: "10px",
                   height: "10px",
                   borderRadius: "50%",
-                  background: info.color,
+                  background: info.barColor,
                 }}
               />
               <span
