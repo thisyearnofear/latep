@@ -35,7 +35,12 @@ import {
   calculatePayoff,
   NC_DEFAULT,
 } from "../util/strategies";
-import { MOVE_HELPER, MOVE_LABEL, getOutcome } from "../content/vocabulary";
+import {
+  MAX_DRAWN_TRUST,
+  MOVE_HELPER,
+  MOVE_LABEL,
+  getOutcome,
+} from "../content/vocabulary";
 import { RoundReceipt } from "../components/receipt/RoundReceipt";
 import { Thread } from "../components/receipt/Thread";
 import { primitiveForRound } from "../components/receipt/helpers";
@@ -59,6 +64,11 @@ interface AIPersona {
   name: string;
   personality: string;
 }
+
+/** Rounds per autoplay batch — the same count that braids the thread fully. */
+const AUTO_ROUNDS = MAX_DRAWN_TRUST;
+/** Slightly longer than the receipt feed so each round prints visibly. */
+const AUTO_ROUND_GAP_MS = 850;
 
 export const TutorialSandbox: React.FC = () => {
   const { unlock, milestones } = useFirstRun();
@@ -213,76 +223,125 @@ export const TutorialSandbox: React.FC = () => {
     }
   };
 
+  /** Resolve one round against the strategy and current noise/stake. */
+  const resolveOne = (chosen: string, historyLength: number): RoundRecord => {
+    let playerMove: GameMove = chosen === "cooperate" ? "C" : "D";
+    const stakeAmount = parseFloat(stake) || 1;
+    let aiMove = strategyRef.current.play();
+    const noiseEvent = { player: false, opponent: false };
+    if (Math.random() < noise) {
+      playerMove = playerMove === "C" ? "D" : "C";
+      noiseEvent.player = true;
+    }
+    if (Math.random() < noise) {
+      aiMove = aiMove === "C" ? "D" : "C";
+      noiseEvent.opponent = true;
+    }
+    const { playerPayout, aiPayout } = calculatePayoff(
+      playerMove,
+      aiMove,
+      stakeAmount,
+      payoffMatrix,
+    );
+    strategyRef.current.remember(aiMove, playerMove);
+    const outcome: RoundRecord["outcome"] =
+      playerMove === "C" && aiMove === "C"
+        ? "caught"
+        : playerMove === "C" && aiMove === "D"
+          ? "betrayed"
+          : playerMove === "D" && aiMove === "C"
+            ? "exploited"
+            : "mutual-destruction";
+    return {
+      round: historyLength + 1,
+      playerMove,
+      aiMove,
+      playerPayout,
+      aiPayout,
+      outcome,
+      noiseEvent,
+    };
+  };
+
+  /** The aria-live line says what the receipt prints, in the same words. */
+  const describeRound = (record: RoundRecord) => {
+    const word = getOutcome(record.playerMove, record.aiMove).word;
+    const noiseFlipped = record.noiseEvent.player || record.noiseEvent.opponent;
+    return `Round ${record.round}: ${word}. You chose ${MOVE_LABEL[record.playerMove]}, ${strategyRef.current.name} chose ${MOVE_LABEL[record.aiMove]}.${noiseFlipped ? " The wind caught someone — a move was flipped." : ""}`;
+  };
+
+  const reactTo = (record: RoundRecord) => {
+    if (record.outcome === "exploited") {
+      audioManager.playSound("win");
+      mascotReact("betrayed_opponent");
+    } else if (record.outcome === "betrayed") {
+      audioManager.playSound("lose");
+      mascotReact("betrayed_by_opponent");
+    } else if (record.outcome === "caught") {
+      audioManager.playSound("coin");
+      mascotReact("mutual_cooperation");
+    } else {
+      audioManager.playSound("defect");
+      mascotReact("mutual_defection");
+    }
+    audioManager.playSound(record.playerMove === "C" ? "cooperate" : "defect");
+  };
+
+  const markFirstTutorial = () => {
+    const wasFirstTutorial = !milestones.played_tutorial;
+    unlock("played_tutorial");
+    if (wasFirstTutorial) {
+      mascotReact("tutorial_complete");
+    }
+  };
+
   const playRound = () => {
-    if (!move) return;
+    if (!move || loading) return;
     setLoading(true);
     setTxError("");
     try {
-      let playerMove: GameMove = move === "cooperate" ? "C" : "D";
-      const stakeAmount = parseFloat(stake) || 1;
-      let aiMove = strategyRef.current.play();
-      const noiseEvent = { player: false, opponent: false };
-      if (Math.random() < noise) {
-        playerMove = playerMove === "C" ? "D" : "C";
-        noiseEvent.player = true;
-      }
-      if (Math.random() < noise) {
-        aiMove = aiMove === "C" ? "D" : "C";
-        noiseEvent.opponent = true;
-      }
-      const noiseFlipped = noiseEvent.player || noiseEvent.opponent;
-      const { playerPayout, aiPayout } = calculatePayoff(
-        playerMove,
-        aiMove,
-        stakeAmount,
-        payoffMatrix,
-      );
-      strategyRef.current.remember(aiMove, playerMove);
-      const outcome: RoundRecord["outcome"] =
-        playerMove === "C" && aiMove === "C"
-          ? "caught"
-          : playerMove === "C" && aiMove === "D"
-            ? "betrayed"
-            : playerMove === "D" && aiMove === "C"
-              ? "exploited"
-              : "mutual-destruction";
-      const roundNum = rounds.length + 1;
-      const record: RoundRecord = {
-        round: roundNum,
-        playerMove,
-        aiMove,
-        playerPayout,
-        aiPayout,
-        outcome,
-        noiseEvent,
-      };
-      setRounds([...rounds, record]);
-      if (outcome === "exploited") {
-        audioManager.playSound("win");
-        mascotReact("betrayed_opponent");
-      } else if (outcome === "betrayed") {
-        audioManager.playSound("lose");
-        mascotReact("betrayed_by_opponent");
-      } else if (outcome === "caught") {
-        audioManager.playSound("coin");
-        mascotReact("mutual_cooperation");
-      } else {
-        audioManager.playSound("defect");
-        mascotReact("mutual_defection");
-      }
-      if (playerMove === "C") audioManager.playSound("cooperate");
-      else audioManager.playSound("defect");
-      // The aria-live line says what the receipt prints, in the same words.
-      const word = getOutcome(playerMove, aiMove).word;
-      setResult(
-        `Round ${roundNum}: ${word}. You chose ${MOVE_LABEL[playerMove]}, ${strategyRef.current.name} chose ${MOVE_LABEL[aiMove]}.${noiseFlipped ? " The wind caught someone — a move was flipped." : ""}`,
-      );
+      const record = resolveOne(move, rounds.length);
+      setRounds((prev) => [...prev, record]);
+      reactTo(record);
+      setResult(describeRound(record));
       void generateAIFeedback(record);
-      const wasFirstTutorial = !milestones.played_tutorial;
-      unlock("played_tutorial");
-      if (wasFirstTutorial) {
-        mascotReact("tutorial_complete");
+      markFirstTutorial();
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      setTxError(`Error: ${errorMessage}`);
+      audioManager.playSound("error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /**
+   * Autoplay: run the chosen move for AUTO_ROUNDS rounds, one receipt feeding
+   * out at a time. The loop carries its own history copy so stale `rounds`
+   * state can't collide between iterations.
+   */
+  const autoPlay = async () => {
+    if (!move || loading) return;
+    setLoading(true);
+    setTxError("");
+    try {
+      let history = rounds.slice();
+      for (let i = 0; i < AUTO_ROUNDS; i++) {
+        const record = resolveOne(move, history.length);
+        history = [...history, record];
+        setRounds(history);
+        reactTo(record);
+        setResult(describeRound(record));
+        if (i < AUTO_ROUNDS - 1) {
+          await new Promise<void>((resolve) =>
+            window.setTimeout(resolve, AUTO_ROUND_GAP_MS),
+          );
+        }
       }
+      const last = history[history.length - 1];
+      if (last) void generateAIFeedback(last);
+      markFirstTutorial();
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -477,6 +536,24 @@ export const TutorialSandbox: React.FC = () => {
               <span>{strategyInfo.name}</span>
             </div>
 
+            {/* The goal: braid the thread fully — five holds in a row. A real
+                Thread drawn at the current streak height, not a meter. */}
+            <div className="sandbox-goal" aria-live="polite">
+              <Thread
+                surface="counter"
+                state={trustAltitude > 0 ? "twisted" : "loose"}
+                twists={trustAltitude}
+                width={80}
+                height={22}
+                className="sandbox-goal__thread"
+              />
+              <span className="sandbox-goal__text">
+                {trustAltitude >= MAX_DRAWN_TRUST
+                  ? "Fully braided — five holds in a row."
+                  : `Braid the thread — ${trustAltitude} of ${MAX_DRAWN_TRUST} holds in a row.`}
+              </span>
+            </div>
+
             <TrustStage
               state={stageState}
               opponentLabel={strategyInfo.name}
@@ -542,8 +619,22 @@ export const TutorialSandbox: React.FC = () => {
                 {loading
                   ? "Playing…"
                   : !move
-                    ? "Select a move first"
+                    ? "Play round"
                     : `Play round — ${move === "cooperate" ? MOVE_LABEL.C : MOVE_LABEL.D}`}
+              </button>
+              <button
+                type="button"
+                className="learning-button"
+                onClick={() => void autoPlay()}
+                disabled={!move || loading}
+              >
+                {loading
+                  ? "Playing…"
+                  : !move
+                    ? `Play ${AUTO_ROUNDS} rounds`
+                    : `Play ${AUTO_ROUNDS} rounds — ${
+                        move === "cooperate" ? MOVE_LABEL.C : MOVE_LABEL.D
+                      }`}
               </button>
               {rounds.length > 0 && (
                 <>

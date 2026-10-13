@@ -316,3 +316,25 @@
     padding: var(--space-sm) var(--space-2xs) var(--space-lg);
   }
 }
+
+/* The streak goal — a live Thread plus the count, printed under the meta. */
+.sandbox-goal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.sandbox-goal__thread {
+  /* Thread renders svg at width:100% — pin the box so it stays a 80px mark
+     beside the count rather than a full-width rule. */
+  flex: none;
+  width: 80px;
+}
+
+.sandbox-goal__text {
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-counter-muted);
+}
