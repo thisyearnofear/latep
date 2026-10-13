@@ -36,6 +36,15 @@
   color: var(--color-counter-text-2);
 }
 
+/* The header scene: two figures leaning toward one another on the counter,
+   the thread between them already twisted — the trust you just built. */
+.everyday-scene {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-top: var(--space-md);
+}
+
 /* --- the receipts --------------------------------------------------------- */
 
 .everyday-list {
@@ -47,8 +56,42 @@
   gap: var(--space-md);
 }
 
+/* The till pays each receipt out in turn — one orchestrated feed, stepped
+   easing, staggered by position. Reduced-motion turns this into a fade. */
+.everyday-list li:nth-child(2) .receipt--feeding {
+  animation-delay: 140ms;
+}
+.everyday-list li:nth-child(3) .receipt--feeding {
+  animation-delay: 280ms;
+}
+.everyday-list li:nth-child(4) .receipt--feeding {
+  animation-delay: 420ms;
+}
+
 .everyday-receipt {
   max-width: none;
+}
+
+/* Mark + situation + the one-liner, printed like a goods line. */
+.everyday-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.everyday-mark {
+  color: var(--color-receipt-ink);
+  flex-shrink: 0;
+}
+
+.everyday-oneline {
+  margin: var(--space-3xs) 0 0;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
 }
 
 /* The situation is the heading. It was a right-aligned line item on a 1200px
