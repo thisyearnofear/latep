@@ -208,7 +208,7 @@
 .tutorial-round-panel {
   padding: clamp(16px, 3vw, 28px);
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-sm);
   background: linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 38%);
   margin-bottom: 24px;
 }
@@ -225,7 +225,7 @@
 .tutorial-settings,
 .learning-details {
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   margin: 24px 0;
   padding: 16px;
   overflow-x: auto;
@@ -295,7 +295,7 @@
 .narrative-panel {
   padding: 16px;
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   background: rgba(10, 14, 26, 0.85);
   overflow-x: auto;
 }
@@ -592,7 +592,7 @@
   width: min(680px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
   border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-sm);
   background: var(--bg-deep);
   color: var(--text-primary);
   padding: 0;

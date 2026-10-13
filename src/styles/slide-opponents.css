@@ -18,8 +18,8 @@
  * dropped into this chapter it put nine dark panels inside a light receipt,
  * with near-white names on a near-white page. `.narrative-strategies` is used
  * by this slide only, so the fix lives here and touches no other file: the
- * cards stop being panels and become printed rows — no fill, a dashed rule
- * between them, the tint left to the swatch and the thread rule alone
+ * cards stop being panels and become printed rows — no fill, one dashed rule
+ * closing the list, the tint left to the swatch and the thread rule alone
  * (design.md §5 and §6). Selecting one is a row on stock, not a lifted card.
  * -------------------------------------------------------------------------- */
 
@@ -79,6 +79,9 @@
 .opponents-scoreboard {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Bottom-aligned: the middle column's label wraps to two lines at 320px, and
+     the two scores should still sit on one line with the name. */
+  align-items: end;
   gap: var(--space-2xs) var(--space-sm);
   margin: 0;
 }
@@ -244,6 +247,7 @@
 /* Nothing in this chapter animates: the reveal belongs to the scene (design.md
    §8). The guard keeps any inherited transition or animation off the receipt. */
 @media (prefers-reduced-motion: reduce) {
+  .lesson-copy .narrative-strategies .strategy-card,
   .lesson-copy .opponents-stat,
   .lesson-copy .opponents-outcome,
   .lesson-copy .opponents-verdict,
