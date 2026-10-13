@@ -49,6 +49,19 @@
   --color-focus: oklch(62% 0.17 255);
 
   /* --------------------------------------------------------------------------
+   * Colour — charts (design.md §6)
+   *
+   * Charts print in receipt ink plus up to four tints — lighter steps of the
+   * same ink family, never nine hues. A strategy is told apart by its name
+   * and thread pattern first; the tint only separates bars that share a
+   * pattern. The lightest tint must still read on receipt stock.
+   * ----------------------------------------------------------------------- */
+  --chart-tint-1: var(--color-receipt-ink);
+  --chart-tint-2: oklch(45% 0.02 60);
+  --chart-tint-3: oklch(62% 0.025 60);
+  --chart-tint-4: oklch(78% 0.03 70);
+
+  /* --------------------------------------------------------------------------
    * Typography
    *
    * Display: page headings on the counter.

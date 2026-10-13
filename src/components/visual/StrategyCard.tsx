@@ -1,12 +1,14 @@
 /**
- * StrategyCard — A glass-panel card representing a strategy personality.
+ * StrategyCard — A counter card representing a strategy personality.
  *
- * Shows a large emoji, the strategy name in Instrument Serif, and a muted
- * description. A colored left border identifies the strategy. Hover lifts the
- * card; selection adds a glowing colored border. Exposes a `data-animate`
+ * Shows the strategy's thread pattern, its name, and a muted
+ * description. A tinted left border backs up the pattern. Hover lifts the
+ * card; selection adds a 2px rule. Exposes a `data-animate`
  * attribute for GSAP staggered reveals.
  */
 
+import "../../styles/tournament.css";
+import type { ThreadPattern } from "../../util/strategies";
 import { CSSProperties, useCallback } from "react";
 import { useTiltInteraction } from "../../hooks/useSlideAnimation";
 
@@ -14,8 +16,8 @@ interface StrategyCardProps {
   id: string;
   name: string;
   description: string;
-  emoji: string;
-  color: string;
+  pattern: ThreadPattern;
+  barColor: string;
   selected?: boolean;
   onClick?: () => void;
   compact?: boolean;
@@ -25,8 +27,8 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
   id,
   name,
   description,
-  emoji,
-  color,
+  pattern,
+  barColor,
   selected = false,
   onClick,
   compact = false,
@@ -49,27 +51,25 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
 
   const cardStyle: CSSProperties = {
     position: "relative",
-    background: "var(--bg-glass)",
-    border: `1px solid ${selected ? color : "var(--border-glass)"}`,
-    borderLeft: `4px solid ${color}`,
-    borderRadius: "16px",
+    background: "var(--color-counter-2)",
+    border: `1px solid ${selected ? barColor : "var(--color-counter-rule)"}`,
+    borderLeft: `4px solid ${barColor}`,
+    borderRadius: "var(--radius-sm)",
     padding: compact ? "16px 18px" : "24px 26px",
     cursor: isInteractive ? "pointer" : "default",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
     transition:
       "transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease",
-    boxShadow: selected
-      ? `0 0 0 1px ${color}, 0 0 32px ${color}55, var(--shadow-md)`
-      : "var(--shadow-md)",
+    /* No glow: a selected card gets a 2px rule, not a halo. */
+    boxShadow: selected ? `0 0 0 2px ${barColor}` : "none",
     overflow: "hidden",
   };
 
-  const emojiStyle: CSSProperties = {
-    fontSize: compact ? "2rem" : "2.75rem",
-    lineHeight: 1,
+  /* `color` feeds the pattern class's currentColor — an inline `background`
+     here would flatten every pattern back to a solid bar. */
+  const swatchStyle: CSSProperties = {
+    width: compact ? 40 : 56,
     marginBottom: compact ? 8 : 12,
-    display: "block",
+    color: barColor,
   };
 
   const nameStyle: CSSProperties = {
@@ -129,7 +129,11 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
           }
         }}
       >
-        <span style={emojiStyle}>{emoji}</span>
+        <span
+          className={`thread-key thread-key--${pattern}`}
+          style={swatchStyle}
+          aria-hidden="true"
+        />
         <h3 style={nameStyle}>{name}</h3>
         {!compact && <p style={descriptionStyle}>{description}</p>}
         <div style={spotlightStyle} aria-hidden="true" />
