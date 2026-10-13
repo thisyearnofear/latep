@@ -1,15 +1,18 @@
 /**
  * Everyday — the collection of everything you've already met.
  *
- * Four receipts, one per primitive, each with its mark, the everyday problem
- * it solves, what the mathematics actually adds, and a link to the round where
- * you already felt it. Rebuilt from `content/primitives.ts` (ticket B5): the
+ * Four receipts, one per primitive, feeding out of the till one after
+ * another: mark, situation, the problem as it happens in life, and what the
+ * mathematics adds. Rebuilt from `content/primitives.ts` (ticket B5): the
  * primitive list is the single source of truth, so this page can never drift
  * from the marks or the wording used on Home and in the epilogue.
  */
 import React from "react";
 import { Link } from "react-router-dom";
 import { Receipt } from "../components/receipt";
+import { Thread } from "../components/receipt/Thread";
+import { TrustFallCharacter } from "../components/TrustFallCharacter";
+import { MARKS } from "../components/marks";
 import { PRIMITIVES, type PrimitiveId } from "../content/primitives";
 import "../styles/everyday.css";
 
@@ -23,7 +26,7 @@ interface Everyday {
   situation: string;
   /** What goes wrong without it. */
   problem: string;
-  /** What the mathematics adds — and, honestly, what it doesn't. */
+  /** What the mathematics adds — one line, honestly. */
   adds: string;
   /** Where you already felt this. */
   tryHref: string;
@@ -33,10 +36,10 @@ interface Everyday {
 const EVERYDAY: Everyday[] = [
   {
     id: "seal",
-    situation: "Class and community votes",
+    situation: "Class votes and community polls",
     problem:
-      "Once you see who voted what, the popular option snowballs — and people vote to please rather than to choose.",
-    adds: "Everyone commits a hash of their ballot first and reveals after voting closes. No vote can be changed, and none can be seen, before the count.",
+      "See who voted what first, and the popular option snowballs — people vote to please, not to choose.",
+    adds: "Commit a hash first, reveal after the count. Nothing changes, and nothing leaks early.",
     tryHref: "/",
     tryLabel: "Play the round again",
   },
@@ -44,8 +47,8 @@ const EVERYDAY: Everyday[] = [
     id: "handshake",
     situation: "Deals with strangers online",
     problem:
-      "You agree on a price, they deliver, you ghost the payment — or the terms quietly “shift” after you've already committed.",
-    adds: "Both sides bind to their move with a proof before revealing it. Once you let go, the arithmetic holds you to it. No take-backs.",
+      "They deliver, you ghost — or the price quietly “shifts” after you\u2019ve committed.",
+    adds: "Both sides bind to a proof before revealing. Once you let go, the arithmetic holds you to it.",
     tryHref: "/learn/play",
     tryLabel: "Practise the handshake",
   },
@@ -53,8 +56,8 @@ const EVERYDAY: Everyday[] = [
     id: "net",
     situation: "Group buys and shared deposits",
     problem:
-      "Twenty people send money to one organiser for a group order. The order goes wrong — who guarantees the refund?",
-    adds: "The contract holds the pot and releases it on agreed conditions. Nobody has to be the trustworthy hero; the settlement is automatic.",
+      "Twenty people send money to one organiser. The order goes wrong — who refunds?",
+    adds: "The contract holds the pot and settles on agreed conditions. Nobody has to be the trustworthy hero.",
     tryHref: "/play",
     tryLabel: "See it settle on-chain",
   },
@@ -62,32 +65,47 @@ const EVERYDAY: Everyday[] = [
     id: "pass",
     situation: "Members-only drops and doors",
     problem:
-      "Airdrops, private sales, club lists: proving you belong usually means handing your identity to a stranger on the internet.",
-    adds: "A zero-knowledge membership proof says “I'm on the list” without saying which entry is yours. Eligibility without exposure. The accreditation panel on the play screen runs exactly this, on-chain; you can read it without a wallet, and connect one to generate a proof.",
+      "Proving you belong usually means handing your identity to a stranger.",
+    adds: "A membership proof says “I\u2019m on the list” without naming which entry is yours.",
     tryHref: "/play",
-    tryLabel: "See the accreditation panel",
+    tryLabel: "See it live on the play screen",
   },
 ];
+
+/* Story-page tilt, within the ±0.8° rule. */
+const TILTS = [-0.6, 0.5, -0.4, 0.7];
 
 export const RealLifePage: React.FC = () => (
   <div className="everyday">
     <header className="everyday-opening">
       <h1 className="everyday-title">That wasn&rsquo;t just a game</h1>
       <p className="everyday-situation">
-        Every choice you made — lean in, hold back, held, toppled — is a trust
-        problem you already have. Here&rsquo;s where you&rsquo;ll meet these
-        four again.
+        Lean in, hold back, held, toppled — each is a trust problem you already
+        have. Here are the four, as you meet them in life.
       </p>
+      <div className="everyday-scene" aria-hidden="true">
+        <TrustFallCharacter color="you" state="leaning" size="xl" />
+        <Thread state="twisted" twists={4} width={160} height={40} />
+        <TrustFallCharacter
+          color="opponent"
+          state="leaning"
+          size="xl"
+          facing="left"
+        />
+      </div>
     </header>
 
     <ul className="everyday-list">
-      {EVERYDAY.map((item) => {
+      {EVERYDAY.map((item, i) => {
         const primitive = PRIMITIVES.find((p) => p.id === item.id);
         if (!primitive) return null;
+        const Mark = MARKS[primitive.mark];
         return (
           <li key={item.id}>
             <Receipt
               wide
+              tilt={TILTS[i]}
+              feeding
               className="everyday-receipt"
               title={primitive.name}
               footer={
@@ -97,7 +115,15 @@ export const RealLifePage: React.FC = () => (
                 </p>
               }
             >
-              <h3 className="everyday-situation-title">{item.situation}</h3>
+              <div className="everyday-head">
+                <span className="everyday-mark">
+                  <Mark size={40} />
+                </span>
+                <div>
+                  <h3 className="everyday-situation-title">{item.situation}</h3>
+                  <p className="everyday-oneline">{primitive.oneLine}</p>
+                </div>
+              </div>
               <p className="everyday-problem">{item.problem}</p>
               <p className="everyday-adds">{item.adds}</p>
             </Receipt>
@@ -113,15 +139,14 @@ export const RealLifePage: React.FC = () => (
         title="Honest scope"
         footer={
           <p className="everyday-scope-text">
-            Stellar is a transparent ledger. This demo proves <em>moves</em> and{" "}
-            <em>list membership</em> — not balances, and not full identity
-            privacy. The stakes are testnet play money; the same commit-reveal
-            and proof-checking flow works for real money.
+            Stellar is a transparent ledger: this proves <em>moves</em> and{" "}
+            <em>membership</em> — not balances, not identity privacy. Stakes are
+            testnet play money.
           </p>
         }
       >
         <p className="everyday-scope-text">
-          Every claim on this page is one the app can actually show you.
+          Every claim on this page is one the app can show you.
         </p>
       </Receipt>
     </div>
