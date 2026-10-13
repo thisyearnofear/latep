@@ -1,0 +1,239 @@
+/* ============================================================================
+ * Personality quiz — design.md §2, §5, §9.
+ *
+ * The scrim is --color-scrim (design.md §3); everything you read closely — the
+ * prompt, the options, the result — prints on a receipt from the shared kit.
+ * Only --color-receipt-* tokens sit inside the receipt.
+ * One containment layer: the receipt is the ticket, not a panel.
+ * ========================================================================== */
+
+.quiz-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  background: var(--color-scrim);
+}
+
+/* Centered ticket. Width stays inside the receipt column so the torn edges
+   keep their pitch at 320px (design.md §10). */
+.quiz-ticket {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+/* ----------------------------------------------------------------------------
+ * Progress — the only dynamic value, passed in as --quiz-progress (0…1).
+ * The fill scales; transform is one of the three animatable properties
+ * (design.md §8).
+ * -------------------------------------------------------------------------- */
+
+.quiz-progress {
+  height: var(--space-3xs);
+  margin-bottom: var(--space-md);
+  background: var(--color-receipt-2);
+  overflow: hidden;
+}
+
+.quiz-progress__fill {
+  height: 100%;
+  background: var(--color-receipt-ink);
+  transform-origin: left center;
+  transform: scaleX(var(--quiz-progress, 0));
+  transition: transform var(--dur-long) var(--ease-out);
+}
+
+/* ----------------------------------------------------------------------------
+ * Question
+ * -------------------------------------------------------------------------- */
+
+.quiz-figure {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--space-sm);
+}
+
+.quiz-prompt {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-style: normal;
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+/* ----------------------------------------------------------------------------
+ * Option tiles — read closely, so receipt tokens only. Grouped with dashed
+ * rules, not nested boxes (design.md §5); buttons get --radius-sm.
+ * -------------------------------------------------------------------------- */
+
+.quiz-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2xs);
+}
+
+.quiz-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px dashed var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition:
+    background var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+.quiz-option:hover {
+  background: var(--color-receipt-2);
+  border-color: var(--color-receipt-ink);
+}
+
+.quiz-option:active {
+  transform: translateY(1px);
+}
+
+.quiz-option:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Quiet text-link dismissal, styled like the system's links (design.md §9). */
+.quiz-dismiss {
+  display: block;
+  margin: var(--space-md) auto 0;
+  padding: var(--space-3xs) var(--space-2xs);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-receipt-faded);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.quiz-dismiss:hover {
+  text-decoration-thickness: 2px;
+}
+
+.quiz-dismiss:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------------------
+ * Result
+ * -------------------------------------------------------------------------- */
+
+.quiz-result__name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin: 0 0 var(--space-2xs);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.quiz-result__icon {
+  flex: none;
+  color: var(--color-receipt-ink);
+}
+
+.quiz-result__description {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  max-width: var(--measure-prose);
+  overflow-wrap: anywhere;
+}
+
+.quiz-result__helper {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+.quiz-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+/* Secondary button on a receipt: transparent, 1px border in the surface's
+   rule colour (design.md §9). */
+.quiz-skip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-sm);
+  border: 1px solid var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--dur-short) var(--ease-out);
+}
+
+.quiz-skip:hover {
+  border-color: var(--color-receipt-ink);
+}
+
+.quiz-skip:active {
+  transform: translateY(1px);
+}
+
+.quiz-skip:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------------------------
+ * Reduced motion: the progress fill just moves to its final state with an
+ * opacity crossfade instead of a scale tween (design.md §8).
+ * -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-progress__fill {
+    transition: none;
+  }
+
+  .quiz-option:active,
+  .quiz-skip:active {
+    transform: none;
+  }
+}

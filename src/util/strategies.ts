@@ -78,7 +78,6 @@ export interface AIStrategy {
   name: string;
   description: string;
   getMove: (history?: GameMove[]) => GameMove;
-  emoji: string;
 }
 
 /**
@@ -102,25 +101,23 @@ export const calculatePayoff = (
   }
 };
 
-/**
- * Get emoji representation of move
- */
-export const getMoveEmoji = (move: GameMove): string => {
-  return move === "C" ? "🤝" : "⚔️";
-};
-
 // ============================================================================
 // Iterated Strategy Interface — stateful, matching Nicky Case's architecture
 // Each strategy remembers the history of play and can make decisions based
 // on the full interaction, not just the last move.
 // ============================================================================
 
+export type ThreadPattern = "solid" | "dashed" | "dotted" | "double";
+
 export interface IteratedStrategy {
   readonly id: string;
   readonly name: string;
   readonly description: string;
-  readonly emoji: string;
-  readonly color: string;
+  /** How a chart tells this strategy apart, instead of a colour of its own
+   *  (design.md §6). */
+  readonly pattern: ThreadPattern;
+  /** Index into the four chart tints. */
+  readonly tint: number;
   /** Called each round to get this strategy's move */
   play: () => GameMove;
   /** Called after each round so the strategy can remember what happened */
@@ -137,8 +134,8 @@ function createAlwaysCooperate(): IteratedStrategy {
     id: "all_c",
     name: "Always Cooperate",
     description: "Trusts you unconditionally. Always catches you.",
-    emoji: "🤝",
-    color: "#FF75FF",
+    pattern: "solid",
+    tint: 3,
     play: () => "C",
     remember: () => {},
     reset: () => {},
@@ -151,8 +148,8 @@ function createAlwaysDefect(): IteratedStrategy {
     id: "all_d",
     name: "Always Defect",
     description: "Never trusts. Always steps aside.",
-    emoji: "⚔️",
-    color: "#52537F",
+    pattern: "dashed",
+    tint: 0,
     play: () => "D",
     remember: () => {},
     reset: () => {},
@@ -165,8 +162,8 @@ function createRandom(): IteratedStrategy {
     id: "random",
     name: "Random",
     description: "Flips a coin every round. Unpredictable.",
-    emoji: "🎲",
-    color: "#FF5E5E",
+    pattern: "dotted",
+    tint: 1,
     play: () => (Math.random() > 0.5 ? "C" : "D"),
     remember: () => {},
     reset: () => {},
@@ -180,8 +177,8 @@ function createTitForTat(): IteratedStrategy {
     id: "tft",
     name: "Tit-for-Tat",
     description: "Starts kind. Then does whatever you did last round.",
-    emoji: "🔄",
-    color: "#4089DD",
+    pattern: "solid",
+    tint: 0,
     play: () => opponentLastMove,
     remember: (_own, opponent) => {
       opponentLastMove = opponent;
@@ -199,8 +196,8 @@ function createTitForTwoTat(): IteratedStrategy {
     id: "tf2t",
     name: "Tit-for-Two-Tat",
     description: "Forgives one betrayal. Retaliates after two in a row.",
-    emoji: "🫶",
-    color: "#88A8CE",
+    pattern: "double",
+    tint: 1,
     play: () => (consecutiveBetrayals >= 2 ? "D" : "C"),
     remember: (_own, opponent) => {
       if (opponent === "D") {
@@ -222,8 +219,8 @@ function createGrudge(): IteratedStrategy {
     id: "grudge",
     name: "Grudge",
     description: "Cooperates... until you betray once. Then never forgives.",
-    emoji: "😤",
-    color: "#efc701",
+    pattern: "solid",
+    tint: 2,
     play: () => (everBetrayed ? "D" : "C"),
     remember: (_own, opponent) => {
       if (opponent === "D") everBetrayed = true;
@@ -241,8 +238,8 @@ function createPavlov(): IteratedStrategy {
     id: "pavlov",
     name: "Pavlov",
     description: "Repeats what worked. Switches when it doesn't.",
-    emoji: "🔔",
-    color: "#86C448",
+    pattern: "dashed",
+    tint: 1,
     play: () => myLastMove,
     remember: (own, opponent) => {
       // Remember the actual move (including noise-flipped)
@@ -268,8 +265,8 @@ function createProber(): IteratedStrategy {
     name: "Prober",
     description:
       "Tests you with C-D-C-C. If you don't retaliate, exploits you.",
-    emoji: "🔍",
-    color: "#f6b24c",
+    pattern: "dotted",
+    tint: 2,
     play: () => {
       if (testSequence.length > 0) {
         return testSequence.shift()!;
@@ -302,8 +299,8 @@ function createGenerousTitForTat(): IteratedStrategy {
     id: "gtft",
     name: "Generous TFT",
     description: "Like TFT, but forgives 10% of your betrayals.",
-    emoji: "🙏",
-    color: "#66BB6A",
+    pattern: "dashed",
+    tint: 3,
     play: () => {
       if (opponentLastMove === "D" && Math.random() < 0.1) {
         return "C"; // Forgive
@@ -363,18 +360,35 @@ export function createStrategy(id: StrategyId): IteratedStrategy {
 }
 
 /** Get strategy metadata without creating an instance */
+/**
+ * How a strategy is told apart in a chart: its NAME and its THREAD PATTERN,
+ * never a colour of its own (design.md §6). Nine strategies cannot be told
+ * apart by nine hues on a receipt anyway, and one of those hues was
+ * accidentally the same blue as "you".
+ */
+/** Receipt ink plus up to four tints (design.md §6, charts). */
+export const TINTS = [
+  "var(--chart-tint-1)",
+  "var(--chart-tint-2)",
+  "var(--chart-tint-3)",
+  "var(--chart-tint-4)",
+] as const;
+
 export function getStrategyInfo(id: StrategyId): {
   name: string;
   description: string;
-  emoji: string;
-  color: string;
+  pattern: ThreadPattern;
+  tint: number;
+  /** The token to print the bar in. */
+  barColor: string;
 } {
   const s = createStrategy(id);
   return {
     name: s.name,
     description: s.description,
-    emoji: s.emoji,
-    color: s.color,
+    pattern: s.pattern,
+    tint: s.tint,
+    barColor: TINTS[s.tint % TINTS.length],
   };
 }
 
@@ -427,28 +441,24 @@ export function playRepeatedGame(
 export const RandomStrategy: AIStrategy = {
   name: "Random",
   description: "Makes random decisions",
-  emoji: "🎲",
   getMove: () => (Math.random() > 0.5 ? "C" : "D"),
 };
 
 export const AlwaysCooperateStrategy: AIStrategy = {
   name: "Always Cooperate",
   description: "Always chooses to cooperate",
-  emoji: "🤝",
   getMove: () => "C",
 };
 
 export const AlwaysDefectStrategy: AIStrategy = {
   name: "Always Defect",
   description: "Always chooses to defect",
-  emoji: "⚔️",
   getMove: () => "D",
 };
 
 export const TitForTatStrategy: AIStrategy = {
   name: "Tit-for-Tat",
   description: "Copies your last move. Starts with cooperation.",
-  emoji: "🔄",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     return history[history.length - 1];
@@ -458,7 +468,6 @@ export const TitForTatStrategy: AIStrategy = {
 export const GenerousTitForTatStrategy: AIStrategy = {
   name: "Generous Tit-for-Tat",
   description: "Mostly copies you, but forgives occasionally",
-  emoji: "🙏",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     const shouldForgive = Math.random() < 0.1;
@@ -472,7 +481,6 @@ export const GenerousTitForTatStrategy: AIStrategy = {
 export const SuspiciousTitForTatStrategy: AIStrategy = {
   name: "Suspicious Tit-for-Tat",
   description: "Assumes worst, then copies your moves",
-  emoji: "😒",
   getMove: (_history: GameMove[] = []) => {
     if (_history.length === 0) return "D";
     return _history[_history.length - 1];
@@ -482,7 +490,6 @@ export const SuspiciousTitForTatStrategy: AIStrategy = {
 export const WinStayLoseShiftStrategy: AIStrategy = {
   name: "Win-Stay, Lose-Shift",
   description: "Repeats winning moves, switches after losses",
-  emoji: "📈",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     const lastOpponentMove = history[history.length - 1];
@@ -494,7 +501,6 @@ export const WinStayLoseShiftStrategy: AIStrategy = {
 export const PavlovStrategy: AIStrategy = {
   name: "Pavlov",
   description: "Cooperates if the outcome was mutual or both defected",
-  emoji: "🔔",
   getMove: (history: GameMove[] = []) => {
     if (history.length === 0) return "C";
     return history[history.length - 1];
@@ -504,7 +510,6 @@ export const PavlovStrategy: AIStrategy = {
 export const OccasionalDefectorStrategy: AIStrategy = {
   name: "Occasional Defector",
   description: "Usually cooperates, but randomly betrays",
-  emoji: "😈",
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   getMove: (_history: GameMove[] = []) => {
     const defectionRate = 0.15;

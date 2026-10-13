@@ -1,3 +1,4 @@
 node scripts/check-large-files.cjs
 npx secretlint "**/*"
+node scripts/design-check.cjs
 npx lint-staged

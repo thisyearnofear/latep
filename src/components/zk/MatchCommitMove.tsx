@@ -7,9 +7,14 @@ import {
   generateProof,
 } from "../../services/noirProofService";
 import { persistSecrets } from "../../services/localSecretStore";
+import { MOVE_HELPER, MOVE_LABEL } from "../../content/vocabulary";
+import { ReceiptLine, TearLine } from "../receipt";
+import { shortTx } from "../receipt/helpers";
 import { NonceCard } from "./NonceCard";
 import { PayoffMatrixReminder } from "./PayoffMatrixReminder";
 import { VerifiedOnChainCard } from "./VerifiedOnChainCard";
+import "../../styles/tournament.css";
+import "../../styles/zk.css";
 
 interface MatchCommitMoveProps {
   /** Which match phase we're committing for. */
@@ -213,286 +218,100 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
 
   if (!address) {
     return (
-      <div style={{ textAlign: "center", padding: "40px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          Connect your wallet to commit a move
-        </p>
+      <div className="zk-loading">
+        <p>Connect your wallet to commit a move</p>
       </div>
     );
   }
 
   return (
-    <div
-      className="zk-card-container"
-      style={{ maxWidth: "600px", margin: "0 auto" }}
-    >
+    <div className="zk-page">
       <button
         type="button"
         onClick={onBack}
         disabled={isLoadingState}
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--text-muted)",
-          cursor: isLoadingState ? "not-allowed" : "pointer",
-          fontFamily: "var(--font-body)",
-          fontSize: "16px",
-          padding: "8px 0",
-          marginBottom: "16px",
-          opacity: isLoadingState ? 0.5 : 1,
-        }}
+        className="zk-back"
       >
         ← Back
       </button>
 
-      <div
-        className="glass-panel"
-        style={{
-          padding: "24px",
-        }}
-      >
-        <h3
-          style={{
-            margin: "0 0 8px 0",
-            color: "var(--text-primary)",
-            textAlign: "center",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          🏟️ {phaseLabel[phase]}
-        </h3>
-        <p
-          style={{
-            margin: "0 0 24px 0",
-            color: "var(--text-secondary)",
-            textAlign: "center",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          Choose your move. When you let go, a ZK proof binds you — no
-          take-backs.
+      <div className="receipt receipt-edge zk-commit">
+        <h3 className="zk-commit__title">{phaseLabel[phase]}</h3>
+        <p className="zk-commit__lede">
+          Choose your move. When you let go, a proof binds you — no take-backs.
         </p>
 
-        {/* Move selection */}
-        <div style={{ marginBottom: "24px" }}>
-          <div
-            className="zk-move-buttons"
-            style={{
-              display: "flex",
-              gap: "12px",
-              justifyContent: "center",
-            }}
+        {/* Move tiles */}
+        <p className="zk-commit__label">Your move</p>
+        <div className="zk-choices">
+          <button
+            type="button"
+            onClick={() => setSelectedMove("C")}
+            disabled={isLoadingState}
+            aria-pressed={selectedMove === "C"}
+            className={
+              selectedMove === "C" ? "zk-move zk-move--picked" : "zk-move"
+            }
           >
-            <button
-              type="button"
-              onClick={() => setSelectedMove("C")}
-              disabled={isLoadingState}
-              style={{
-                flex: 1,
-                padding: "20px",
-                borderRadius: "12px",
-                border:
-                  selectedMove === "C"
-                    ? "3px solid var(--accent-cooperate)"
-                    : "2px solid var(--border-glass)",
-                background:
-                  selectedMove === "C"
-                    ? "rgba(76, 175, 80, 0.1)"
-                    : "var(--bg-glass-light)",
-                cursor: isLoadingState ? "not-allowed" : "pointer",
-                transition: "transform 0.2s ease, all 0.2s",
-                fontFamily: "var(--font-body)",
-                opacity: isLoadingState ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoadingState)
-                  e.currentTarget.style.transform =
-                    "translateY(-4px) rotate(-3deg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "";
-              }}
-            >
-              <div style={{ fontSize: "32px", marginBottom: "8px" }}>🤝</div>
-              <div
-                style={{
-                  fontWeight: "bold",
-                  color:
-                    selectedMove === "C"
-                      ? "var(--accent-cooperate)"
-                      : "var(--text-primary)",
-                }}
-              >
-                Cooperate
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  marginTop: "4px",
-                }}
-              >
-                You'll catch them
-              </div>
-            </button>
-            <button
-              type="button"
-              onClick={() => setSelectedMove("D")}
-              disabled={isLoadingState}
-              style={{
-                flex: 1,
-                padding: "20px",
-                borderRadius: "12px",
-                border:
-                  selectedMove === "D"
-                    ? "3px solid var(--accent-defect)"
-                    : "2px solid var(--border-glass)",
-                background:
-                  selectedMove === "D"
-                    ? "rgba(244, 67, 54, 0.1)"
-                    : "var(--bg-glass-light)",
-                cursor: isLoadingState ? "not-allowed" : "pointer",
-                transition: "transform 0.2s ease, all 0.2s",
-                fontFamily: "var(--font-body)",
-                opacity: isLoadingState ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoadingState)
-                  e.currentTarget.style.transform =
-                    "translateY(4px) rotate(3deg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "";
-              }}
-            >
-              <div style={{ fontSize: "32px", marginBottom: "8px" }}>⚔️</div>
-              <div
-                style={{
-                  fontWeight: "bold",
-                  color:
-                    selectedMove === "D"
-                      ? "var(--accent-defect)"
-                      : "var(--text-primary)",
-                }}
-              >
-                Defect
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  marginTop: "4px",
-                }}
-              >
-                You'll step aside
-              </div>
-            </button>
-          </div>
+            <span className="zk-move__name">{MOVE_LABEL.C}</span>
+            <span className="zk-move__note">{MOVE_HELPER.C}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedMove("D")}
+            disabled={isLoadingState}
+            aria-pressed={selectedMove === "D"}
+            className={
+              selectedMove === "D" ? "zk-move zk-move--picked" : "zk-move"
+            }
+          >
+            <span className="zk-move__name">{MOVE_LABEL.D}</span>
+            <span className="zk-move__note">{MOVE_HELPER.D}</span>
+          </button>
         </div>
 
         <PayoffMatrixReminder />
 
-        <NonceCard nonce={savedNonce} />
-
-        {/* On-chain celebration beat */}
-        {status === "verified" && <VerifiedOnChainCard hash={verifiedTxHash} />}
-
-        {/* Status / debug */}
-        {status !== "choose" && status !== "verified" && (
-          <div
-            style={{
-              background: "var(--bg-glass-light)",
-              borderRadius: "8px",
-              padding: "16px",
-              marginBottom: "16px",
-              fontSize: "12px",
-              color: "var(--text-secondary)",
-              fontFamily: "monospace",
-              textAlign: "center",
-            }}
-          >
+        {/* The commit stub: below the tear line, each line prints only when
+            the state behind it is real. */}
+        {status !== "choose" && (
+          <div className="zk-stub" aria-live="polite">
+            <TearLine label="The seal" />
+            <ReceiptLine
+              label="Seal"
+              value={status === "generating" ? "Sealing…" : "Sealed"}
+            />
+            <ReceiptLine
+              label="Proof"
+              value={status === "generating" ? "—" : "generated"}
+            />
+            <ReceiptLine
+              label="Submitted"
+              value={
+                verifiedTxHash
+                  ? shortTx(verifiedTxHash)
+                  : status === "submitting"
+                    ? "sending…"
+                    : "—"
+              }
+            />
             {status === "generating" && (
-              <div>
-                <div
-                  className="tf-falling"
-                  style={{
-                    fontSize: "36px",
-                    marginBottom: "8px",
-                    display: "inline-block",
-                  }}
-                >
-                  🧍
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "14px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  You're falling... your ZK proof is binding your move.
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                    marginTop: "4px",
-                  }}
-                >
-                  Creating a zero-knowledge proof that your move is valid — this
-                  takes a few seconds.
-                </div>
-              </div>
+              <p className="zk-stub__hint">
+                Proving your move is valid without showing it — this takes a few
+                seconds.
+              </p>
             )}
             {status === "submitting" && (
-              <div>
-                <div
-                  className="tf-suspended"
-                  style={{
-                    fontSize: "36px",
-                    marginBottom: "8px",
-                    display: "inline-block",
-                  }}
-                >
-                  🕳️
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "14px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Suspended in the air — committing to the blockchain...
-                </div>
-              </div>
+              <p className="zk-stub__hint">
+                Sending the sealed move to the contract…
+              </p>
             )}
-            {showTech && debug && (
-              <div style={{ marginTop: "4px" }}>{debug}</div>
-            )}
+            {showTech && debug && <p className="zk-tech__log">{debug}</p>}
           </div>
         )}
 
         {status !== "choose" && status !== "verified" && (
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              marginBottom: "16px",
-              fontFamily: "var(--font-body)",
-              fontSize: "12px",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-            }}
-          >
+          <label className="zk-tech">
             <input
               type="checkbox"
               checked={showTech}
@@ -502,28 +321,19 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
           </label>
         )}
 
+        <NonceCard nonce={savedNonce} />
+
+        {/* On-chain celebration beat */}
+        {status === "verified" && <VerifiedOnChainCard hash={verifiedTxHash} />}
+
         {txError && (
-          <p
-            style={{
-              color: "var(--accent-defect, #F44336)",
-              marginBottom: "16px",
-              textAlign: "center",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            ⚠️ {txError}
+          <p className="zk-error" role="alert">
+            {txError}
           </p>
         )}
         {error && (
-          <p
-            style={{
-              color: "var(--accent-defect, #F44336)",
-              marginBottom: "16px",
-              textAlign: "center",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            ⚠️ {error}
+          <p className="zk-error" role="alert">
+            {error}
           </p>
         )}
 
@@ -531,25 +341,15 @@ export const MatchCommitMove: React.FC<MatchCommitMoveProps> = ({
           type="button"
           onClick={() => void handleCommit()}
           disabled={!selectedMove || isLoadingState}
-          style={{
-            background: "var(--accent-violet)",
-            color: "white",
-            border: "none",
-            borderRadius: "var(--radius-sm)",
-            padding: "14px",
-            fontFamily: "var(--font-body)",
-            fontSize: "18px",
-            cursor: "pointer",
-            width: "100%",
-          }}
+          className="till-button till-button--primary zk-submit"
         >
           {isLoadingState
             ? status === "generating"
-              ? " Falling..."
+              ? "Sealing…"
               : status === "submitting"
-                ? " Committing..."
-                : " Verified!"
-            : "✋ Let go"}
+                ? "Committing…"
+                : "Sealed"
+            : "Let go"}
         </button>
       </div>
     </div>

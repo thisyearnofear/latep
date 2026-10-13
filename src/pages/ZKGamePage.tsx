@@ -19,12 +19,12 @@ import {
 import { StickManScene } from "../components/zk/StickManScene";
 import { WalletSetupHelper } from "../components/WalletSetupHelper";
 import ConnectAccount from "../components/ConnectAccount";
-import { ShimmerButton } from "../components/ui/ShimmerButton";
-import { ElectricButton } from "../components/ui/ElectricButton";
 import { useAchievementToast } from "../components/ui/AchievementToast";
 import { useMascot } from "../components/MascotContext";
 import { getUnlockedAchievements } from "../components/ui/AchievementBadge";
 import AudioManager from "../components/AudioManager";
+import "../styles/tournament.css";
+import "../styles/zk.css";
 
 type ViewState =
   | { type: "lobby" }
@@ -41,19 +41,15 @@ type ViewState =
       phase: "startNext" | "joinNext" | "rematch";
     };
 
-/** Card-like div with consistent styling */
+/** A counter panel — the flat surface game facts sit on. */
 const CardDiv: React.FC<{
   children: React.ReactNode;
   style?: React.CSSProperties;
   className?: string;
 }> = ({ children, style, className }) => (
   <div
-    className={className ? `glass-panel ${className}` : "glass-panel"}
-    style={{
-      borderRadius: "12px",
-      padding: "16px",
-      ...style,
-    }}
+    className={className ? `zk-panel ${className}` : "zk-panel"}
+    style={style}
   >
     {children}
   </div>
@@ -91,8 +87,11 @@ export const ZKGamePage: React.FC = () => {
       revealScrolledFor.current !== view.gameId
     ) {
       revealScrolledFor.current = view.gameId;
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       revealCardRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: reduceMotion ? "auto" : "smooth",
         block: "center",
       });
     }
@@ -344,7 +343,7 @@ export const ZKGamePage: React.FC = () => {
     // Show game result view if resolved or both revealed
     if (isResolved) {
       return (
-        <div className="tf-fade-in-up" style={{ padding: "24px" }}>
+        <div className="zk-page tf-fade-in-up">
           <GameResult
             gameId={view.gameId}
             gameState={currentGame}
@@ -357,10 +356,7 @@ export const ZKGamePage: React.FC = () => {
     }
 
     return (
-      <div
-        className="zk-page-container tf-fade-in-up"
-        style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}
-      >
+      <div className="zk-page tf-fade-in-up">
         {/* Unified header + step indicator */}
         <ZKStepIndicator
           step={step}
@@ -382,108 +378,52 @@ export const ZKGamePage: React.FC = () => {
           stake={Number(currentGame.stake) / 10_000_000}
         />
 
-        {/* Game status card */}
-        <CardDiv
-          style={{ padding: "24px", marginBottom: "20px" }}
-          className={opponentJoined ? "tf-joined-glow" : undefined}
-        >
-          <h4
-            style={{
-              margin: "0 0 16px 0",
-              color: "var(--text-primary)",
-              textAlign: "center",
-              fontFamily: "var(--font-body)",
-            }}
-          >
+        {/* Game status card — facts on the counter, "you" in your colour */}
+        <CardDiv className="zk-panel--centred">
+          <h4 className="zk-section-title">
             {currentGame.status === "AwaitingPlayer2"
-              ? "⏳ Waiting for opponent to join..."
+              ? "Waiting for an opponent to join"
               : currentGame.status === "BothCommitted"
-                ? "🔐 Moves Committed — Reveal Now!"
-                : `📊 Game ${currentGame.status}`}
+                ? "Both moves are sealed — time to reveal"
+                : `Game ${currentGame.status}`}
           </h4>
 
-          {/* Opponent joined celebratory banner */}
+          {/* Opponent joined — words and a rule, not a glow */}
           {opponentJoined && (
-            <div
-              className="tf-joined-text"
-              style={{
-                textAlign: "center",
-                marginBottom: "16px",
-                padding: "10px",
-                borderRadius: "var(--radius-md)",
-                background: "rgba(74, 222, 128, 0.12)",
-                border: "1px solid rgba(74, 222, 128, 0.3)",
-                fontFamily: "var(--font-body)",
-                fontSize: "16px",
-                fontWeight: 600,
-                color: "var(--accent-cooperate)",
-              }}
-            >
-              🎉 Opponent joined!
-            </div>
+            <p className="zk-joined">Opponent joined — both moves sealed.</p>
           )}
 
-          <div
-            className="zk-game-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-              fontSize: "14px",
-            }}
-          >
+          <dl className="zk-grid">
             <div>
-              <p style={{ margin: "0 0 2px", color: "var(--text-secondary)" }}>
-                Player 1
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  color: address === currentGame.player1 ? "#4CAF50" : "#333",
-                  fontWeight:
-                    address === currentGame.player1 ? "bold" : "normal",
-                }}
-              >
-                {currentGame.player1.slice(0, 8)}...
-                {address === currentGame.player1 && " (You)"}
-              </p>
+              <dt>Player 1</dt>
+              <dd className={address === currentGame.player1 ? "zk-you" : ""}>
+                {currentGame.player1.slice(0, 8)}…
+                {address === currentGame.player1 && " (you)"}
+              </dd>
             </div>
             <div>
-              <p style={{ margin: "0 0 2px", color: "var(--text-secondary)" }}>
-                Player 2
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  color: address === currentGame.player2 ? "#F44336" : "#333",
-                  fontWeight:
-                    address === currentGame.player2 ? "bold" : "normal",
-                }}
-              >
+              <dt>Player 2</dt>
+              <dd className={address === currentGame.player2 ? "zk-you" : ""}>
                 {currentGame.player2
-                  ? `${currentGame.player2.slice(0, 8)}...${address === currentGame.player2 ? " (You)" : ""}`
+                  ? `${currentGame.player2.slice(0, 8)}…${address === currentGame.player2 ? " (you)" : ""}`
                   : "—"}
-              </p>
+              </dd>
             </div>
             <div>
-              <p style={{ margin: "0 0 2px", color: "var(--text-secondary)" }}>
-                Stake
-              </p>
-              <p style={{ margin: 0, fontWeight: "bold", color: "#667eea" }}>
+              <dt>Stake</dt>
+              <dd>
                 {(BigInt(currentGame.stake) / BigInt(10_000_000)).toString()}{" "}
                 XLM
-              </p>
+              </dd>
             </div>
             <div>
-              <p style={{ margin: "0 0 2px", color: "var(--text-secondary)" }}>
-                Moves
-              </p>
-              <p style={{ margin: 0, color: "var(--text-primary)" }}>
-                {currentGame.move1 ? "✅" : "⏳"} P1{" "}
-                {currentGame.move2 ? "✅" : "⏳"} P2
-              </p>
+              <dt>Moves</dt>
+              <dd>
+                P1 {currentGame.move1 ? "sealed" : "waiting"} · P2{" "}
+                {currentGame.move2 ? "sealed" : "waiting"}
+              </dd>
             </div>
-          </div>
+          </dl>
         </CardDiv>
 
         {/* Reveal move section (when BothCommitted) */}
@@ -508,23 +448,9 @@ export const ZKGamePage: React.FC = () => {
             const canRefund = now > deadline && deadline > 0;
             if (!canRefund) return null;
             return (
-              <CardDiv
-                style={{
-                  textAlign: "center",
-                  padding: "16px",
-                  marginTop: "16px",
-                  background: "rgba(100, 116, 139, 0.05)",
-                  border: "1px solid rgba(100, 116, 139, 0.2)",
-                }}
-              >
-                <p
-                  style={{
-                    color: "#64748b",
-                    margin: "0 0 8px",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  Reveal deadline passed and neither player revealed.
+              <CardDiv className="zk-panel--centred">
+                <p className="zk-lede">
+                  The reveal deadline passed and neither player revealed.
                 </p>
                 <button
                   type="button"
@@ -534,20 +460,9 @@ export const ZKGamePage: React.FC = () => {
                     });
                   }}
                   disabled={txLoading}
-                  style={{
-                    background: "transparent",
-                    color: "var(--text-secondary)",
-                    border: "1px solid var(--border-glass)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "8px 16px",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "var(--text-sm)",
-                    cursor: "pointer",
-                  }}
+                  className="till-button"
                 >
-                  {txLoading
-                    ? "⏳ Processing..."
-                    : "↩️ Claim Refund (Split Escrow)"}
+                  {txLoading ? "Processing…" : "Claim refund (split escrow)"}
                 </button>
               </CardDiv>
             );
@@ -562,103 +477,26 @@ export const ZKGamePage: React.FC = () => {
             const canCancel = now > deadline && deadline > 0;
             const timeLeft = deadline > 0 ? Math.max(0, deadline - now) : 0;
             return (
-              <CardDiv
-                style={{
-                  textAlign: "center",
-                  padding: "24px",
-                  background: "rgba(245, 158, 11, 0.05)",
-                  border: "1px solid rgba(245, 158, 11, 0.2)",
-                }}
-              >
-                {/* Pulsing waiting indicator */}
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "10px",
-                    marginBottom: "14px",
-                  }}
-                >
-                  <span
-                    className="tf-waiting-dot"
-                    style={{
-                      display: "inline-block",
-                      width: "10px",
-                      height: "10px",
-                      borderRadius: "50%",
-                      background: "#f59e0b",
-                      boxShadow: "0 0 12px rgba(245, 158, 11, 0.6)",
-                    }}
-                  />
-                  <p
-                    className="tf-waiting-pulse"
-                    style={{
-                      color: "#f59e0b",
-                      margin: 0,
-                      fontWeight: "bold",
-                      fontFamily: "var(--font-body)",
-                    }}
-                  >
-                    Waiting for opponent...
-                  </p>
+              <CardDiv className="zk-panel--centred">
+                <p className="zk-section-title">Waiting for an opponent…</p>
+
+                {/* The game id, printed big — it's the thing you share. */}
+                <div className="zk-gameid">
+                  <span className="zk-gameid__label">Share this game id</span>
+                  <span className="zk-gameid__value">#{view.gameId}</span>
                 </div>
 
-                {/* Prominent game ID for sharing */}
-                <div
-                  style={{
-                    margin: "0 0 16px",
-                    padding: "12px",
-                    borderRadius: "var(--radius-md)",
-                    background: "var(--bg-glass-light)",
-                    border: "1px solid var(--border-glass)",
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: "0 0 4px",
-                      color: "var(--text-secondary)",
-                      fontFamily: "var(--font-body)",
-                    }}
-                  >
-                    Share your Game ID
-                  </p>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontSize: "28px",
-                      fontWeight: 600,
-                      color: "var(--accent-violet)",
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    #{view.gameId}
-                  </div>
-                </div>
-
-                {/* Copy game link button */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <ShimmerButton
-                    size="sm"
+                <div className="zk-actions zk-panel__actions">
+                  <button
+                    type="button"
+                    className="till-button"
                     onClick={() => handleCopyGameLink(view.gameId)}
                   >
-                    {copiedLink ? "✅ Copied!" : "🔗 Copy Game Link"}
-                  </ShimmerButton>
+                    {copiedLink ? "Link copied" : "Copy game link"}
+                  </button>
                 </div>
 
-                <p
-                  style={{
-                    color: "var(--text-secondary)",
-                    marginTop: "8px",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
+                <p className="zk-lede">
                   {canCancel
                     ? "Commit deadline passed. You can cancel to reclaim your stake."
                     : `Time remaining for opponent: ${Math.floor(timeLeft / 60)}m ${timeLeft % 60}s`}
@@ -672,21 +510,9 @@ export const ZKGamePage: React.FC = () => {
                       });
                     }}
                     disabled={txLoading}
-                    style={{
-                      marginTop: "12px",
-                      fontFamily: "var(--font-body)",
-                      background: "transparent",
-                      color: "var(--text-secondary)",
-                      border: "1px solid var(--border-glass)",
-                      borderRadius: "var(--radius-sm)",
-                      padding: "8px 16px",
-                      fontSize: "var(--text-sm)",
-                      cursor: "pointer",
-                    }}
+                    className="till-button zk-row__btn"
                   >
-                    {txLoading
-                      ? "⏳ Cancelling..."
-                      : "↩️ Cancel & Reclaim Stake"}
+                    {txLoading ? "Cancelling…" : "Cancel and reclaim stake"}
                   </button>
                 )}
               </CardDiv>
@@ -695,53 +521,26 @@ export const ZKGamePage: React.FC = () => {
 
         {/* Resolve button if both revealed */}
         {currentGame.status === "BothCommitted" && bothRevealed && (
-          <div style={{ marginTop: "16px" }}>
-            <CardDiv
-              style={{
-                textAlign: "center",
-                padding: "16px",
-                background: "rgba(16, 185, 129, 0.05)",
-                border: "1px solid rgba(16, 185, 129, 0.2)",
-              }}
-            >
-              <p
-                style={{
-                  color: "#10b981",
-                  margin: "0 0 12px",
-                  fontWeight: "bold",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                ✅ Both players revealed! Resolve to distribute payouts.
-              </p>
-              <GameResult
-                gameId={view.gameId}
-                gameState={currentGame}
-                onBack={handleBackToLobby}
-                onPlayAgain={handlePlayAgain}
-              />
-            </CardDiv>
-          </div>
+          <CardDiv className="zk-panel--centred">
+            <p className="zk-section-title">
+              Both players revealed — resolve to settle the round.
+            </p>
+            <GameResult
+              gameId={view.gameId}
+              gameState={currentGame}
+              onBack={handleBackToLobby}
+              onPlayAgain={handlePlayAgain}
+            />
+          </CardDiv>
         )}
 
         {/* If awaiting player 2 and spectator */}
         {currentGame.status === "AwaitingPlayer2" &&
           address !== currentGame.player1 && (
-            <CardDiv
-              style={{
-                textAlign: "center",
-                padding: "24px",
-              }}
-            >
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                🔍 This game is waiting for a second player.
-              </p>{" "}
+            <CardDiv className="zk-panel--centred">
+              <p className="zk-lede">
+                This round is waiting for a second player.
+              </p>
               <button
                 type="button"
                 onClick={() =>
@@ -752,58 +551,23 @@ export const ZKGamePage: React.FC = () => {
                   )
                 }
                 disabled={!address}
-                style={{
-                  marginTop: "12px",
-                  fontFamily: "var(--font-body)",
-                  background: "var(--accent-violet)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "var(--radius-sm)",
-                  padding: "8px 16px",
-                  fontSize: "var(--text-sm)",
-                  cursor: "pointer",
-                }}
+                className="till-button till-button--primary"
               >
-                🎮 Join This Game
+                Join this round
               </button>
             </CardDiv>
           )}
 
         {/* Error state if game not found */}
         {!currentGame && (
-          <CardDiv
-            style={{
-              textAlign: "center",
-              padding: "24px",
-              background: "rgba(244, 67, 54, 0.05)",
-              border: "1px solid rgba(244, 67, 54, 0.2)",
-            }}
-          >
-            <p
-              style={{
-                color: "#F44336",
-                margin: 0,
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              ⚠️ Game not found
-            </p>
+          <CardDiv className="zk-panel--centred">
+            <p className="zk-error">Game not found.</p>
             <button
               type="button"
               onClick={handleBackToLobby}
-              style={{
-                marginTop: "12px",
-                fontFamily: "var(--font-body)",
-                background: "transparent",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border-glass)",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
+              className="till-button"
             >
-              ← Back to Lobby
+              ← Back to lobby
             </button>
           </CardDiv>
         )}
@@ -815,16 +579,8 @@ export const ZKGamePage: React.FC = () => {
   // If viewing a specific game but no data loaded yet
   if (view.type === "game" && !currentGame) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "60px",
-          color: "var(--text-muted)",
-          fontFamily: "var(--font-body)",
-        }}
-      >
-        <div style={{ fontSize: "40px", marginBottom: "16px" }}>⏳</div>
-        <p style={{ margin: 0 }}>Loading game...</p>
+      <div className="zk-loading">
+        <p>Loading game…</p>
       </div>
     );
   }
@@ -832,7 +588,7 @@ export const ZKGamePage: React.FC = () => {
   // Match setup flow
   if (view.type === "matchSetup") {
     return (
-      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
+      <div className="zk-page tf-fade-in-up">
         <MatchSetup
           onCreateMatch={handleMatchSetupConfirm}
           onBack={handleMatchSetupBack}
@@ -855,7 +611,7 @@ export const ZKGamePage: React.FC = () => {
               ? "create"
               : "join";
     return (
-      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
+      <div className="zk-page tf-fade-in-up">
         <MatchCommitMove
           phase={phase}
           matchId={view.matchId}
@@ -909,10 +665,7 @@ export const ZKGamePage: React.FC = () => {
               : undefined;
 
     return (
-      <div
-        className="zk-page-container tf-fade-in-up"
-        style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}
-      >
+      <div className="zk-page tf-fade-in-up">
         {/* Unified header + step indicator for current round */}
         {currentGame && !matchCompleted && !matchCancelled ? (
           <ZKStepIndicator
@@ -945,108 +698,64 @@ export const ZKGamePage: React.FC = () => {
 
         {/* Completed match: winner + rematch */}
         {matchCompleted && (
-          <CardDiv
-            style={{
-              textAlign: "center",
-              padding: "24px",
-              background: "rgba(16, 185, 129, 0.05)",
-              border: "1px solid rgba(16, 185, 129, 0.2)",
-            }}
-          >
-            <p
-              style={{
-                color: "#10b981",
-                margin: "0 0 16px",
-                fontWeight: "bold",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              🏆 Match complete! Start a new match with the same opponent.
+          <CardDiv className="zk-panel--centred">
+            <p className="zk-section-title">
+              Match complete — start a new one with the same opponent, or head
+              back.
             </p>
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-                flexWrap: "wrap",
-              }}
-            >
-              <ElectricButton color="violet" size="md" onClick={handleRematch}>
-                🔄 Rematch
-              </ElectricButton>
-              <ShimmerButton size="md" onClick={handleBackToLobby}>
-                ← Back to Lobby
-              </ShimmerButton>
+            <div className="zk-actions zk-panel__actions">
+              <button
+                type="button"
+                className="till-button till-button--primary"
+                onClick={handleRematch}
+              >
+                Rematch
+              </button>
+              <button
+                type="button"
+                className="till-button"
+                onClick={handleBackToLobby}
+              >
+                ← Back to lobby
+              </button>
             </div>
           </CardDiv>
         )}
 
         {/* Cancelled match */}
         {matchCancelled && (
-          <CardDiv
-            style={{
-              textAlign: "center",
-              padding: "24px",
-              background: "rgba(239, 68, 68, 0.05)",
-              border: "1px solid rgba(239, 68, 68, 0.2)",
-            }}
-          >
-            <p
-              style={{
-                color: "#ef4444",
-                margin: "0 0 16px",
-                fontWeight: "bold",
-                fontFamily: "var(--font-body)",
-              }}
+          <CardDiv className="zk-panel--centred">
+            <p className="zk-error">This match was cancelled.</p>
+            <button
+              type="button"
+              className="till-button"
+              onClick={handleBackToLobby}
             >
-              ✖️ This match was cancelled.
-            </p>
-            <ShimmerButton size="md" onClick={handleBackToLobby}>
-              ← Back to Lobby
-            </ShimmerButton>
+              ← Back to lobby
+            </button>
           </CardDiv>
         )}
 
         {/* Awaiting next round: commit next round prompt */}
         {awaitingNextRound && !matchCompleted && (
-          <CardDiv
-            style={{
-              textAlign: "center",
-              padding: "24px",
-              background: "rgba(139, 92, 246, 0.05)",
-              border: "1px solid rgba(139, 92, 246, 0.2)",
-            }}
-          >
+          <CardDiv className="zk-panel--centred">
             {view.role === "p1" ? (
               <>
-                <p
-                  style={{
-                    color: "var(--accent-violet)",
-                    margin: "0 0 16px",
-                    fontWeight: "bold",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  ⏭️ Round resolved. Commit your next move to start round{" "}
+                <p className="zk-lede">
+                  Round resolved. Commit your next move to start round{" "}
                   {currentMatch.current_round + 1}.
                 </p>
-                <ElectricButton
-                  color="violet"
-                  size="md"
+                <button
+                  type="button"
+                  className="till-button till-button--primary"
                   onClick={() => handleStartNextRound(view.matchId)}
                 >
-                  ▶️ Commit Next Round
-                </ElectricButton>
+                  Commit next round
+                </button>
               </>
             ) : (
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                ⏳ Waiting for opponent to start the next round...
+              <p className="zk-lede">
+                Waiting for your opponent to start the next round…
               </p>
             )}
           </CardDiv>
@@ -1058,75 +767,41 @@ export const ZKGamePage: React.FC = () => {
           !matchCancelled &&
           currentGame && (
             <>
-              <CardDiv
-                style={{ padding: "24px", marginBottom: "20px" }}
-                className={opponentJoined ? "tf-joined-glow" : undefined}
-              >
-                <h4
-                  style={{
-                    margin: "0 0 16px 0",
-                    color: "var(--text-primary)",
-                    textAlign: "center",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  🎮 Round {currentMatch.current_round} — Game #
+              <CardDiv className="zk-panel--centred">
+                <h4 className="zk-section-title">
+                  Round {currentMatch.current_round} — Game #
                   {currentMatch.current_game_id}
                 </h4>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
-                    gap: "12px",
-                    fontSize: "14px",
-                  }}
-                >
+                {opponentJoined && (
+                  <p className="zk-joined">
+                    Opponent joined — both moves sealed.
+                  </p>
+                )}
+                <dl className="zk-grid">
                   <div>
-                    <p
-                      style={{
-                        margin: "0 0 2px",
-                        color: "var(--text-secondary)",
-                      }}
+                    <dt>Player 1</dt>
+                    <dd
+                      className={
+                        address === currentGame.player1 ? "zk-you" : ""
+                      }
                     >
-                      Player 1
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        color:
-                          address === currentGame.player1 ? "#4CAF50" : "#333",
-                        fontWeight:
-                          address === currentGame.player1 ? "bold" : "normal",
-                      }}
-                    >
-                      {currentGame.player1.slice(0, 8)}...
-                      {address === currentGame.player1 && " (You)"}
-                    </p>
+                      {currentGame.player1.slice(0, 8)}…
+                      {address === currentGame.player1 && " (you)"}
+                    </dd>
                   </div>
                   <div>
-                    <p
-                      style={{
-                        margin: "0 0 2px",
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      Player 2
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        color:
-                          address === currentGame.player2 ? "#F44336" : "#333",
-                        fontWeight:
-                          address === currentGame.player2 ? "bold" : "normal",
-                      }}
+                    <dt>Player 2</dt>
+                    <dd
+                      className={
+                        address === currentGame.player2 ? "zk-you" : ""
+                      }
                     >
                       {currentGame.player2
-                        ? `${currentGame.player2.slice(0, 8)}...${address === currentGame.player2 ? " (You)" : ""}`
+                        ? `${currentGame.player2.slice(0, 8)}…${address === currentGame.player2 ? " (you)" : ""}`
                         : "—"}
-                    </p>
+                    </dd>
                   </div>
-                </div>
+                </dl>
               </CardDiv>
 
               {/* Reveal move section */}
@@ -1142,7 +817,7 @@ export const ZKGamePage: React.FC = () => {
 
               {/* Resolve / result when both revealed */}
               {currentGame.status === "BothCommitted" && bothRevealed && (
-                <div style={{ marginTop: "16px" }}>
+                <div className="zk-result-slot">
                   <GameResult
                     gameId={view.gameId}
                     gameState={currentGame}
@@ -1164,16 +839,8 @@ export const ZKGamePage: React.FC = () => {
   // Match view loading state
   if (view.type === "match" && !currentMatch) {
     return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "60px",
-          color: "var(--text-muted)",
-          fontFamily: "var(--font-body)",
-        }}
-      >
-        <div style={{ fontSize: "40px", marginBottom: "16px" }}>⏳</div>
-        <p style={{ margin: 0 }}>Loading match...</p>
+      <div className="zk-loading">
+        <p>Loading match…</p>
       </div>
     );
   }
@@ -1183,7 +850,7 @@ export const ZKGamePage: React.FC = () => {
     // If we came from MatchSetup, use the match commit flow instead.
     if (pendingMatchSetup) {
       return (
-        <div className="tf-fade-in-up" style={{ padding: "24px" }}>
+        <div className="zk-page tf-fade-in-up">
           <MatchCommitMove
             phase="create"
             matchId={0}
@@ -1212,7 +879,7 @@ export const ZKGamePage: React.FC = () => {
       );
     }
     return (
-      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
+      <div className="zk-page tf-fade-in-up">
         <ZKStepIndicator
           step="commit"
           onBack={handleBackToLobby}
@@ -1230,7 +897,7 @@ export const ZKGamePage: React.FC = () => {
   // Join game flow
   if (view.type === "join") {
     return (
-      <div className="tf-fade-in-up" style={{ padding: "24px" }}>
+      <div className="zk-page tf-fade-in-up">
         <ZKStepIndicator
           step="commit"
           gameId={view.gameId}
@@ -1251,16 +918,7 @@ export const ZKGamePage: React.FC = () => {
 
   // Lobby
   return (
-    <div
-      className="zk-page-container tf-fade-in-up"
-      style={{
-        padding: "24px",
-        minHeight: "calc(100vh - 80px)",
-        background: !address
-          ? "linear-gradient(135deg, #0a0e1a 0%, #141a2e 50%, #1a1f3a 100%)"
-          : undefined,
-      }}
-    >
+    <div className="zk-page tf-fade-in-up">
       <OnboardingOverlay />
 
       {/* Wallet setup helper — shows when wallet not connected or not funded */}
@@ -1268,47 +926,19 @@ export const ZKGamePage: React.FC = () => {
 
       {/* Connect prompt (only if wallet helper didn't cover it) */}
       {!address && (
-        <div
-          className="glass-panel"
-          style={{
-            textAlign: "center",
-            padding: "32px 24px",
-            marginBottom: "24px",
-            maxWidth: "480px",
-            margin: "0 auto 24px",
-            borderColor: "rgba(102,126,234,0.2)",
-          }}
-        >
+        <div className="zk-panel zk-panel--centred zk-setup">
           <ConnectAccount />
         </div>
       )}
 
-      {/* Nav to main game */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "24px",
-        }}
-      >
+      <div className="zk-head">
         <div />
         <button
           type="button"
           onClick={() => void navigate("/")}
-          style={{
-            background: "var(--bg-glass-light)",
-            border: "1px solid var(--border-glass)",
-            color: "var(--text-secondary)",
-            cursor: "pointer",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            padding: "8px 16px",
-            borderRadius: "var(--radius-md)",
-            transition: "all 0.3s var(--ease-out)",
-          }}
+          className="till-button"
         >
-          ← Back to Tutorial
+          ← Back to tutorial
         </button>
       </div>
 

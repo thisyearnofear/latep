@@ -1,0 +1,259 @@
+/* ============================================================================
+ * The Opponents — lesson chapter "Meet the Opponents" (ticket A4 remainder).
+ *
+ * The lesson column IS the receipt (learning.css .lesson-copy), so nothing here
+ * is a panel: the scoreboard, the outcome, the move help and the strategy note
+ * are printed straight onto it and grouped with dashed rules (design.md §5).
+ *
+ * Text rules are written as `.lesson-copy .opponents-*` because learning.css
+ * styles `.lesson-copy p` with a higher specificity than a bare class — an
+ * unprefixed rule would silently lose its size and its faded ink.
+ * ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+ * The pick list: strategy rows printed ON the lesson receipt
+ *
+ * `StrategyCard` (visual/StrategyCard.tsx, ticket B6) is built as a COUNTER
+ * card: counter-2 fill, counter text. On the tournament page that is correct;
+ * dropped into this chapter it put nine dark panels inside a light receipt,
+ * with near-white names on a near-white page. `.narrative-strategies` is used
+ * by this slide only, so the fix lives here and touches no other file: the
+ * cards stop being panels and become printed rows — no fill, one dashed rule
+ * closing the list, the tint left to the swatch and the thread rule alone
+ * (design.md §5 and §6). Selecting one is a row on stock, not a lifted card.
+ * -------------------------------------------------------------------------- */
+
+.lesson-copy .narrative-strategies .strategy-card {
+  background: transparent;
+  border: none;
+  border-left: 3px solid currentColor;
+  border-radius: 0;
+  padding: var(--space-2xs) 0 var(--space-3xs) var(--space-xs);
+  overflow: visible;
+  transition: background-color var(--dur-short) var(--ease-out);
+}
+
+/* One full-width rule closes the pick list; the grid's own gaps separate the
+   rows, so no rule is drawn per card (a per-card rule would break against the
+   column count, which learning.css changes at two widths). */
+.lesson-copy > .narrative-strategies {
+  padding-bottom: var(--space-2xs);
+  border-bottom: 1px dashed var(--color-receipt-rule);
+}
+
+.lesson-copy .narrative-strategies .strategy-card--interactive:hover {
+  transform: none;
+  background: var(--color-receipt-2);
+}
+
+.lesson-copy .narrative-strategies .strategy-card__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+/* The pattern swatch is the card's only decoration; the tint that
+   `chart-tint-N` puts on `currentColor` is what it and the left rule print in,
+   so the name stays ink and never relies on a tint for meaning (design.md §6). */
+.lesson-copy .narrative-strategies .strategy-card__swatch {
+  width: 32px;
+  height: 3px;
+  margin: 0 0 var(--space-3xs);
+}
+
+/* ----------------------------------------------------------------------------
+ * Scoreboard
+ *
+ * Blue is you and amber is your partner, always (design.md §3); on a receipt
+ * that is the print variant of each thread colour. The middle column carries
+ * the round and the opponent's name, so a long name ("Always Cooperate")
+ * breaks inside its own track instead of pushing the receipt past 320px
+ * (design.md §10).
+ * -------------------------------------------------------------------------- */
+
+.opponents-scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* Bottom-aligned: the middle column's label wraps to two lines at 320px, and
+     the two scores should still sit on one line with the name. */
+  align-items: end;
+  gap: var(--space-2xs) var(--space-sm);
+  margin: 0;
+}
+
+.opponents-stat {
+  min-width: 0;
+  margin: 0;
+}
+
+.lesson-copy .opponents-stat-label {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .opponents-stat-value {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-print);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-receipt-ink);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* The opponent's name is a name, not a printed figure: body face, so it reads
+   as the line the round is against rather than as a score. */
+.lesson-copy .opponents-stat-name {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: normal;
+}
+
+.opponents-stat--you .opponents-stat-value {
+  color: var(--color-you-print);
+}
+
+.opponents-stat--partner .opponents-stat-value {
+  color: var(--color-partner-print);
+}
+
+/* ----------------------------------------------------------------------------
+ * Outcome, prompt, verdict, note
+ *
+ * Only one of the outcome line or the verdict follows the scoreboard, and
+ * .lesson-copy draws its rule after a text element only — so the rules are
+ * drawn here, on whichever of these blocks is present.
+ * -------------------------------------------------------------------------- */
+
+.lesson-copy
+  > :is(
+    .opponents-outcome,
+    .opponents-prompt-block,
+    .opponents-verdict,
+    .opponents-note
+  ) {
+  margin-top: 0;
+  padding-top: var(--space-xs);
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+/* The outcome word comes from content/vocabulary.ts and is printed with its
+   sentence: an outcome is never carried by colour alone (design.md §7), and
+   stamp red stays off this line entirely. */
+.lesson-copy .opponents-outcome {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.opponents-outcome:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.opponents-prompt-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.lesson-copy .opponents-prompt {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+}
+
+/* The helper lines under the move names, verbatim from vocabulary.ts
+   (design.md §9). */
+.lesson-copy .opponents-help {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+.lesson-copy .opponents-help strong {
+  color: var(--color-receipt-ink);
+  font-weight: 700;
+}
+
+/* Headings and lead lines are roman, never italic (design.md §4). */
+.lesson-copy .opponents-verdict {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .opponents-note {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .opponents-note strong {
+  color: var(--color-receipt-ink);
+  font-weight: 700;
+}
+
+@media (max-width: 400px) {
+  .opponents-scoreboard {
+    gap: var(--space-3xs);
+  }
+
+  .lesson-copy .opponents-stat-value {
+    font-size: var(--text-lg);
+  }
+
+  .lesson-copy .opponents-verdict {
+    font-size: var(--text-lg);
+  }
+}
+
+/* Nothing in this chapter animates: the reveal belongs to the scene (design.md
+   §8). The guard keeps any inherited transition or animation off the receipt. */
+@media (prefers-reduced-motion: reduce) {
+  .lesson-copy .narrative-strategies .strategy-card,
+  .lesson-copy .opponents-stat,
+  .lesson-copy .opponents-outcome,
+  .lesson-copy .opponents-verdict,
+  .lesson-copy .opponents-note,
+  .lesson-copy .opponents-prompt-block {
+    animation: none !important;
+    transition: none !important;
+  }
+}

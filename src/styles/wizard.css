@@ -1,0 +1,314 @@
+/* ============================================================================
+ * First-run wizard — the welcome overlay and the landing-page next-step hint.
+ *
+ * Two surfaces, decided per element (design.md §2):
+ *   .wizard-*    the overlay panel is a Receipt. Everything inside it is
+ *                read closely, so it wears only --color-receipt-* tokens.
+ *                The dimmed backdrop is --color-scrim — no colour literal,
+ *                no glass (design.md §3).
+ *   .next-step   one short helper line on the counter, so it wears only
+ *                --color-counter-* tokens.
+ *
+ * Steps are grouped with dashed rules and spacing, never nested boxes
+ * (design.md §5); the selected row presses in with --color-receipt-2.
+ * ========================================================================== */
+
+.wizard-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-sm);
+  overflow-y: auto;
+  background: var(--color-scrim);
+}
+
+.wizard-panel {
+  width: 100%;
+  max-width: 560px;
+  margin: auto;
+}
+
+.wizard {
+  width: 100%;
+}
+
+/* ----------------------------------------------------------------------------
+ * Head — figure, title, lead. Long text stays on the receipt.
+ * -------------------------------------------------------------------------- */
+
+.wizard__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-md);
+  text-align: center;
+}
+
+.wizard__figure {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.wizard__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.wizard__lead {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+}
+
+/* ----------------------------------------------------------------------------
+ * Steps — printed rows, not nested boxes.
+ * -------------------------------------------------------------------------- */
+
+.wizard__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wizard-step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-2xs);
+  border-bottom: 1px dashed var(--color-receipt-rule);
+}
+
+.wizard-step:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.wizard-step--active {
+  background: var(--color-receipt-2);
+}
+
+.wizard-step__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-receipt-ink);
+}
+
+.wizard-step--done .wizard-step__icon {
+  color: var(--color-receipt-faded);
+}
+
+.wizard-step__text {
+  min-width: 0;
+}
+
+.wizard-step__title {
+  margin: 0 0 var(--space-3xs);
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  font-style: normal;
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.wizard-step--done .wizard-step__title {
+  color: var(--color-receipt-faded);
+}
+
+.wizard-step__num {
+  font-family: var(--font-print);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: var(--tracking-print-label);
+  color: var(--color-receipt-faded);
+}
+
+.wizard-step__body {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+  overflow-wrap: anywhere;
+}
+
+/* ----------------------------------------------------------------------------
+ * Step CTA — the receipt's own button pair: selected = ink fill (primary on
+ * a receipt, design.md §9), unselected = transparent with the surface's rule.
+ * -------------------------------------------------------------------------- */
+
+.wizard-step__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3xs);
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-sm);
+  border: 1px solid var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+.wizard-step__cta:not(:disabled):hover {
+  background: var(--color-receipt-2);
+}
+
+.wizard-step__cta:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.wizard-step__cta:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.wizard-step--active .wizard-step__cta {
+  border: 2px solid var(--color-receipt-ink);
+  background: var(--color-receipt-ink);
+  color: var(--color-receipt);
+}
+
+.wizard-step--active .wizard-step__cta:not(:disabled):hover {
+  background: var(--color-receipt-faded);
+  border-color: var(--color-receipt-faded);
+}
+
+/* ----------------------------------------------------------------------------
+ * Foot — printed footer of the receipt: note + quiet dismiss link.
+ * -------------------------------------------------------------------------- */
+
+.wizard__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-xs);
+}
+
+.wizard__note {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+.wizard__dismiss {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.wizard__dismiss:hover {
+  text-decoration-thickness: 2px;
+}
+
+.wizard__dismiss:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* The tick icon is aria-hidden, so the done state stays announced. */
+.wizard-step__sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ----------------------------------------------------------------------------
+ * Next-step hint — a short line on the counter, never a receipt.
+ * -------------------------------------------------------------------------- */
+
+.next-step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-xs);
+  max-width: 640px;
+  margin: 0 auto var(--space-md);
+  padding: var(--space-2xs) var(--space-sm);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+  font-family: var(--font-body);
+}
+
+.next-step__icon {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--color-counter-text-2);
+}
+
+.next-step__text {
+  flex: 1 1 220px;
+  min-width: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+  overflow-wrap: anywhere;
+}
+
+.next-step__cta {
+  flex: none;
+}
+
+/* At 320px the CTA moves onto its own line so the row never squeezes the
+   prose to nothing (design.md §10). */
+@media (max-width: 460px) {
+  .wizard-step {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .wizard-step__cta {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wizard-step__cta:not(:disabled):active {
+    transform: none;
+  }
+}

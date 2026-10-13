@@ -1,5 +1,4 @@
 // SINGLE SOURCE OF TRUTH: AI module exports
-export { AITutorPanel } from "./AITutorPanel";
 export {
   AI_PERSONAS,
   selectPersonaForContext,

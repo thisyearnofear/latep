@@ -1,5 +1,6 @@
 import React from "react";
 import { getStrategyInfo, type StrategyId } from "../../util/strategies";
+import "../../styles/tournament.css";
 
 interface StrategyInspectorProps {
   strategyId: StrategyId;
@@ -123,179 +124,47 @@ export const StrategyInspector: React.FC<StrategyInspectorProps> = ({
   const logic = STRATEGY_LOGIC[strategyId];
 
   return (
-    <div
-      className="tf-fade-in-up glass-panel"
-      style={{
-        marginTop: "10px",
-        borderRadius: "12px",
-        padding: "16px",
-        textAlign: "left",
-        border: `2px solid ${info.color}40`,
-      }}
-    >
-      {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          marginBottom: "12px",
-        }}
-      >
-        <span style={{ fontSize: "24px" }}>{info.emoji}</span>
-        <h4
-          style={{
-            fontFamily: "var(--font-body)",
-            color: info.color,
-            margin: 0,
-          }}
-        >
+    <div className="till-inspector receipt receipt-edge tf-fade-in-up">
+      {/* Header: the pattern key and the name are the identity; the tint on
+          the name ties it back to the charts. */}
+      <div className="till-inspector__head">
+        <span
+          className={`thread-key thread-key--${info.pattern} chart-tint-${info.tint}`}
+          aria-hidden="true"
+        />
+        <h4 className={`till-inspector__name chart-tint-${info.tint}`}>
           {info.name}
         </h4>
       </div>
 
       {/* How it works */}
-      <div style={{ marginBottom: "10px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-muted)",
-            margin: "0 0 4px 0",
-            fontSize: "0.75rem",
-            fontWeight: "bold",
-          }}
-        >
-          HOW IT WORKS
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-primary)",
-            margin: 0,
-            fontSize: "0.85rem",
-            lineHeight: 1.4,
-          }}
-        >
-          {logic.howItWorks}
-        </p>
+      <div className="till-inspector__section">
+        <p className="till-inspector__label">How it works</p>
+        <p className="till-inspector__body">{logic.howItWorks}</p>
       </div>
 
       {/* First move */}
-      <div style={{ marginBottom: "10px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-muted)",
-            margin: "0 0 4px 0",
-            fontSize: "0.75rem",
-            fontWeight: "bold",
-          }}
-        >
-          FIRST MOVE
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-primary)",
-            margin: 0,
-            fontSize: "0.85rem",
-          }}
-        >
-          {logic.firstMove}
-        </p>
+      <div className="till-inspector__section">
+        <p className="till-inspector__label">First move</p>
+        <p className="till-inspector__body">{logic.firstMove}</p>
       </div>
 
       {/* Strength + Weakness */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "10px",
-          marginBottom: "10px",
-        }}
-      >
+      <div className="till-inspector__grid">
         <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "#4CAF50",
-              margin: "0 0 4px 0",
-              fontSize: "0.75rem",
-              fontWeight: "bold",
-            }}
-          >
-            ✅ STRENGTH
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
-              margin: 0,
-              fontSize: "0.8rem",
-              lineHeight: 1.3,
-            }}
-          >
-            {logic.strength}
-          </p>
+          <p className="till-inspector__label">Strength</p>
+          <p className="till-inspector__body">{logic.strength}</p>
         </div>
         <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "#F44336",
-              margin: "0 0 4px 0",
-              fontSize: "0.75rem",
-              fontWeight: "bold",
-            }}
-          >
-            ❌ WEAKNESS
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
-              margin: 0,
-              fontSize: "0.8rem",
-              lineHeight: 1.3,
-            }}
-          >
-            {logic.weakness}
-          </p>
+          <p className="till-inspector__label">Weakness</p>
+          <p className="till-inspector__body">{logic.weakness}</p>
         </div>
       </div>
 
       {/* Example */}
-      <div
-        style={{
-          background: "rgba(102, 126, 234, 0.06)",
-          borderRadius: "8px",
-          padding: "10px",
-          border: "1px solid rgba(102, 126, 234, 0.15)",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "#667eea",
-            margin: "0 0 4px 0",
-            fontSize: "0.75rem",
-            fontWeight: "bold",
-          }}
-        >
-          📖 EXAMPLE
-        </p>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-secondary)",
-            margin: 0,
-            fontSize: "0.8rem",
-            lineHeight: 1.4,
-            fontStyle: "italic",
-          }}
-        >
-          {logic.example}
-        </p>
+      <div className="till-inspector__example">
+        <p className="till-inspector__label">Example</p>
+        <p className="till-inspector__body">{logic.example}</p>
       </div>
     </div>
   );

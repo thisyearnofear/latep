@@ -86,7 +86,9 @@ Four product shifts carry most of the impact. The restyle supports them:
 6. **Every PR includes before/after screenshots** at 390 and 1440 px for each
    route it touches (`npm run shots`, section 4).
 7. **No new dependencies** except `lucide-react` (ticket B1). Ask before
-   adding anything else. Fonts load from Google Fonts, not npm.
+   adding anything else. Fonts are self-hosted woff2 (Fontsource, latin
+   subset) in `public/fonts/`, loaded via `src/styles/fonts.css` — not Google
+   Fonts, not npm imports (the packages were only the download vehicle).
 8. **Strings live in one place.** Primitive names and everyday lines come from
    `src/content/primitives.ts`. Move, outcome, and stamp labels come from
    `src/content/vocabulary.ts`. Don't retype them.
@@ -163,21 +165,39 @@ Two scripts the team runs on every PR.
 | Hex / `rgb()` / `rgba()` literals in `.tsx` and `.css` (outside `tokens.css`) | 527                   | 0                               |
 | `style={{` blocks                                                             | 941                   | under 120 (dynamic values only) |
 | Emoji (`\p{Extended_Pictographic}`) in `.ts`/`.tsx`                           | 329                   | 0                               |
-| User-visible "Cooperate" / "Defect" strings                                   | 90                    | Glossary and inspector only     |
+| Word-boundary `Cooperate` / `Defect` in strings and JSX text                  | 56                    | Glossary and inspector only     |
 | `glass-panel` uses                                                            | 47                    | 0                               |
 
 The script reads `scripts/design-baseline.json` and **fails if any number goes
-up**. When a PR brings a number down, it updates the baseline in the same PR.
-That makes progress visible and stops regressions. Add it to `lint-staged`.
+up**. When a PR brings a number down, run `npm run design:check:write` and
+commit the updated baseline in the same PR. That makes progress visible and
+stops regressions. It runs in the pre-commit hook, so it cannot be merged past.
 
-**`npm run shots`** (`scripts/shots.mjs`). Starts from a running `npm run dev`
+Measured over the files under `src/`, excluding `src/contracts/` (generated
+from Rust) and `src/debug/` (the deliberate escape hatch). `src/styles/tokens.css`
+is the one file allowed to hold raw colour values.
+
+The `Cooperate`/`Defect` metric matches quoted strings and JSX text nodes only,
+and strips comments first — otherwise the vocabulary file's own documentation
+about the words would count against the metric. It is deliberately blunt within
+that scope, so it over-counts the glossary and inspector; those land at their
+target, not at 0. Baseline 56 as of B1.
+
+**`npm run shots`** (`scripts/shots.cjs`). Starts against a running `npm run dev`
 and screenshots `/`, `/learn`, `/learn/play`, `/tournament`, `/play`,
-`/real-life` at 390 and 1440 px into `e2e/shots/` (add to `.gitignore`; never
-commit them, per `AGENTS.md`). Use Playwright with `channel: "chrome"` so no
-browser download is needed.
+`/real-life` at 390 and 1440 px into `e2e/shots/` (gitignored; never commit
+them, per `AGENTS.md`). Uses Playwright with `channel: "chrome"` so no browser
+download is needed.
 
 **Every PR runs:** `npm run build`, `npm run lint`, `npm run design:check`,
-`npm run shots`.
+`npm run check:hidden-moves`, `npm run shots`.
+
+**`npm run check:hidden-moves`** (`scripts/check-hidden-moves.cjs`) walks the
+DOM of every stage on every route that has one, and fails if a move value
+appears before the reveal — as text, as an attribute, or in the accessibility
+tree. It is the automated half of the hidden-move rule, and it is what proves
+B3's "inspect the DOM in the sealed phase" done-criterion rather than trusting
+a human to remember. Needs a running `npm run dev`.
 
 ---
 
@@ -199,12 +219,19 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 
 ### Phase 1 — Foundation
 
+> **Status: complete (2026-10-12).** A0, A1, B1, B1b and B2 are all shipped on
+> `redesign`. The notes under each ticket below record what the next tickets
+> need to know. Phase 2 starts at B3 (the trust lean scene).
+
 **A0 · Tooling** (S) — Dev A
 
 - Create `scripts/design-check.cjs`, `scripts/design-baseline.json`,
-  `scripts/shots.mjs`; add `design:check` and `shots` to `package.json`;
-  add `e2e/shots/` to `.gitignore`.
-- Done: both scripts run; baseline matches the table in section 4.
+  `scripts/shots.cjs`; add `design:check`, `design:check:write`, and `shots` to
+  `package.json`; add the `design:check` line to `.husky/pre-commit`; add
+  `e2e/shots/` to `.gitignore`.
+- Done: `npm run design:check` reproduces the table in section 4 exactly and
+  exits 1 on a planted regression; `npm run shots` writes both widths for all
+  six routes.
 
 **A1 · Tokens and the counter flip** (M) — Dev A
 
@@ -233,6 +260,18 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
   unreadable in the PR description.
 - Done: every route is readable at 1440 and 390, with no purple and no glass
   blur; `design:check` doesn't go up.
+- **Shipped 2026-10-12** (`a64111b`). Two things the next tickets must know:
+  1. The legacy block is **not all aliases**. `--space-xs/sm/md/lg/xl` and
+     `--radius-md/lg/xl` hold _literal_ old values, because custom properties
+     on the same element are last-declaration-wins: aliasing `--space-md` to
+     `--space-sm` inside the block resolves to the block's own redefined
+     `--space-sm`, not the token. Do not "tidy" those into aliases.
+  2. Fonts resolve in the browser (verified via `document.fonts.check`).
+     Martian Mono is lazy — it only downloads once a component uses
+     `--font-print`, which today is the game-view set, not the landing pages.
+- Pre-existing bugs confirmed **not** caused by A1 (shot the same route from
+  `main` and compared): the invisible "Evolution Settings" / "Payoff Matrix" /
+  "Stage: Ready" text on `/tournament`. Already B6 scope.
 
 **B1 · Content and marks** (M) — Dev B
 
@@ -252,6 +291,9 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
   include screenshots in the PR.
 - Done: marks are recognisable at 24px. The lead signs off on the drawings
   before anything uses them.
+- **Shipped 2026-10-12.** `NetMark` was redrawn after review: the first pass
+  was a square grid, which reads as a _window pane_ at 24px, not netting. It is
+  now a diamond lattice. The other three were legible as drawn.
 
 **B1b · Receipt kit and thread** (M) — Dev B
 
@@ -268,6 +310,20 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - The kit is presentational only: it never computes outcomes.
 - Done: a debug preview shows a receipt with every line type, every stamp,
   a stub with tear line, and every thread state, at 390 and 1440.
+- **Shipped 2026-10-12.** Three things the next tickets need to know:
+  1. **The tear is a `border-image`, not a mask.** Two bands must be removed
+     from opposite edges; multi-layer mask compositing has no portable
+     spelling (Safari has only `-webkit-mask-composite`, and the obvious
+     `intersect` erases the receipt between the bands). The tile bakes in
+     `#f7f5ef` because a data URI can't read a custom property — `receipt.css`
+     is the second file exempt from the colour-literal check, and only for
+     that. Each wedge must stay bounded to its own band or the two union into
+     a solid rectangle.
+  2. **`background-clip: padding-box` must come after the `background`
+     shorthand.** The shorthand resets it to `border-box`, and that reset is
+     exactly what fills the tear back in. Same trap in any rule that sets both.
+  3. **`Thread` draws 0 twists as loose.** A `twisted` state with zero twists
+     renders the untwisted picture, not a flat braid.
 
 **B2 · Rig poses for the lean** (M) — Dev B
 
@@ -281,8 +337,29 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Export the hand position per pose so `Thread` can attach to it.
 - Reduced motion: poses switch with no transition.
 - Done: a debug preview shows all poses in both facings, on both surfaces.
+- **Shipped 2026-10-12.** Notes for B3:
+  1. The pose table, `RIG` geometry and `getHandPosition` live in
+     `src/components/trustFallRig.ts`, not in the component file. Import
+     values from there — `TrustFallCharacter.tsx` re-exports the _types_ only,
+     because re-exporting values from a component file trips the react-refresh
+     lint rule.
+  2. `getHandPosition(state, "right", facing)` returns the anchor **in the
+     figure's own viewBox** (`-4 -4 48 56`), already mirrored for
+     `facing: "left"`. B3 maps it to screen coordinates itself.
+  3. Angle convention, now that it is written down: a limb hangs along `+y` at
+     0deg and `rotate(θ)` maps `(0, L)` to `(-L·sin θ, L·cos θ)`. So **-90deg
+     reaches forward**, +90 reaches back, and the rig's `lS`/`rS` labels are
+     from the figure's side, not the viewer's.
+  4. Reduced motion is one declaration: `--rig-transition: none` under
+     `prefers-reduced-motion`. Every joint reads it.
 
 ### Phase 2 — The story
+
+> **Status: complete (2026-10-12).** B3, B4, A2 and A3 are all shipped on
+> `redesign`. Phase 3 starts at A4 (the Learn journey).
+>
+> Every PR so far has run the full gate: build, lint, design:check,
+> check:hidden-moves, shots at 390 and 1440.
 
 **B3 · The trust lean scene** (L) — Dev B. _The most important ticket._
 
@@ -307,6 +384,20 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Done: all 4 outcomes plus a noise flip, in screenshots and a short screen
   recording; reduced motion jumps straight to the final state; the hidden-move
   rule still holds (inspect the DOM in the "sealed" phase: no move value).
+- **Shipped 2026-10-12.** Notes for A3:
+  1. The scene is a **wide `Receipt`**, so it brings its own torn edges and
+     stock. Anything placed on top of it is receipt content, not a panel — no
+     nesting a panel inside it.
+  2. `onRevealComplete` is a new **optional** prop, so the nine existing
+     callers are unaffected. It carries no authority: a receipt fed by it
+     still only prints what app state confirms.
+  3. The scene needs a `min-height` below 700px of container width. Squeezed to
+     the 800/300 aspect ratio it is only ~150px tall, which is not enough for a
+     sealed stub, a standing figure and a label — the stub ends up covering the
+     figure's head.
+  4. Below 460px the stub **captions are hidden** and only the `SEALED` stamp
+     shows; the actor labels already say which seal is whose, and two long
+     captions side by side overflow the receipt.
 
 **B4 · Round receipt and takeaway** (S) — Dev B
 
@@ -320,8 +411,14 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Feeds out with `--dur-print` / `--ease-feed`; reduced motion just fades in.
 - Which primitive to show: practice rounds 1–2 → The Seal; round 3+ → The
   Handshake. ZK result → The Net (on confirmed settlement) or The Pass (after
-  an accreditation proof). Document this mapping in the file.
+  an accreditation proof). That mapping is `primitiveForRound` in
+  `receipt/helpers.ts`; the caller passes the result in as `primitiveId`.
 - Done: renders for all 4 outcomes, both modes, with focus-visible on the link.
+- **Shipped 2026-10-12.** `RoundReceipt` takes every value as a prop and never
+  computes an outcome or a payoff — it maps an already-revealed pair to the
+  wording via `getOutcome`. A pending or unconfirmed transaction always prints
+  `PENDING`; `explorerUrl` is only called when `confirmed` is true, so there is
+  no path that renders a link to a transaction that hasn't landed.
 
 **A2 · App shell** (M) — Dev A
 
@@ -337,6 +434,16 @@ Rough sizing for a rookie: S ≈ half a day, M ≈ 1–2 days, L ≈ 3+ days.
 - Replace the audio emoji with `lucide-react` `Volume2` / `VolumeX`.
 - Done: nav fits on one row at 320px; the active link is shown by underline
   plus weight, not colour alone; keyboard order is logical.
+- **Shipped 2026-10-12.** Notes for A3:
+  1. A legacy `max-width: 700px` block in `index.css` was forcing
+     `.shell-header { flex-wrap: wrap; height: auto }`, which put the header on
+     **two rows** below 700px — the one thing design.md §10 rules out. It is
+     gone. If you add a `.shell-*` rule anywhere, it goes in `shell.css`.
+  2. `CustomCursor` and `TopographicBackground` are no longer rendered, but the
+     **files are still imported by nothing and still on disk** until B9. Do not
+     assume they are safe to delete; check first.
+  3. The active nav state is an underline plus weight. Keep it that way — a
+     judge at a distance cannot see a colour-only difference.
 
 **A3 · Home** (L) — Dev A. _Depends on B3 and B4. Build the layout against
 the current stage first, then swap._
@@ -361,6 +468,19 @@ the current stage first, then swap._
 - Done: matches `design.md` at all five widths; zero emoji and zero colour
   literals in `Home.tsx`; the full play → reveal → receipt → play again loop
   works by keyboard.
+- **Shipped 2026-10-12.** Notes for Phase 3:
+  1. The round receipt is rendered **inside `TrustExperiment`**, not by Home.
+     The ticket says Home may change that file's markup only, and the receipt
+     needs the round state the component already holds. Home gets the
+     primitives row and "where next".
+  2. That is a deliberate reading of the "markup and styles only" boundary: the
+     component's behaviour is untouched, but its **copy** now comes from
+     `content/vocabulary` (`MOVE_LABEL`, `MOVE_HELPER`) instead of inline
+     "Cooperate" / "Defect". A copy change is a vocabulary change, which is
+     what B1 introduced the content files for.
+  3. **Still to do here:** earlier rounds do not yet stack into a history strip.
+     That needs round history lifted out of `TrustExperiment`, which is a
+     logic change and was not made under this ticket's boundary.
 
 ### Phase 3 — Sweep every surface
 
@@ -435,14 +555,17 @@ listed bugs. Split large files into several PRs.
 - **B8 · Motion QA** (S): reduced-motion pass on every animated screen; no
   `transition: all`, no springs; `--ease-feed` used only for the receipt feed;
   one orchestrated moment per view.
-- **B9 · Deletions** (S): **needs explicit sign-off from the project owner
-  first.** Candidates, all unused after Phase 2–3 (verify each with a search
-  before proposing): `ui/CustomCursor.tsx`, `ui/ShimmerButton.tsx`,
-  `ui/ElectricButton.tsx`, `ui/StaggerButton.tsx`, `hooks/useMagnetic.ts`,
-  `visual/TopographicBackground.tsx`, `visual/TrustFallFigure.tsx` (already
-  unused), `DemoRound.tsx` (already unused), `Character.tsx` (if
-  `AITutorPanel` moves to the rig). Keep `styles/balloon.css`: `LearnJourney`
-  still imports it; it's restyled in A4.
+- **B9 · Deletions** (S): ✅ **done 2026-10-13** (`e02b9a3`, project-owner
+  sign-off in chat). Deleted, all verified unimported first:
+  `ui/CustomCursor.tsx`, `ui/ShimmerButton.tsx`, `ui/ElectricButton.tsx`,
+  `ui/StaggerButton.tsx`, `ui/SuccessCelebration.tsx` (+ `SuccessCelebration`
+  export dropped from `ui/index.ts`), `hooks/useMagnetic.ts`,
+  `visual/TopographicBackground.tsx`, `visual/TrustFallFigure.tsx` (+ exports
+  dropped from `visual/index.ts`), `DemoRound.tsx`. Kept: `Character.tsx`
+  (`AITutorPanel` still imports it — out of scope), `gsap` (live reveal
+  choreography), `howler` (opt-in audio). `three` has zero imports left and
+  can go from `package.json` in a lockfile-safe follow-up. Restore with
+  `git revert e02b9a3`.
 - **Merge `redesign` → `main`** after the lead's final review and the 5-person
   comprehension test from section 1.
 
@@ -514,13 +637,17 @@ in **Blockers** sends it back.
 Locked by the project owner (2026-10-12):
 
 - **Visual direction: Receipts + Threads**, as defined in `design.md`.
-
-Still open:
-
-1. **The trust lean replaces the one-way trust fall** as the core picture
-   (section 1). The name, the "trust me, trust me not" story, and the falling
-   rig all stay; the new poses are additive. Confirm before B3 starts.
-2. **Nav labels** "Everyday" and "Play with a friend" (A2).
-3. **Deletion list** in B9 (sign off when Phase 3 is done).
-4. **Strategy display names in `src/util/strategies.ts`** may be edited for
-   emoji removal only (B6).
+- **Decision 1 — the trust lean replaces the one-way trust fall** as the core
+  picture (section 1). The name, the "trust me, trust me not" story, and the
+  falling rig all stay; the lean poses are additive, so the fall survives for
+  the ZK commit/reveal beats. Unblocks B2 and B3.
+- **Decision 2 — nav labels are "Everyday"** (`/real-life`) **and "Play with a
+  friend"** (`/play`). Unblocks A2.
+- **Decision 3 — merge timing.** `main` is frozen until after the Oct 13
+  submission. All redesign work lands on `redesign`; `redesign` merges to `main`
+  after Phase 4 review. A winner-announcement hotfix on `main` is not a
+  conflict risk: rebase the ticket branches forward when it lands.
+- **Decision 4 — the deletion list** (B9): ✅ signed off and executed
+  2026-10-13 (`e02b9a3`). See B9 above for the kept/deleted ledger.
+- **Decision 5 — strategy display names in `src/util/strategies.ts`** may be
+  edited for emoji removal only (B6).

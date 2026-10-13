@@ -1,7 +1,16 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { TrustFallCharacter, type CharacterState } from "../TrustFallCharacter";
+import { Receipt, ReceiptStub, Stamp } from "../receipt";
+import { Thread } from "../receipt/Thread";
 import type { GameMove } from "../../util/strategies";
+import {
+  getOutcome,
+  MOVE_LABEL,
+  MAX_DRAWN_TWISTS,
+  STAMPS,
+  type ThreadState,
+} from "../../content/vocabulary";
 import "../../styles/trust-experiment.css";
 
 export type TrustStageState =
@@ -27,46 +36,80 @@ export interface TrustStageProps {
   noiseEvent?: { player: boolean; opponent: boolean };
   showChoices?: boolean;
   compact?: boolean;
+  /**
+   * Fires once the reveal choreography has finished, so the round receipt can
+   * feed out at the right moment. Presentation timing only: nothing about
+   * validity, confirmation, or settlement may depend on it (design.md §7).
+   */
+  onRevealComplete?: () => void;
 }
 
-function outcomeActorState(
-  own: GameMove,
-  other: GameMove,
-): { state: CharacterState; drop: number } {
-  if (own === "C" && other === "C") return { state: "caught", drop: 20 };
-  if (own === "C" && other === "D") return { state: "impact", drop: 65 };
-  if (own === "D" && other === "C") return { state: "celebrating", drop: 0 };
-  return { state: "standing", drop: 0 };
+/* ============================================================================
+ * The four outcomes — design.md §7.
+ *
+ * This table replaces the old `outcomeActorState`. A reviewer should be able
+ * to check every move pair against design.md §7 and find it here, in the same
+ * order, with the same words:
+ *
+ *   you / partner   word          pose you / pose partner   thread
+ *   ---------------------------------------------------------------------
+ *   C  / C         Held          held       / held          twisted
+ *   C  / D         Dropped       toppled    / holding-back  snapped
+ *   D  / C         You took it   holding-back / toppled     snapped
+ *   D  / D         Standoff      holding-back / holding-back slack
+ *
+ * The thread state comes from `getOutcome` (content/vocabulary.ts), which is
+ * the single source of truth; only the poses live here, because they are a
+ * property of the drawing rather than of the words.
+ *
+ * Before the reveal there is no outcome at all: both figures hold their seal,
+ * the thread is loose, and no move value is anywhere in the DOM.
+ * ========================================================================== */
+
+const OUTCOME_POSES: Record<
+  string,
+  { you: CharacterState; partner: CharacterState }
+> = {
+  // C / C — Held: both lean in, palms meet, both are held up.
+  CC: { you: "held", partner: "held" },
+  // C / D — Dropped: you leaned in, they held back; you go over.
+  CD: { you: "toppled", partner: "holding-back" },
+  // D / C — You took it: the reverse. The leaner goes over, not you.
+  DC: { you: "holding-back", partner: "toppled" },
+  // D / D — Standoff: both upright and apart, nothing gained.
+  DD: { you: "holding-back", partner: "holding-back" },
+};
+
+/** Before anyone has chosen, both figures stand ready. */
+const READY_POSE: CharacterState = "standing";
+
+function posesFor(
+  phase: TrustStageState["phase"],
+  you?: GameMove,
+  partner?: GameMove,
+) {
+  if (phase !== "revealing" && phase !== "outcome") {
+    return { you: READY_POSE, partner: READY_POSE };
+  }
+  if (!you || !partner) return { you: READY_POSE, partner: READY_POSE };
+  return OUTCOME_POSES[`${you}${partner}`];
 }
 
-function WindLines() {
+/** The stub each figure holds before the reveal. Never carries a move value. */
+function SealedStub({
+  side,
+  label,
+}: {
+  side: "you" | "partner";
+  label: string;
+}) {
   return (
-    <>
-      <path d="M80 105 Q200 95 320 105 T560 105 T720 100" />
-      <path d="M120 115 Q240 125 360 115 T600 118 T720 112" />
-      <path d="M80 125 Q220 118 340 126 T580 124 T700 128" />
-    </>
-  );
-}
-
-function ChoiceCard({ label, locked }: { label: string; locked: boolean }) {
-  return (
-    <span className="trust-seal-doc">
-      {locked ? (
-        <svg viewBox="0 0 20 24" className="trust-seal-icon">
-          <rect x="3" y="10" width="14" height="12" rx="2" />
-          <path d="M6 10 V7 a4 4 0 0 1 8 0 v3" />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 20 24" className="trust-seal-icon">
-          <rect x="2" y="1" width="16" height="22" rx="2" />
-          <line x1="5" y1="7" x2="15" y2="7" />
-          <line x1="5" y1="11" x2="15" y2="11" />
-          <line x1="5" y1="15" x2="12" y2="15" />
-        </svg>
-      )}
-      {label}
-    </span>
+    <div className={`trust-seal trust-seal-stub trust-seal-stub-${side}`}>
+      <ReceiptStub>
+        <Stamp text={STAMPS.sealed} />
+        <span className="trust-seal-caption">{label}</span>
+      </ReceiptStub>
+    </div>
   );
 }
 
@@ -81,9 +124,11 @@ export function TrustStage({
   noiseEvent,
   showChoices = true,
   compact = false,
+  onRevealComplete,
 }: TrustStageProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const previousAltitude = useRef(0);
+  const revealFired = useRef<string | number | null>(null);
 
   const revealed = state.phase === "revealing" || state.phase === "outcome";
   const playerMove = revealed ? state.playerMove : undefined;
@@ -92,100 +137,110 @@ export function TrustStage({
   const altitude = Number.isFinite(trustAltitude)
     ? Math.max(0, Math.floor(trustAltitude!))
     : 0;
-  const visualAltitude = Math.min(altitude, 5);
+  const visualAltitude = Math.min(altitude, MAX_DRAWN_TWISTS);
   const windRisk = Number.isFinite(noise)
     ? Math.min(0.5, Math.max(0, noise!))
     : 0;
   const playerFlipped = state.phase === "outcome" && !!noiseEvent?.player;
   const opponentFlipped = state.phase === "outcome" && !!noiseEvent?.opponent;
-  const windEvent =
-    state.phase === "outcome"
-      ? playerFlipped && opponentFlipped
-        ? "both"
-        : playerFlipped
-          ? "player"
-          : opponentFlipped
-            ? "opponent"
-            : "none"
-      : "none";
 
-  const motionScale = compact ? 0.5 : 1;
-  const youPose =
-    state.phase === "outcome" && playerMove && opponentMove
-      ? outcomeActorState(playerMove, opponentMove)
-      : { state: "standing" as CharacterState, drop: 0 };
-  const partnerPose =
-    state.phase === "outcome" && playerMove && opponentMove
-      ? outcomeActorState(opponentMove, playerMove)
-      : { state: "standing" as CharacterState, drop: 0 };
+  const poses = posesFor(state.phase, playerMove, opponentMove);
 
+  /**
+   * The thread. Before the reveal it is always loose — the scene cannot hint
+   * at the outcome through the thread any more than it can through markup.
+   */
+  const threadState: ThreadState = revealed
+    ? getOutcome(playerMove!, opponentMove!).thread
+    : "loose";
+  const threadTwists = revealed
+    ? threadState === "twisted"
+      ? Math.max(1, visualAltitude)
+      : 0
+    : 0;
+
+  // --- Reveal choreography: stubs tear, poses and thread, then the stamp. ---
   useEffect(() => {
     const root = stageRef.current;
     if (!root) return;
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let ctx = gsap.context(() => {});
+    let ctx = gsap.context(() => {}, root);
+
     const play = () => {
       ctx.revert();
       ctx = gsap.context(() => {
         const actors = gsap.utils.toArray<HTMLElement>(".trust-actor-inner");
-        const seals = gsap.utils.toArray<HTMLElement>(".trust-seal");
+        const stubs = gsap.utils.toArray<HTMLElement>(".trust-seal-stub");
+        const thread = gsap.utils.toArray<HTMLElement>(".trust-thread");
+
         const reset = () => {
           gsap.set(actors, { clearProps: "transform" });
-          gsap.set(seals, { clearProps: "transform" });
+          gsap.set(stubs, { clearProps: "transform,opacity" });
+          gsap.set(thread, { clearProps: "opacity,transform" });
         };
+
         if (media.matches) {
+          // Reduced motion: jump straight to the final state. The flow still
+          // works, it just doesn't move (design.md §8).
           reset();
+          gsap.set(stubs, { display: "none" });
           return;
         }
+
         if (state.phase === "choose" || state.phase === "idle") {
           reset();
           gsap.from(actors, {
-            y: -8 * motionScale,
-            duration: 0.35,
+            y: -6 * (compact ? 0.5 : 1),
+            duration: 0.3,
             ease: "power2.out",
           });
         } else if (state.phase === "sealed") {
-          gsap.set(actors, { clearProps: "transform" });
-          gsap.fromTo(
-            seals,
-            { scale: 0.94 },
-            { scale: 1, duration: 0.24, ease: "power2.out" },
-          );
-        } else if (state.phase === "revealing") {
+          reset();
+          gsap.from(stubs, {
+            scale: 0.94,
+            opacity: 0,
+            duration: 0.24,
+            ease: "power2.out",
+          });
+        } else if (state.phase === "revealing" || state.phase === "outcome") {
+          // The one orchestrated moment. Durations match design.md §8's
+          // sequence: tear 200ms, poses + thread 600ms, stamp 150ms.
           const tl = gsap.timeline();
-          tl.to(actors[0], { rotation: 12, duration: 0.22 }, 0)
-            .to(actors[1], { rotation: -12, duration: 0.22 }, 0)
-            .to(
-              actors[0],
-              { y: 45 * motionScale, rotation: 35, duration: 0.6 },
-              0.22,
+          tl.to(stubs, {
+            y: 10,
+            opacity: 0,
+            rotation: compact ? 6 : 10,
+            duration: 0.2,
+            ease: "power1.in",
+          })
+            .fromTo(
+              thread,
+              { opacity: 0, scaleX: 0.9 },
+              { opacity: 1, scaleX: 1, duration: 0.6, ease: "power2.out" },
+              0.2,
             )
-            .to(
-              actors[1],
-              { y: 45 * motionScale, rotation: -35, duration: 0.6 },
-              0.22,
+            .fromTo(
+              actors,
+              { y: compact ? -4 : -8 },
+              { y: 0, duration: 0.6, ease: "power2.out" },
+              0.2,
+            )
+            .fromTo(
+              ".trust-scene-stamp",
+              { opacity: 0, scale: 1.25, rotation: -9 },
+              {
+                opacity: 1,
+                scale: 1,
+                rotation: -4,
+                duration: 0.15,
+                ease: "none", // no bounce (design.md §8)
+              },
+              0.8,
             );
-        } else if (state.phase === "outcome" && playerMove && opponentMove) {
-          gsap.set(actors, { clearProps: "transform" });
-          const you = outcomeActorState(playerMove, opponentMove);
-          const partner = outcomeActorState(opponentMove, playerMove);
-          if (you.drop) {
-            gsap.to(actors[0], {
-              y: you.drop * motionScale,
-              duration: 0.5,
-              ease: "bounce.out",
-            });
-          }
-          if (partner.drop) {
-            gsap.to(actors[1], {
-              y: partner.drop * motionScale,
-              duration: 0.5,
-              ease: "bounce.out",
-            });
-          }
         }
       }, root);
     };
+
     play();
     const onChange = () => play();
     media.addEventListener("change", onChange);
@@ -193,8 +248,28 @@ export function TrustStage({
       media.removeEventListener("change", onChange);
       ctx.revert();
     };
-  }, [state.phase, playerMove, opponentMove, roundKey, motionScale]);
+  }, [state.phase, playerMove, opponentMove, roundKey, compact]);
 
+  /**
+   * Tell the caller the reveal has landed. Fires once per round, and never
+   * sooner than the choreography — but it carries no authority: a receipt fed
+   * by this callback still only prints what app state confirms.
+   */
+  useEffect(() => {
+    if (!onRevealComplete) return;
+    if (state.phase !== "revealing") return;
+    if (revealFired.current === roundKey) return;
+    revealFired.current = roundKey;
+
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const delay = reduced ? 0 : 950;
+    const t = window.setTimeout(onRevealComplete, delay);
+    return () => window.clearTimeout(t);
+  }, [state.phase, roundKey, onRevealComplete]);
+
+  // Trust height still lifts the ground a little; the drawing caps at 5.
   useEffect(() => {
     const root = stageRef.current;
     const from = previousAltitude.current;
@@ -204,8 +279,8 @@ export function TrustStage({
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       const ctx = gsap.context(() => {
         gsap.fromTo(
-          ".trust-terrain-motion",
-          { y: (from - visualAltitude) * 6 },
+          ".trust-ground-motion",
+          { y: (from - visualAltitude) * 5 },
           { y: 0, duration: 0.45, ease: "power2.out" },
         );
       }, root);
@@ -214,203 +289,173 @@ export function TrustStage({
     return () => mm.revert();
   }, [visualAltitude]);
 
+  // Wind: only a recorded flip shows a gust (never the configured risk).
   useEffect(() => {
     const root = stageRef.current;
     if (!root || (!playerFlipped && !opponentFlipped)) return;
     const mm = gsap.matchMedia();
     mm.add("(prefers-reduced-motion: no-preference)", () => {
       const ctx = gsap.context(() => {
-        const tl = gsap.timeline();
-        tl.fromTo(
-          ".trust-gust",
-          { opacity: 0.6, x: -16 },
-          { opacity: 0.35, x: 16, duration: 0.35, ease: "power2.out" },
-        ).to(".trust-gust", {
-          opacity: 0,
-          x: 0,
-          duration: 0.25,
-          ease: "power2.out",
-        });
+        gsap
+          .timeline()
+          .fromTo(
+            ".trust-gust",
+            { opacity: 0.6, x: -14 },
+            { opacity: 0.3, x: 14, duration: 0.35, ease: "power2.out" },
+          )
+          .to(".trust-gust", {
+            opacity: 0,
+            x: 0,
+            duration: 0.25,
+            ease: "power2.out",
+          });
       }, root);
       return () => ctx.revert();
     });
     return () => mm.revert();
   }, [roundKey, playerFlipped, opponentFlipped]);
 
+  const outcomeWord = revealed
+    ? getOutcome(playerMove!, opponentMove!).word
+    : null;
+  const outcomeStamp = revealed
+    ? STAMPS[getOutcome(playerMove!, opponentMove!).id as keyof typeof STAMPS]
+    : null;
+
   return (
     <div
       className={`trust-stage-surface${compact ? " trust-stage-compact" : ""}`}
       data-stage-phase={state.phase}
       data-trust-height={trustAltitude !== undefined ? altitude : undefined}
-      data-wind-event={windEvent}
+      data-thread-state={threadState}
       ref={stageRef}
     >
-      <div className="trust-stage" aria-hidden="true">
-        <div className="trust-scene">
+      <div className="trust-stage">
+        {/*
+          A wide receipt carries the scene (design.md §2). One containment
+          layer: the actors, stubs and thread are content inside it, never
+          panels inside a panel.
+        */}
+        <Receipt
+          wide
+          className={`trust-scene${compact ? " trust-scene-compact" : ""}`}
+        >
+          {/* The printed ground the two figures stand on. */}
           <svg
-            className="trust-landscape"
-            viewBox="0 0 800 340"
-            preserveAspectRatio="xMidYMid meet"
+            className="trust-ground"
+            viewBox="0 0 800 200"
+            preserveAspectRatio="none"
+            aria-hidden="true"
           >
-            <g
-              className="trust-terrain"
-              transform={`translate(0 ${visualAltitude * 6})`}
-            >
-              <g className="trust-terrain-motion">
-                <path
-                  className="tl-hill tl-hill-far"
-                  d="M-40 245 Q140 85 340 230 T840 160"
-                />
-                <path
-                  className="tl-contour"
-                  d="M-40 232 Q140 72 340 217 T840 147"
-                />
-                <path
-                  className="tl-contour"
-                  d="M-40 258 Q140 98 340 243 T840 173"
-                />
-                <path
-                  className="tl-hill tl-hill-near"
-                  d="M-40 290 Q210 120 460 265 T840 210"
-                />
-                <path
-                  className="tl-contour"
-                  d="M-40 277 Q210 107 460 252 T840 197"
-                />
-                <path
-                  className="tl-contour"
-                  d="M-40 303 Q210 133 460 278 T840 223"
-                />
-              </g>
-            </g>
-            {trustAltitude !== undefined && (
-              <g className="trust-height-gauge">
-                <line x1="32" y1="240" x2="32" y2="140" />
-                {[1, 2, 3, 4, 5].map((i) => (
+            <g className="trust-ground-motion">
+              <line
+                className="trust-ground-line"
+                x1="40"
+                y1="150"
+                x2="760"
+                y2="150"
+              />
+              {[0, 1, 2, 3, 4, 5].map((i) => {
+                const x = 120 + i * 112;
+                const h = 6 + visualAltitude * 2;
+                return (
                   <line
                     key={i}
-                    className={
-                      i <= visualAltitude
-                        ? "trust-height-tick trust-height-tick-lit"
-                        : "trust-height-tick"
-                    }
-                    x1="24"
-                    y1={240 - i * 20}
-                    x2="40"
-                    y2={240 - i * 20}
+                    className="trust-ground-tick"
+                    x1={x}
+                    y1={150}
+                    x2={x}
+                    y2={150 - h}
                   />
-                ))}
-              </g>
-            )}
-            <g className="trust-wind" opacity={windRisk > 0 ? 0.12 : 0}>
-              <WindLines />
+                );
+              })}
             </g>
             <g className="trust-gust" opacity={0}>
-              <WindLines />
+              <path d="M40 108 Q220 98 400 108 T760 102" />
+              <path d="M40 120 Q260 130 440 118 T760 124" />
             </g>
-            <g className="tl-stars">
-              <circle cx="90" cy="60" r="1.6" />
-              <circle cx="200" cy="38" r="1.2" />
-              <circle cx="330" cy="70" r="1.4" />
-              <circle cx="470" cy="45" r="1.2" />
-              <circle cx="620" cy="66" r="1.6" />
-              <circle cx="730" cy="40" r="1.2" />
-              <circle cx="520" cy="100" r="1.1" />
-              <circle cx="150" cy="120" r="1.1" />
-            </g>
-            <path
-              className="tl-rock"
-              d={`M144 245 L190 ${312 + visualAltitude * 6} L278 ${322 + visualAltitude * 6} L336 245 Z`}
-            />
-            <path
-              className="tl-rock"
-              d={`M656 245 L610 ${312 + visualAltitude * 6} L522 ${322 + visualAltitude * 6} L464 245 Z`}
-            />
-            <ellipse
-              className="tl-platform"
-              cx="240"
-              cy="245"
-              rx="96"
-              ry="15"
-            />
-            <ellipse
-              className="tl-platform"
-              cx="560"
-              cy="245"
-              rx="96"
-              ry="15"
-            />
           </svg>
 
-          {showChoices && (
-            <>
-              <div className="trust-seal trust-seal-you">
-                {revealed ? (
-                  <ChoiceCard
-                    label={playerMove === "C" ? "Cooperate" : "Defect"}
-                    locked={false}
-                  />
-                ) : state.phase === "choose" || state.phase === "idle" ? (
-                  <ChoiceCard label="Choose a move" locked={false} />
-                ) : (
-                  <ChoiceCard
-                    label="Your choice is sealed"
-                    locked={commitmentIllustration}
-                  />
-                )}
-              </div>
-              <div className="trust-seal trust-seal-partner">
-                {revealed ? (
-                  <ChoiceCard
-                    label={opponentMove === "C" ? "Cooperate" : "Defect"}
-                    locked={false}
-                  />
-                ) : (
-                  <ChoiceCard
-                    label={
-                      commitmentIllustration ? "Choice sealed" : "Choice hidden"
-                    }
-                    locked={commitmentIllustration}
-                  />
-                )}
-              </div>
-            </>
-          )}
-
-          <div
-            className="trust-actor trust-actor-you"
-            data-wind-affected={
-              state.phase === "outcome" && playerFlipped ? true : undefined
-            }
-          >
-            <div className="trust-actor-inner">
-              <TrustFallCharacter state={youPose.state} color="you" size="xl" />
-            </div>
-          </div>
-          <div
-            className="trust-actor trust-actor-partner"
-            data-wind-affected={
-              state.phase === "outcome" && opponentFlipped ? true : undefined
-            }
-          >
+          {/* Two figures facing each other across the gap. */}
+          <div className="trust-actor trust-actor-you">
             <div className="trust-actor-inner">
               <TrustFallCharacter
-                state={partnerPose.state}
-                color="opponent"
-                size="xl"
+                state={poses.you}
+                color="you"
+                size={compact ? "lg" : "2xl"}
+                facing="right"
               />
             </div>
           </div>
-        </div>
-        <span className="trust-actor-label trust-actor-label-you">You</span>
-        <span className="trust-actor-label trust-actor-label-partner">
-          {opponentLabel}
-        </span>
+
+          <div className="trust-actor trust-actor-partner">
+            <div className="trust-actor-inner">
+              <TrustFallCharacter
+                state={poses.partner}
+                color="opponent"
+                size={compact ? "lg" : "2xl"}
+                facing="left"
+              />
+            </div>
+          </div>
+
+          {/* Labels are anchored to the scene, not to the figure: a label
+              inside the actor box moves with the actor and ends up wherever
+              the pose puts it. */}
+          <span className="trust-actor-label trust-actor-label-you">You</span>
+          <span className="trust-actor-label trust-actor-label-partner">
+            {opponentLabel}
+          </span>
+
+          {/* The thread between their hands. Loose until the reveal. */}
+          <div className="trust-thread">
+            <Thread
+              state={threadState}
+              twists={threadTwists}
+              surface="receipt"
+              width={400}
+              height={compact ? 34 : 46}
+            />
+          </div>
+
+          {showChoices && (
+            <>
+              {revealed ? (
+                <div className="trust-seal trust-seal-revealed">
+                  <Stamp text={outcomeStamp!} />
+                  <span className="trust-seal-caption">{outcomeWord}</span>
+                </div>
+              ) : (
+                <>
+                  <SealedStub
+                    side="you"
+                    label={
+                      state.phase === "choose" || state.phase === "idle"
+                        ? "Choose a move"
+                        : commitmentIllustration
+                          ? "Your seal"
+                          : "Your choice is sealed"
+                    }
+                  />
+                  <SealedStub
+                    side="partner"
+                    label={
+                      commitmentIllustration
+                        ? "Their seal"
+                        : "Their choice is sealed"
+                    }
+                  />
+                </>
+              )}
+            </>
+          )}
+        </Receipt>
       </div>
+
       {announce && (
         <p className="trust-stage-caption" role="status" aria-live="polite">
           {revealed
-            ? `Played moves — You: ${playerMove === "C" ? "Cooperate" : "Defect"}; ${opponentLabel}: ${opponentMove === "C" ? "Cooperate" : "Defect"}.`
+            ? `Played — You: ${MOVE_LABEL[playerMove!]}; ${opponentLabel}: ${MOVE_LABEL[opponentMove!]}. ${outcomeWord}.`
             : state.phase === "sealed"
               ? "Both choices are sealed in this local illustration."
               : state.phase === "idle"
@@ -424,8 +469,8 @@ export function TrustStage({
             <span>
               Trust height: {altitude} mutual-cooperation round
               {altitude === 1 ? "" : "s"} in a row.
-              {altitude > 5 &&
-                " Visual height capped at 5; the streak continues."}
+              {altitude > MAX_DRAWN_TWISTS &&
+                ` Drawing caps at ${MAX_DRAWN_TWISTS}; the streak continues.`}
             </span>
           )}
           {noise !== undefined && (

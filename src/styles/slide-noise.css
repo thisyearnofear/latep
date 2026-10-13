@@ -1,0 +1,125 @@
+/* ============================================================================
+ * Noise — lesson chapter "The Noise" (ticket A4 remainder).
+ *
+ * The lesson column IS the receipt (learning.css .lesson-copy), so nothing here
+ * is a panel: groups are dashed rules and space (design.md §5). Only the
+ * caption beside the scene sits on the counter, and it takes counter tokens.
+ *
+ * Text rules are written as `.lesson-copy .noise-*` because learning.css styles
+ * `.lesson-copy p`; a bare class cannot outweigh it, and the printed sizes and
+ * the faded thermal ink would silently fall back to the body defaults.
+ * ========================================================================== */
+
+/* --- counter: the one line beside the scene -------------------------------- */
+
+.noise-caption {
+  margin: 0 0 var(--space-2xs);
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-muted);
+  overflow-wrap: anywhere;
+}
+
+/* --- receipt: the noise control ------------------------------------------- */
+
+.noise-control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin: 0;
+}
+
+.noise-control-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2xs);
+}
+
+/* A control label is a printed label: print face, uppercase, tracked. */
+.noise-label {
+  margin: 0;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+}
+
+.lesson-copy .noise-value {
+  margin: 0;
+  font-family: var(--font-print);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-receipt-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The native slider, printed in receipt ink. No gradient track and no custom
+   thumb: the browser paints its own range, tinted by accent-color, so there is
+   no colour literal and nothing that could glow (design.md §3). */
+.noise-slider {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  accent-color: var(--color-receipt-ink);
+  cursor: pointer;
+}
+
+.noise-slider:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.lesson-copy .noise-hint {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+/* --- receipt: the run's result -------------------------------------------- */
+
+.noise-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin: 0;
+  padding-top: var(--space-sm);
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+.noise-bar {
+  height: 6px;
+  overflow: hidden;
+  background: var(--color-receipt-2);
+}
+
+/* The chapter's only dynamic value, passed in as --bar-scale. */
+.noise-bar-fill {
+  height: 100%;
+  background: var(--color-receipt-ink);
+  transform-origin: left center;
+  transform: scaleX(var(--bar-scale, 0));
+}
+
+.lesson-copy .noise-summary {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 400px) {
+  .lesson-copy .noise-value {
+    font-size: var(--text-md);
+  }
+}

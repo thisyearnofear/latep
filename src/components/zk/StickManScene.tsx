@@ -2,10 +2,10 @@
  * StickManScene — a visual representation of the trust fall at each
  * stage of the ZK game flow, using the jointed TrustFallCharacter rig.
  *
- * Each player stands on a raised platform edge. When a move is committed
+ * Each player stands on a printed platform slab. When a move is committed
  * the figure topples (rig rotation) and physically plunges off its platform
  * — the fall distance scales with the stake, so "the fall" is the proof wait.
- * Resolve lands them: caught (cradled above the ground) or impact (flat, dust).
+ * Resolve lands them: caught (cradled above the ground) or impact (flat).
  *
  *   commit:   Both standing on their platforms, facing each other
  *   waiting:  You've committed — you plunge off your edge, opponent waits
@@ -15,6 +15,7 @@
 import React from "react";
 import { TrustFallCharacter, type CharacterState } from "../TrustFallCharacter";
 import type { ZKStep } from "./ZKStepIndicator";
+import "../../styles/zk.css";
 
 interface StickManSceneProps {
   step: ZKStep;
@@ -99,11 +100,11 @@ export const StickManScene: React.FC<StickManSceneProps> = ({
           case "caught":
             return { you: "We caught each other!", opponent: "Trust!" };
           case "betrayed":
-            return { you: "Ouch...", opponent: "I stepped aside" };
+            return { you: "Ouch…", opponent: "I stepped aside" };
           case "exploited":
-            return { you: "I stepped aside!", opponent: "Ouch..." };
+            return { you: "I stepped aside!", opponent: "Ouch…" };
           case "mutual":
-            return { you: "Nobody caught anyone", opponent: "💥" };
+            return { you: "Nobody caught anyone", opponent: "…" };
           default:
             return {};
         }
@@ -131,68 +132,26 @@ export const StickManScene: React.FC<StickManSceneProps> = ({
 
   return (
     <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-end",
-        gap: "56px",
-        height: `${fallHeight + PLATFORM_H + 70}px`,
-        marginBottom: "20px",
-        position: "relative",
-      }}
+      className="zk-scene"
+      style={{ height: `${fallHeight + PLATFORM_H + 70}px` }}
     >
       {/* Ground line */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "8px",
-          left: "8%",
-          right: "8%",
-          height: "2px",
-          background:
-            "linear-gradient(90deg, transparent, var(--border-glass-hover) 20%, var(--border-glass-hover) 80%, transparent)",
-        }}
-      />
+      <div className="zk-scene__ground" />
 
       {slots.map(({ key, state, color, speech: line, lean }) => {
         const L = layoutFor(state, fallHeight);
         return (
-          <div
-            key={key}
-            style={{
-              position: "relative",
-              width: "76px",
-              height: "100%",
-            }}
-          >
+          <div key={key} className="zk-slot">
             {/* Platform edge */}
-            {L.platform && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "8px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "68px",
-                  height: `${PLATFORM_H}px`,
-                  borderRadius: "6px 6px 3px 3px",
-                  background:
-                    "linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02) 38%, rgba(10,14,26,0.55))",
-                  border: "1px solid var(--border-glass)",
-                  borderTop: "2px solid var(--border-glass-hover)",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.10)",
-                }}
-              />
-            )}
+            {L.platform && <div className="zk-platform" />}
 
-            {/* Character slot: offset toward center while airborne */}
+            {/* Character slot: offset toward center while airborne. The bottom
+                and lean are data — they stay inline like the chart bars. */}
             <div
+              className="zk-slot__char"
               style={{
-                position: "absolute",
                 bottom: `${L.bottom}px`,
-                left: "50%",
                 transform: `translateX(calc(-50% + ${state === "falling" ? lean : 0}px))`,
-                transition: "bottom 0.5s var(--ease-out)",
               }}
             >
               {/* Inner wrapper carries the plunge so the offset transform stays put */}

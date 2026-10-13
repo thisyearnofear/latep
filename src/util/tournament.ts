@@ -15,7 +15,7 @@ export interface PopulationEntry {
 export interface StrategyScore {
   strategyId: StrategyId;
   name: string;
-  emoji: string;
+  pattern: string;
   color: string;
   totalScore: number;
   avgScore: number;

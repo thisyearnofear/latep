@@ -15,35 +15,46 @@ import { TrustStage } from "../visual/TrustStage";
 import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
 import { LessonDetails } from "../learning/LessonDetails";
+import { MARKS } from "../marks";
+import { getPrimitive, type PrimitiveId } from "../../content/primitives";
+import "../../styles/slide-repeat.css";
 
-const STEP_COLORS = [
-  "rgba(102,126,234,0.15)",
-  "rgba(240,160,32,0.15)",
-  "rgba(74,222,128,0.15)",
-];
-const STEP_TEXT = [
-  "var(--accent-violet)",
-  "var(--accent-warm)",
-  "var(--accent-cooperate)",
-];
-const STEPS: Array<{ name: string; short: string; full: string }> = [
+const STEPS: Array<{
+  name: string;
+  /** The primitive this step is — name and line come from primitives.ts. */
+  primitive: PrimitiveId;
+  short: string;
+  full: string;
+}> = [
   {
     name: "Commit",
+    primitive: "seal",
     short:
       "Prove that a hidden commitment contains a valid move for this game.",
     full: "A zero-knowledge proof verifies that the hidden commitment contains a valid move for this game. It does not reveal which move you chose.",
   },
   {
     name: "Reveal",
+    primitive: "handshake",
     short: "Reveal the move and nonce; the contract checks their hash.",
     full: "After both players commit, reveal your move and nonce. The contract checks their hash against your stored commitment.",
   },
   {
     name: "Resolve",
+    primitive: "net",
     short: "A transaction applies the rules and pays from contract escrow.",
     full: "A resolution transaction applies the game rules and transfers XLM from contract escrow. Timeout and recovery paths handle unfinished games.",
   },
 ];
+
+/**
+ * The fourth primitive is not part of a round: it is the accreditation proof
+ * waiting in the lobby. Name and everyday line come from primitives.ts.
+ */
+const PASS = getPrimitive("pass");
+const PassMark = MARKS[PASS.mark];
+const PASS_NOTE =
+  "A round never needs it. The lobby’s accreditation proof is exactly this.";
 
 export const RealThingSlide: React.FC<SlideProps> = () => {
   const navigate = useNavigate();
@@ -68,90 +79,51 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
         </>
       }
     >
-      {/* How it works */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-        {STEPS.map((step, i) => (
-          <div
-            key={step.name}
-            style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}
-          >
-            <div
-              style={{
-                minWidth: "28px",
-                height: "28px",
-                borderRadius: "50%",
-                background: STEP_COLORS[i],
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-base)",
-                color: STEP_TEXT[i],
-                flexShrink: 0,
-              }}
-            >
-              {i + 1}
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-sm)",
-                  fontWeight: 600,
-                  color: "var(--text-primary)",
-                  margin: "0 0 2px",
-                }}
-              >
-                {step.name}
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-sm)",
-                  color: "var(--text-secondary)",
-                  margin: 0,
-                }}
-              >
-                {step.short}
-              </p>
-            </div>
+      {/* How it works — each step is one of the four counter objects, named
+          with the wording from content/primitives.ts */}
+      <ul className="realthing-steps">
+        {STEPS.map((step) => {
+          const primitive = getPrimitive(step.primitive);
+          const Mark = MARKS[primitive.mark];
+          return (
+            <li key={step.name} className="realthing-step">
+              <span className="realthing-step-mark">
+                <Mark size={24} />
+              </span>
+              <div className="realthing-step-body">
+                <p className="realthing-step-name">{step.name}</p>
+                <p className="realthing-step-line">{step.short}</p>
+                <p className="realthing-step-primitive">
+                  {primitive.name} — {primitive.oneLine}
+                </p>
+              </div>
+            </li>
+          );
+        })}
+        {/* The Pass is the fourth primitive, and it belongs to the lobby. */}
+        <li className="realthing-step">
+          <span className="realthing-step-mark">
+            <PassMark size={24} />
+          </span>
+          <div className="realthing-step-body">
+            <p className="realthing-step-name">{PASS.name}</p>
+            <p className="realthing-step-line">{PASS.oneLine}</p>
+            <p className="realthing-step-primitive">{PASS_NOTE}</p>
           </div>
-        ))}
-      </div>
+        </li>
+      </ul>
 
-      <p
-        style={{
-          fontFamily: "var(--font-display)",
-          fontStyle: "italic",
-          fontSize: "var(--text-base)",
-          color: "var(--text-secondary)",
-          margin: 0,
-        }}
-      >
+      <p className="realthing-lead">
         Proofs check valid moves, not cooperative intentions.
       </p>
 
-      {/* Wallet status */}
+      {/* Wallet status — a printed line, and the words carry the state. */}
       {address ? (
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            color: "var(--accent-cooperate)",
-            margin: 0,
-          }}
-        >
-          ✓ Wallet connected — {address.slice(0, 8)}...{address.slice(-6)}
+        <p className="realthing-wallet realthing-wallet--connected">
+          Wallet connected — {address.slice(0, 8)}…{address.slice(-6)}
         </p>
       ) : (
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            color: "var(--text-muted)",
-            margin: 0,
-          }}
-        >
+        <p className="realthing-wallet">
           Connect a Stellar wallet in the lobby when you are ready.
         </p>
       )}
@@ -160,31 +132,13 @@ export const RealThingSlide: React.FC<SlideProps> = () => {
         trigger="How verification works"
         title="Commit, reveal, resolve"
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="realthing-detail">
           {STEPS.map((step) => (
-            <p
-              key={step.name}
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-secondary)",
-                margin: 0,
-              }}
-            >
-              <strong style={{ color: "var(--text-primary)" }}>
-                {step.name}:
-              </strong>{" "}
-              {step.full}
+            <p key={step.name} className="realthing-detail-step">
+              <strong>{step.name}:</strong> {step.full}
             </p>
           ))}
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
+          <p className="realthing-detail-step">
             On-chain play adds XLM escrow and hidden commitments. A proof checks
             a valid move, not whether someone will cooperate. Review the network
             and stakes in the lobby.

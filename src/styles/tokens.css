@@ -1,0 +1,143 @@
+/* ============================================================================
+ * Latep — Design tokens
+ *
+ * The single source of truth for colour, type, space, shape, elevation, and
+ * motion. Read ../design.md before adding anything: if a value isn't here, it
+ * doesn't exist yet, and adding it means amending design.md in the same PR.
+ *
+ * Two surfaces, always:
+ *   --color-counter-*   the dark surface — nav, page headings, scene frames
+ *   --color-receipt-*   the light surface — anything read closely
+ *
+ * Pick one surface and stay on it. Mixing counter and receipt tokens on a
+ * single element is the most common mistake in this codebase.
+ * ========================================================================== */
+
+:root {
+  /* --------------------------------------------------------------------------
+   * Colour — counter (dark surface)
+   * ----------------------------------------------------------------------- */
+  --color-counter: oklch(23% 0.012 60);
+  --color-counter-2: oklch(28% 0.014 60);
+  --color-counter-rule: oklch(38% 0.012 60);
+  --color-counter-text: oklch(94% 0.01 85);
+  --color-counter-text-2: oklch(78% 0.012 80);
+  --color-counter-muted: oklch(66% 0.012 75);
+
+  /* --------------------------------------------------------------------------
+   * Colour — receipt (light surface)
+   * ----------------------------------------------------------------------- */
+  --color-receipt: oklch(97% 0.008 95);
+  --color-receipt-2: oklch(93% 0.01 95);
+  --color-receipt-rule: oklch(82% 0.01 90);
+  --color-receipt-ink: oklch(20% 0.01 60);
+  --color-receipt-faded: oklch(48% 0.01 60);
+
+  /* --------------------------------------------------------------------------
+   * Colour — threads and people
+   *
+   * Blue is always you, amber is always your partner. Never decoration.
+   * There is no "bond" colour: mutual trust is the two threads twisted.
+   * ----------------------------------------------------------------------- */
+  --color-you: oklch(68% 0.15 250);
+  --color-you-print: oklch(48% 0.16 255);
+  --color-partner: oklch(80% 0.15 75);
+  --color-partner-print: oklch(52% 0.14 55);
+
+  /* Stamp red: stamps and errors only. "Hold back" is never red. */
+  --color-stamp: oklch(55% 0.19 28);
+  --color-focus: oklch(62% 0.17 255);
+
+  /* The modal scrim. An overlay must not erase the page behind it — losing
+     context is what makes a wizard feel like a wall — but a translucent
+     black is the only translucency allowed outside the shadow tokens, so it
+     lives here as a token rather than as an rgba() in a component.
+     (design.md §3, added with the quiz/wizard overlays.) */
+  --color-scrim: oklch(0% 0 0 / 0.62);
+
+  /* --------------------------------------------------------------------------
+   * Colour — charts (design.md §6)
+   *
+   * Charts print in receipt ink plus up to four tints — lighter steps of the
+   * same ink family, never nine hues. A strategy is told apart by its name
+   * and thread pattern first; the tint only separates bars that share a
+   * pattern. The lightest tint must still read on receipt stock.
+   * ----------------------------------------------------------------------- */
+  --chart-tint-1: var(--color-receipt-ink);
+  --chart-tint-2: oklch(45% 0.02 60);
+  --chart-tint-3: oklch(62% 0.025 60);
+  --chart-tint-4: oklch(78% 0.03 70);
+
+  /* --------------------------------------------------------------------------
+   * Typography
+   *
+   * Display: page headings on the counter.
+   * Body:    every sentence you read.
+   * Print:   what the receipt printer prints — line items, times, hashes,
+   *          nonces, tx ids, stamps, labels. Never paragraphs.
+   * ----------------------------------------------------------------------- */
+  --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", "Open Sans", system-ui, sans-serif;
+  --font-print: "Martian Mono", "Roboto Mono", ui-monospace, monospace;
+
+  --text-xs: 0.8125rem; /* receipt labels, captions */
+  --text-sm: 0.9375rem; /* helper text, table cells */
+  --text-md: 1.0625rem; /* body (default) */
+  --text-lg: 1.3125rem; /* lead paragraph */
+  --text-xl: clamp(1.5rem, 1.2rem + 1vw, 2rem); /* section heading */
+  --text-2xl: clamp(2rem, 1.5rem + 2vw, 3rem); /* page heading */
+  --text-3xl: clamp(2.5rem, 1.6rem + 4vw, 4.75rem); /* story hero only */
+
+  --leading-body: 1.55;
+  --tracking-display: -0.02em;
+  --tracking-print-label: 0.06em;
+  --measure-prose: 68ch;
+
+  /* --------------------------------------------------------------------------
+   * Space
+   * ----------------------------------------------------------------------- */
+  --space-3xs: 4px;
+  --space-2xs: 8px;
+  --space-xs: 12px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+  --space-2xl: 72px;
+  --space-3xl: 112px;
+
+  /* --------------------------------------------------------------------------
+   * Shape and elevation
+   *
+   * Receipts have no rounded corners — their edges are torn (see
+   * components/receipt/receipt.css). Inputs and buttons get 3px. No pills
+   * except the network badge. Nothing has a shadow but a receipt.
+   * ----------------------------------------------------------------------- */
+  --radius-sm: 3px;
+  --shadow-receipt:
+    0 1px 0 oklch(20% 0.01 60 / 0.18), 0 6px 18px oklch(0% 0 0 / 0.22);
+
+  /* --------------------------------------------------------------------------
+   * Motion
+   *
+   * One orchestrated moment per view: the reveal. Everything else is quiet.
+   * Animate transform, opacity and clip-path only — never `transition: all`.
+   * ----------------------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-feed: steps(12, end); /* stepped: receipt printing ONLY */
+
+  --dur-micro: 120ms; /* press, toggle */
+  --dur-short: 220ms; /* hover, menus, tooltips */
+  --dur-long: 420ms; /* panels, page reveal */
+  --dur-print: 700ms; /* a receipt feeding out */
+  --dur-scene: 1400ms; /* the lean / thread sequence (scene only) */
+
+  /* --------------------------------------------------------------------------
+   * Layout
+   * ----------------------------------------------------------------------- */
+  --layout-max: 1200px;
+  --layout-gutter: var(--space-md);
+  --receipt-col-max: 420px; /* receipts in a column */
+}
