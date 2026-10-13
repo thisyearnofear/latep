@@ -26,7 +26,7 @@ interface PopEntry {
   strategyId: StrategyId;
   name: string;
   pattern: string;
-  color: string;
+  tint: number;
   count: number;
 }
 
@@ -55,7 +55,7 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
         strategyId: id,
         name: info.name,
         pattern: info.pattern,
-        color: info.barColor,
+        tint: info.tint,
         count: 1,
       };
     }).reduce((acc, entry) => {
@@ -153,7 +153,7 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
           strategyId: id,
           name: info.name,
           pattern: info.pattern,
-          color: info.barColor,
+          tint: info.tint,
           count: 1,
         };
       }).reduce((acc, entry) => {
@@ -200,33 +200,16 @@ export const TournamentSlide: React.FC<SlideProps> = ({ onNext }) => {
               : "watch which strategies grow."}
       </p>
 
-      {/* Completion */}
+      {/* Completion — the lesson column is already the receipt, so this is
+          grouped by a dashed rule, not nested as a receipt of its own. */}
       {isComplete && (
-        <div
-          className="glass-panel lesson-result"
-          style={{
-            borderColor: "rgba(102,126,234,0.3)",
-          }}
-        >
+        <div className="lesson-result till-result">
           <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-lg)",
-              color: dominantStrategy?.color || "var(--accent-violet)",
-              marginBottom: "8px",
-            }}
+            className={`till-result__name ${dominantStrategy ? `chart-tint-${dominantStrategy.tint}` : ""}`}
           >
             {dominantStrategy?.name} dominates
           </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: "var(--text-base)",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
+          <p className="till-result__note">
             This is one simulated population under these payoffs. Change the
             conditions in the tournament sandbox to explore different outcomes.
           </p>

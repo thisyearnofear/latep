@@ -114,7 +114,7 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
                 name={info.name}
                 description={info.description}
                 pattern={info.pattern}
-                barColor={info.barColor}
+                tint={info.tint}
                 compact
                 onClick={() => startMatch(id)}
               />

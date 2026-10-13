@@ -169,146 +169,49 @@ export const TournamentMode: React.FC = () => {
         No heading of its own: the page already says "The Tournament", and two
         headings and two trophy emoji said the same thing twice.
       */}
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          color: "rgba(255,255,255,0.6)",
-          margin: "0 0 20px 0",
-          fontSize: "0.85rem",
-          lineHeight: 1.4,
-        }}
-      >
+      <p className="till-intro">
         All strategies play each other. The weak die. The strong reproduce.
         Watch trust evolve over generations.
       </p>
 
-      {/* Winner banner */}
+      {/* Winner banner — a finished tournament prints its own receipt. */}
       {winner && (
-        <div
-          className="tf-fade-in-up"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(255, 180, 80, 0.2), rgba(255, 140, 60, 0.1))",
-            borderRadius: "12px",
-            padding: "16px",
-            marginBottom: "20px",
-            border: "2px solid rgba(255, 180, 80, 0.4)",
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "#ffb050",
-              margin: 0,
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-            }}
-          >
-            🏆 {winner} dominates after {generation} generations!
+        <div className="till-winner receipt receipt-edge tf-fade-in-up">
+          <p className="till-winner__line">
+            {winner} dominates after {generation} generations.
           </p>
-          <button
-            type="button"
-            onClick={reset}
-            style={{
-              background: "var(--bg-glass-light)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-glass)",
-              borderRadius: "var(--radius-sm)",
-              padding: "8px 16px",
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              cursor: "pointer",
-              marginTop: "10px",
-            }}
-          >
-            🔄 Start New Tournament
+          <button type="button" onClick={reset} className="till-button">
+            Start a new tournament
           </button>
         </div>
       )}
 
       {/* Generation + stage indicator */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "20px",
-          marginBottom: "16px",
-        }}
-      >
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.5)",
-              margin: 0,
-            }}
-          >
-            Generation
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.95)",
-              margin: 0,
-              fontWeight: "bold",
-              fontSize: "1.3rem",
-            }}
-          >
-            {generation}
-          </p>
+      <div className="till-stats">
+        <div className="till-stat">
+          <p className="till-stat__label">Generation</p>
+          <p className="till-stat__value">{generation}</p>
         </div>
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.5)",
-              margin: 0,
-            }}
-          >
-            Population
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.95)",
-              margin: 0,
-              fontWeight: "bold",
-              fontSize: "1.3rem",
-            }}
-          >
-            {totalPopulation}
-          </p>
+        <div className="till-stat">
+          <p className="till-stat__label">Population</p>
+          <p className="till-stat__value">{totalPopulation}</p>
         </div>
-        <div>
+        <div className="till-stat">
+          <p className="till-stat__label">Stage</p>
           <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.5)",
-              margin: 0,
-            }}
-          >
-            Stage
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              /* Never colour alone: the word beside it says the same thing. */
-              color:
-                stage === "eliminating"
-                  ? "var(--color-stamp)"
-                  : "var(--color-counter-text)",
-              margin: 0,
-              fontWeight: "bold",
-              fontSize: "1rem",
-            }}
+            className={
+              stage === "eliminating"
+                ? "till-stat__value till-stat__value--stamp"
+                : "till-stat__value"
+            }
           >
             {stage === "playing"
-              ? "⚔️ Playing..."
+              ? "Playing…"
               : stage === "eliminating"
-                ? "💀 Eliminating..."
+                ? "Eliminating…"
                 : stage === "reproducing"
-                  ? "🌱 Reproducing..."
-                  : "✋ Ready"}
+                  ? "Reproducing…"
+                  : "Ready"}
           </p>
         </div>
       </div>
@@ -336,8 +239,7 @@ export const TournamentMode: React.FC = () => {
                 }
               >
                 <span
-                  className={`thread-key thread-key--${info.pattern}`}
-                  style={{ color: info.barColor }}
+                  className={`thread-key thread-key--${info.pattern} chart-tint-${info.tint}`}
                   aria-hidden="true"
                 />
                 <span className="till-roll__name">
@@ -351,8 +253,8 @@ export const TournamentMode: React.FC = () => {
               </div>
               <div className="till-roll__track">
                 <div
-                  className={`till-roll__fill till-roll__fill--${info.pattern}`}
-                  style={{ width: `${barWidth}%`, color: info.barColor }}
+                  className={`till-roll__fill till-roll__fill--${info.pattern} chart-tint-${info.tint}`}
+                  style={{ width: `${barWidth}%` }}
                 />
               </div>
             </div>
@@ -367,8 +269,8 @@ export const TournamentMode: React.FC = () => {
             return (
               <span key={entry.strategyId} className="till-roll__legend-item">
                 <span
-                  className={`thread-key thread-key--${info.pattern}`}
-                  style={{ color: info.barColor, width: 18 }}
+                  className={`thread-key thread-key--${info.pattern} chart-tint-${info.tint}`}
+                  style={{ width: 18 }}
                   aria-hidden="true"
                 />
                 {info.name}
@@ -379,54 +281,26 @@ export const TournamentMode: React.FC = () => {
       </div>
 
       {/* Controls */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-          justifyContent: "center",
-          marginBottom: "20px",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="till-controls">
         <button
           type="button"
           onClick={playTournament}
           disabled={stage !== "rest" || !!winner}
-          style={{
-            background: "var(--accent-violet)",
-            color: "white",
-            border: "none",
-            borderRadius: "var(--radius-sm)",
-            padding: "8px 16px",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            cursor: "pointer",
-            width: "130px",
-          }}
+          className="till-button till-button--primary"
         >
-          {stage === "playing" ? "⚔️ Playing..." : "⚔️ Play Tournament"}
+          {stage === "playing" ? "Playing…" : "Play a tournament"}
         </button>
         <button
           type="button"
           onClick={evolve}
           disabled={stage !== "rest" || scores.length === 0 || !!winner}
-          style={{
-            background: "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-sm)",
-            padding: "8px 16px",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            cursor: "pointer",
-            width: "130px",
-          }}
+          className="till-button"
         >
           {stage === "eliminating"
-            ? "💀..."
+            ? "Eliminating…"
             : stage === "reproducing"
-              ? "🌱..."
-              : "🧬 Evolve"}
+              ? "Reproducing…"
+              : "Evolve"}
         </button>
         <button
           type="button"
@@ -442,88 +316,35 @@ export const TournamentMode: React.FC = () => {
             }
           }}
           disabled={!!winner}
-          style={{
-            background: autoPlay
-              ? "rgba(102, 126, 234, 0.3)"
-              : "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-sm)",
-            padding: "8px 16px",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            cursor: "pointer",
-            width: "120px",
-          }}
+          aria-pressed={autoPlay}
+          className={
+            autoPlay ? "till-button till-button--active" : "till-button"
+          }
         >
-          {autoPlay ? "⏸ Stop" : "▶ Auto-play"}
+          {autoPlay ? "Stop" : "Auto-play"}
         </button>
-        <button
-          type="button"
-          onClick={reset}
-          style={{
-            background: "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-sm)",
-            padding: "8px 16px",
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-sm)",
-            cursor: "pointer",
-            width: "100px",
-          }}
-        >
-          🔄 Reset
+        <button type="button" onClick={reset} className="till-button">
+          Reset
         </button>
       </div>
 
-      {/* Settings: noise + turns sliders */}
-      <div
-        style={{
-          background: "rgba(255,255,255,0.05)",
-          borderRadius: "12px",
-          padding: "16px",
-          marginBottom: "20px",
-          border: "1px solid rgba(255,255,255,0.08)",
-        }}
-      >
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--color-counter-muted)",
-            margin: "0 0 12px 0",
-            fontSize: "0.85rem",
-            textAlign: "left",
-          }}
-        >
-          🎛️ Tournament Settings
-        </p>
+      {/* Settings: noise + turns sliders. A form is read closely, so it
+          prints on stock. */}
+      <div className="till-settings receipt receipt-edge">
+        <p className="till-settings__title">Tournament settings</p>
 
         {/* Noise slider */}
-        <div style={{ marginBottom: "14px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "4px",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: "0.8rem",
-              }}
-            >
-              💨 Noise (mistake probability)
+        <div className="till-field">
+          <div className="till-field__row">
+            <span className="till-field__label">
+              Noise (mistake probability)
             </span>
             <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: config.noise > 0.1 ? "#ffb050" : "rgba(255,255,255,0.6)",
-                fontSize: "0.8rem",
-                fontWeight: "bold",
-              }}
+              className={
+                config.noise > 0.1
+                  ? "till-field__value till-field__value--loud"
+                  : "till-field__value"
+              }
             >
               {(config.noise * 100).toFixed(0)}%
             </span>
@@ -539,17 +360,8 @@ export const TournamentMode: React.FC = () => {
               setScores([]); // Clear stale scores
             }}
             disabled={stage !== "rest"}
-            style={{ width: "100%", accentColor: "var(--color-you)" }}
           />
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.4)",
-              margin: "4px 0 0 0",
-              fontSize: "0.72rem",
-              textAlign: "left",
-            }}
-          >
+          <p className="till-field__hint">
             {config.noise === 0
               ? "Perfect communication — no mistakes"
               : config.noise < 0.05
@@ -561,33 +373,10 @@ export const TournamentMode: React.FC = () => {
         </div>
 
         {/* Turns per match slider */}
-        <div style={{ marginBottom: "14px" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "4px",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: "0.8rem",
-              }}
-            >
-              🔁 Rounds per match
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: "0.8rem",
-                fontWeight: "bold",
-              }}
-            >
-              {config.turnsPerMatch}
-            </span>
+        <div className="till-field">
+          <div className="till-field__row">
+            <span className="till-field__label">Rounds per match</span>
+            <span className="till-field__value">{config.turnsPerMatch}</span>
           </div>
           <input
             type="range"
@@ -600,38 +389,16 @@ export const TournamentMode: React.FC = () => {
               setScores([]);
             }}
             disabled={stage !== "rest"}
-            style={{ width: "100%", accentColor: "var(--color-you)" }}
           />
         </div>
 
         {/* Selection size */}
-        <div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "4px",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: "0.8rem",
-              }}
-            >
-              ⚖️ Selection pressure (eliminate/reproduce)
+        <div className="till-field">
+          <div className="till-field__row">
+            <span className="till-field__label">
+              Selection pressure (eliminate / reproduce)
             </span>
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "rgba(255,255,255,0.6)",
-                fontSize: "0.8rem",
-                fontWeight: "bold",
-              }}
-            >
-              {config.selectionSize}
-            </span>
+            <span className="till-field__value">{config.selectionSize}</span>
           </div>
           <input
             type="range"
@@ -644,12 +411,11 @@ export const TournamentMode: React.FC = () => {
               setScores([]);
             }}
             disabled={stage !== "rest"}
-            style={{ width: "100%", accentColor: "var(--color-you)" }}
           />
         </div>
 
         {/* Payoff matrix editor */}
-        <div style={{ marginTop: "14px" }}>
+        <div className="till-field">
           <PayoffMatrixEditor
             payoffs={config.payoffs}
             onChange={(payoffs: PayoffMatrix) => {
@@ -661,102 +427,31 @@ export const TournamentMode: React.FC = () => {
         </div>
       </div>
 
-      {/* Score table (after tournament played) */}
+      {/* Score table (after tournament played) — a section of the roll. */}
       {scores.length > 0 && (
-        <div
-          className="tf-fade-in-up"
-          style={{
-            background: "rgba(255,255,255,0.95)",
-            borderRadius: "12px",
-            padding: "16px",
-            marginBottom: "20px",
-          }}
-        >
-          <h4
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
-              margin: "0 0 12px 0",
-              textAlign: "center",
-            }}
-          >
-            📊 Generation {generation} — Tournament Results
+        <div className="till-results receipt receipt-edge tf-fade-in-up">
+          <h4 className="till-results__title">
+            Generation {generation} — results
           </h4>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-              fontFamily: "var(--font-body)",
-            }}
-          >
+          <table className="till-results__table">
             <thead>
-              <tr style={{ borderBottom: "2px solid #ddd" }}>
-                <th
-                  style={{
-                    padding: "6px 4px",
-                    color: "var(--text-secondary)",
-                    textAlign: "left",
-                  }}
-                >
-                  Strategy
-                </th>
-                <th
-                  style={{ padding: "6px 4px", color: "var(--text-secondary)" }}
-                >
-                  Pop
-                </th>
-                <th
-                  style={{ padding: "6px 4px", color: "var(--text-secondary)" }}
-                >
-                  Avg Score
-                </th>
-                <th
-                  style={{ padding: "6px 4px", color: "var(--text-secondary)" }}
-                >
-                  Total
-                </th>
+              <tr>
+                <th>Strategy</th>
+                <th>Pop</th>
+                <th>Avg score</th>
+                <th>Total</th>
               </tr>
             </thead>
             <tbody>
               {scores.map((s, i) => (
                 <tr
                   key={s.strategyId}
-                  style={{
-                    borderBottom: "1px solid #eee",
-                    background:
-                      i === 0 ? "rgba(76, 175, 80, 0.05)" : "transparent",
-                  }}
+                  className={i === 0 ? "till-results__row--leader" : undefined}
                 >
-                  <td
-                    style={{
-                      padding: "6px 4px",
-                      color: s.color,
-                      fontWeight: i === 0 ? "bold" : "normal",
-                      textAlign: "left",
-                    }}
-                  >
-                    {s.name}
-                  </td>
-                  <td
-                    style={{ padding: "6px 4px", color: "var(--text-primary)" }}
-                  >
-                    {s.population}
-                  </td>
-                  <td
-                    style={{
-                      padding: "6px 4px",
-                      color: i === 0 ? "#4CAF50" : "#333",
-                      fontWeight: i === 0 ? "bold" : "normal",
-                    }}
-                  >
-                    {s.avgScore.toFixed(1)}
-                  </td>
-                  <td
-                    style={{ padding: "6px 4px", color: "var(--text-muted)" }}
-                  >
-                    {s.totalScore}
-                  </td>
+                  <td>{s.name}</td>
+                  <td>{s.population}</td>
+                  <td>{s.avgScore.toFixed(1)}</td>
+                  <td>{s.totalScore}</td>
                 </tr>
               ))}
             </tbody>
@@ -764,58 +459,21 @@ export const TournamentMode: React.FC = () => {
         </div>
       )}
 
-      {/* Evolution history mini-chart */}
+      {/* Evolution history mini-chart — a section of the roll. Heights and
+          tints are per-strategy data, so they stay inline. */}
       {history.length > 0 && (
-        <div
-          style={{
-            background: "rgba(255,255,255,0.08)",
-            borderRadius: "12px",
-            padding: "16px",
-            marginBottom: "20px",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          <h4
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--color-counter-muted)",
-              margin: "0 0 12px 0",
-              textAlign: "center",
-            }}
-          >
-            📈 Population Over Generations
-          </h4>
-          <div
-            style={{
-              display: "flex",
-              gap: "4px",
-              alignItems: "flex-end",
-              height: "60px",
-              overflowX: "auto",
-              paddingBottom: "4px",
-            }}
-          >
+        <div className="till-results receipt receipt-edge">
+          <h4 className="till-results__title">Population over generations</h4>
+          <div className="till-history__chart">
             {/* Generation 0 (initial) */}
-            <div
-              style={{
-                minWidth: "30px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "flex-end",
-                height: "100%",
-              }}
-            >
+            <div className="till-history__col" title="Gen 0">
               {DEFAULT_POPULATION.map((e) => {
                 const info = getStrategyInfo(e.strategyId);
                 return (
                   <div
                     key={e.strategyId}
-                    style={{
-                      height: `${(e.count / 25) * 100}%`,
-                      background: info.barColor,
-                      opacity: 0.7,
-                      minHeight: "2px",
-                    }}
+                    className={`tint-fill chart-tint-${info.tint}`}
+                    style={{ height: `${(e.count / 25) * 100}%` }}
                     title={`${info.name}: ${e.count}`}
                   />
                 );
@@ -827,13 +485,7 @@ export const TournamentMode: React.FC = () => {
               return (
                 <div
                   key={h.gen}
-                  style={{
-                    minWidth: "30px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "flex-end",
-                    height: "100%",
-                  }}
+                  className="till-history__col"
                   title={`Gen ${h.gen}`}
                 >
                   {Object.entries(h.pop).map(([id, count]) => {
@@ -841,10 +493,9 @@ export const TournamentMode: React.FC = () => {
                     return (
                       <div
                         key={id}
+                        className={`tint-fill chart-tint-${info.tint}`}
                         style={{
                           height: `${(count / total) * 100}%`,
-                          background: info.barColor,
-                          opacity: 0.7,
                           minHeight: count > 0 ? "2px" : "0",
                         }}
                         title={`${info.name}: ${count}`}
@@ -855,72 +506,18 @@ export const TournamentMode: React.FC = () => {
               );
             })}
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "4px",
-            }}
-          >
-            <span
-              style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem" }}
-            >
-              Gen 0
-            </span>
-            <span
-              style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.7rem" }}
-            >
-              Gen {generation}
-            </span>
+          <div className="till-history__axis">
+            <span>Gen 0</span>
+            <span>Gen {generation}</span>
           </div>
         </div>
       )}
 
-      {/* Legend */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "8px",
-          justifyContent: "center",
-        }}
-      >
-        {DEFAULT_POPULATION.map((e) => {
-          const info = getStrategyInfo(e.strategyId);
-          const extinct = !population.find(
-            (p) => p.strategyId === e.strategyId,
-          );
-          return (
-            <div
-              key={e.strategyId}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-                opacity: extinct ? 0.3 : 1,
-              }}
-            >
-              <div
-                style={{
-                  width: "10px",
-                  height: "10px",
-                  borderRadius: "50%",
-                  background: info.barColor,
-                }}
-              />
-              <span
-                style={{
-                  fontFamily: "var(--font-body)",
-                  color: "rgba(255,255,255,0.5)",
-                  fontSize: "0.72rem",
-                }}
-              >
-                {info.name}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+      {/*
+        No separate legend here: the till roll above always names every
+        strategy next to its pattern key, so a second legend would print the
+        same information twice.
+      */}
     </div>
   );
 };

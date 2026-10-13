@@ -11,71 +11,75 @@
  */
 
 import React from "react";
+import {
+  Footprints,
+  Gem,
+  Handshake,
+  HeartCrack,
+  Lock,
+  Stamp,
+  Trophy,
+  Wind,
+  type LucideIcon,
+} from "lucide-react";
+import { Receipt, ReceiptStub } from "../receipt";
+import "../../styles/ui.css";
 
 export interface Achievement {
   id: string;
-  icon: string;
+  icon: LucideIcon;
   title: string;
   description: string;
-  color: string;
 }
 
 export const ACHIEVEMENTS: Record<string, Achievement> = {
   first_catch: {
     id: "first_catch",
-    icon: "🤝",
+    icon: Handshake,
     title: "First Catch",
-    description: "You cooperated and they caught you. Trust begins.",
-    color: "var(--accent-cooperate)",
+    description: "You leaned in and they held you up. Trust begins.",
   },
   first_betrayal: {
     id: "first_betrayal",
-    icon: "💥",
+    icon: HeartCrack,
     title: "The Fall",
-    description: "You fell and they stepped aside. Now you know.",
-    color: "var(--accent-defect)",
+    description: "You leaned in and they stepped aside. Now you know.",
   },
   first_exploit: {
     id: "first_exploit",
-    icon: "🏆",
+    icon: Footprints,
     title: "The Exploit",
     description: "You stepped aside while they fell. Was it worth it?",
-    color: "var(--accent-warm)",
   },
   trust_streak_5: {
     id: "trust_streak_5",
-    icon: "🔥",
+    icon: Stamp,
     title: "Trust Streak",
-    description: "5 rounds of mutual cooperation in a row.",
-    color: "var(--accent-violet)",
+    description: "Five rounds of leaning in together, in a row.",
   },
   tournament_winner: {
     id: "tournament_winner",
-    icon: "👑",
+    icon: Trophy,
     title: "Tournament Champion",
     description: "Your strategy dominated the evolutionary tournament.",
-    color: "var(--accent-warm)",
   },
   noise_master: {
     id: "noise_master",
-    icon: "💨",
+    icon: Wind,
     title: "Noise Master",
     description: "You explored how noise destroys trust.",
-    color: "var(--accent-violet)",
   },
   zk_player: {
     id: "zk_player",
-    icon: "🔒",
+    icon: Lock,
     title: "ZK Player",
     description: "You played your first game with real stakes.",
-    color: "var(--accent-violet)",
   },
   zk_winner: {
     id: "zk_winner",
-    icon: "💎",
+    icon: Gem,
     title: "ZK Winner",
     description: "You won a game with real XLM at stake.",
-    color: "var(--accent-cooperate)",
   },
 };
 
@@ -88,62 +92,27 @@ export const AchievementBadge: React.FC<AchievementBadgeProps> = ({
   achievement,
   compact,
 }) => {
+  const Icon = achievement.icon;
+
   if (compact) {
     return (
-      <div
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "6px",
-          padding: "4px 10px",
-          background: "var(--bg-glass-light)",
-          border: `1px solid ${achievement.color}`,
-          borderRadius: "100px",
-          fontSize: "var(--text-xs)",
-          fontFamily: "var(--font-body)",
-          color: achievement.color,
-        }}
-      >
-        <span>{achievement.icon}</span>
-        <span>{achievement.title}</span>
-      </div>
+      <ReceiptStub>
+        <span className="ui-achievement ui-achievement--compact">
+          <Icon size={16} aria-hidden />
+          <span>{achievement.title}</span>
+        </span>
+      </ReceiptStub>
     );
   }
 
   return (
-    <div
-      className="glass-panel"
-      style={{
-        padding: "20px",
-        textAlign: "center",
-        borderColor: achievement.color,
-        boxShadow: `0 0 24px ${achievement.color.replace("var(--", "rgba(").replace(")", ", 0.15)")}`,
-      }}
-    >
-      <div style={{ fontSize: "40px", marginBottom: "8px" }}>
-        {achievement.icon}
+    <Receipt>
+      <div className="ui-achievement">
+        <Icon size={32} className="ui-achievement__icon" aria-hidden />
+        <p className="ui-achievement__title">{achievement.title}</p>
+        <p className="ui-achievement__description">{achievement.description}</p>
       </div>
-      <p
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-lg)",
-          color: achievement.color,
-          margin: "0 0 4px",
-        }}
-      >
-        {achievement.title}
-      </p>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-xs)",
-          color: "var(--text-secondary)",
-          margin: 0,
-        }}
-      >
-        {achievement.description}
-      </p>
-    </div>
+    </Receipt>
   );
 };
 
