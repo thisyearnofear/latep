@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { useAudioSettings } from "../hooks/useAudioSettings";
 import { LessonActionProvider } from "./learning/LessonActions";
@@ -229,6 +230,11 @@ export const SlideSystem: React.FC<SlideSystemProps> = ({
               flow.
             </p>
           </LessonDetails>
+          {/* Every chapter keeps one way out — the deck never traps a
+              reader who would rather play. */}
+          <Link to="/learn/play" className="lesson-skip">
+            Skip to the sandbox →
+          </Link>
         </div>
 
         {/* Slide content */}

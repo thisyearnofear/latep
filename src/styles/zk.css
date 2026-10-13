@@ -746,64 +746,62 @@
 }
 
 .zk-onboard {
-  max-width: 440px;
+  max-width: 460px;
   width: 100%;
-  text-align: center;
-}
-
-.zk-onboard__mark {
-  display: flex;
-  justify-content: center;
-  margin-bottom: var(--space-2xs);
-  color: var(--color-receipt-ink);
+  text-align: left;
 }
 
 .zk-onboard__title {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   color: var(--color-receipt-ink);
-  margin: 0 0 var(--space-2xs) 0;
+  margin: 0 0 var(--space-sm) 0;
+  text-align: center;
 }
 
-.zk-onboard__body {
+/* The three beats as printed rows — mark on the left, one line each. */
+.zk-onboard__rows {
+  list-style: none;
+  margin: 0 0 var(--space-md) 0;
+  padding: 0;
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+.zk-onboard__row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px dashed var(--color-receipt-rule);
+}
+
+.zk-onboard__row-mark {
+  flex: none;
+  color: var(--color-receipt-ink);
+  padding-top: 2px;
+}
+
+.zk-onboard__row-copy {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   color: var(--color-receipt-faded);
   line-height: 1.6;
-  margin: 0 0 var(--space-md) 0;
 }
 
-/* Steps as printed counters — 1 of 3 — not dots. */
-.zk-onboard__count {
+.zk-onboard__row-copy strong {
+  display: block;
   font-family: var(--font-print);
   font-size: var(--text-xs);
-  color: var(--color-receipt-faded);
-  margin: 0 0 var(--space-sm) 0;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-receipt-ink);
+  margin-bottom: 2px;
 }
 
 .zk-onboard__actions {
   display: flex;
   gap: var(--space-2xs);
   justify-content: center;
-}
-
-.zk-onboard__skip {
-  background: none;
-  border: none;
-  color: var(--color-receipt-faded);
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  cursor: pointer;
-  margin-top: var(--space-sm);
-}
-
-.zk-onboard__skip:hover {
-  color: var(--color-receipt-ink);
-}
-
-.zk-onboard__skip:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
 }
 
 /* --- narrow screens -------------------------------------------------------- */
