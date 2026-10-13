@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
 import { useGameStats, type GameRecord } from "../../hooks/useGameStats";
-import { ElectricButton } from "../ui/ElectricButton";
-import { ShimmerButton } from "../ui/ShimmerButton";
 import { unlockAchievement } from "../ui/AchievementBadge";
 import { TrustFallCharacter } from "../TrustFallCharacter";
 
@@ -678,17 +676,21 @@ export const GameResult: React.FC<GameResultProps> = ({
                 marginTop: "8px",
               }}
             >
-              <ElectricButton
-                color="violet"
-                size="md"
+              <button
+                type="button"
                 onClick={onPlayAgain}
+                className="till-button till-button--primary"
                 style={{ minWidth: 200 }}
               >
-                🪂 Play Again
-              </ElectricButton>
-              <ShimmerButton size="md" onClick={onBack}>
-                ← Back to Lobby
-              </ShimmerButton>
+                Play again
+              </button>
+              <button
+                type="button"
+                onClick={onBack}
+                className="till-button"
+              >
+                Back to lobby
+              </button>
             </div>
           )}
 

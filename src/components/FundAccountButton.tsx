@@ -4,6 +4,7 @@ import { useWallet } from "../hooks/useWallet.ts";
 import { Button, Tooltip } from "@stellar/design-system";
 import { getFriendbotUrl } from "../util/friendbot";
 import { useWalletBalance } from "../hooks/useWalletBalance.ts";
+import "../styles/zk.css";
 
 const FundAccountButton: React.FC = () => {
   const { addNotification } = useNotification();
@@ -61,7 +62,7 @@ const FundAccountButton: React.FC = () => {
           </Button>
         }
       >
-        <div style={{ width: "13em" }}>
+        <div className="zk-fund-tip">
           {isFunded
             ? "Account is already funded"
             : "Fund your account using the Stellar Friendbot"}

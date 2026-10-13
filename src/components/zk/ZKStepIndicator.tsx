@@ -4,18 +4,17 @@
  * Instead of a separate "Game #N" title and a disconnected step bar,
  * this component merges them into one cohesive header strip:
  *
- *   ← Lobby  |  Commit → Wait → Reveal → Resolve  |  Game #42
+ *   ← Lobby  |  Commit — Wait — Reveal — Resolve  |  Game #42
  *
- * The steps use stick-man iconography to visualize the trust fall:
- *   Commit:  🧍 standing at the edge
- *   Wait:    ⏳ waiting (falling animation)
- *   Reveal:  🤝 catching each other
- *   Resolve: 🏆 outcome
+ * Steps are words in a row on the counter: a done step is ruled through
+ * and reads "done", the current step is inked and underlined and reads
+ * "now". No step is carried by colour alone.
  *
- * The current step glows; completed steps show a green check.
- * An optional detail line sits below the bar.
+ * An optional detail line sits below the bar, and an explicit "Next —"
+ * line answers "what do I click now?".
  */
 import React from "react";
+import "../../styles/zk.css";
 
 export type ZKStep = "commit" | "waiting" | "reveal" | "resolve";
 
@@ -31,21 +30,11 @@ interface ZKStepIndicatorProps {
   nextAction?: string;
 }
 
-const STEPS: {
-  key: ZKStep;
-  label: string;
-  icon: string;
-  description: string;
-}[] = [
-  {
-    key: "commit",
-    label: "Commit",
-    icon: "🧍",
-    description: "Choose your move",
-  },
-  { key: "waiting", label: "Wait", icon: "⏳", description: "Opponent's turn" },
-  { key: "reveal", label: "Reveal", icon: "🤝", description: "Show your move" },
-  { key: "resolve", label: "Resolve", icon: "🏆", description: "Outcome" },
+const STEPS: { key: ZKStep; label: string }[] = [
+  { key: "commit", label: "Commit" },
+  { key: "waiting", label: "Wait" },
+  { key: "reveal", label: "Reveal" },
+  { key: "resolve", label: "Resolve" },
 ];
 
 export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
@@ -58,227 +47,65 @@ export const ZKStepIndicator: React.FC<ZKStepIndicatorProps> = ({
   const currentIndex = STEPS.findIndex((s) => s.key === step);
 
   return (
-    <div
-      style={{
-        marginBottom: "24px",
-        fontFamily: "var(--font-body)",
-      }}
-    >
-      {/* Unified header bar */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px",
-          padding: "12px 20px",
-          background: "var(--color-counter)",
-          border: "1px solid var(--border-glass)",
-          borderRadius: "var(--legacy-radius-md)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-        }}
-      >
-        {/* Back button */}
+    <div className="zk-steps">
+      <div className="zk-steps__bar">
         {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              padding: "4px 8px",
-              borderRadius: "var(--radius-sm)",
-              transition: "color 0.2s, background 0.2s",
-              whiteSpace: "nowrap",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--text-primary)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.06)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--text-muted)";
-              e.currentTarget.style.background = "none";
-            }}
-          >
+          <button type="button" onClick={onBack} className="zk-back">
             ← Lobby
           </button>
         )}
+        {onBack && <div className="zk-steps__rule" aria-hidden="true" />}
 
-        {/* Divider */}
-        {onBack && (
-          <div
-            style={{
-              width: "1px",
-              height: "24px",
-              background: "var(--border-glass)",
-              flexShrink: 0,
-            }}
-          />
-        )}
-
-        {/* Step flow — the main visual element */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0",
-            flex: 1,
-            justifyContent: "center",
-          }}
-        >
+        <ol className="zk-steps__list" aria-label="Round progress">
           {STEPS.map((s, i) => {
             const isDone = i < currentIndex;
             const isActive = i === currentIndex;
-
+            const state = isDone
+              ? "zk-step zk-step--done"
+              : isActive
+                ? "zk-step zk-step--active"
+                : "zk-step";
             return (
               <React.Fragment key={s.key}>
-                {/* Step node */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "4px",
-                    minWidth: "56px",
-                  }}
+                <li
+                  className={state}
+                  aria-current={isActive ? "step" : undefined}
                 >
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "14px",
-                      background: isDone
-                        ? "rgba(74, 222, 128, 0.12)"
-                        : isActive
-                          ? "rgba(102, 126, 234, 0.15)"
-                          : "transparent",
-                      border: isActive
-                        ? "2px solid var(--accent-violet)"
-                        : isDone
-                          ? "2px solid rgba(74, 222, 128, 0.3)"
-                          : "1px solid var(--border-glass)",
-                      boxShadow: isActive
-                        ? "0 0 12px rgba(102, 126, 234, 0.3)"
-                        : "none",
-                      transition: "all 0.3s var(--ease-out)",
-                    }}
-                  >
-                    {isDone ? (
-                      <span
-                        style={{
-                          color: "rgba(74, 222, 128, 0.9)",
-                          fontSize: "12px",
-                        }}
-                      >
-                        ✓
-                      </span>
-                    ) : (
-                      s.icon
-                    )}
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "var(--text-xs)",
-                      fontWeight: isActive ? 600 : 400,
-                      color: isActive
-                        ? "var(--text-primary)"
-                        : isDone
-                          ? "rgba(74, 222, 128, 0.7)"
-                          : "var(--text-muted)",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {s.label}
-                    {isActive && nextAction ? " ↓" : ""}
+                  <span className="zk-step__name">{s.label}</span>
+                  <span className="zk-step__state">
+                    {isDone ? "done" : isActive ? "now" : ""}
                   </span>
-                </div>
-
-                {/* Connector */}
+                </li>
                 {i < STEPS.length - 1 && (
-                  <div
-                    style={{
-                      flex: "1",
-                      height: "2px",
-                      maxWidth: "48px",
-                      margin: "0 4px",
-                      marginBottom: "18px",
-                      background:
-                        i < currentIndex
-                          ? "rgba(74, 222, 128, 0.3)"
-                          : "var(--border-glass)",
-                      borderRadius: "1px",
-                      transition: "background 0.3s var(--ease-out)",
-                    }}
+                  <li
+                    className={
+                      i < currentIndex
+                        ? "zk-step__conn zk-step__conn--done"
+                        : "zk-step__conn"
+                    }
+                    aria-hidden="true"
                   />
                 )}
               </React.Fragment>
             );
           })}
-        </div>
+        </ol>
 
-        {/* Game ID on the right */}
         {gameId !== undefined && (
           <>
-            <div
-              style={{
-                width: "1px",
-                height: "24px",
-                background: "var(--border-glass)",
-                flexShrink: 0,
-              }}
-            />
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-secondary)",
-                whiteSpace: "nowrap",
-                fontWeight: 600,
-              }}
-            >
-              #{gameId}
-            </span>
+            <div className="zk-steps__rule" aria-hidden="true" />
+            <span className="zk-steps__id">#{gameId}</span>
           </>
         )}
       </div>
 
-      {/* Detail line below the bar */}
-      {detail && (
-        <div
-          style={{
-            marginTop: "10px",
-            fontSize: "var(--text-xs)",
-            color: "var(--text-muted)",
-            textAlign: "center",
-            fontStyle: "italic",
-          }}
-        >
-          {detail}
-        </div>
-      )}
+      {detail && <p className="zk-steps__detail">{detail}</p>}
 
-      {/* Explicit next action — answers "what do I click now?" */}
       {nextAction && (
-        <div
-          style={{
-            marginTop: "8px",
-            fontSize: "var(--text-sm)",
-            fontWeight: 600,
-            color: "var(--text-primary)",
-            textAlign: "center",
-          }}
-        >
-          <span style={{ color: "var(--accent-violet)" }}>Next ▸ </span>
+        <p className="zk-steps__next">
+          <strong>Next — </strong>
           {nextAction}
-        </div>
+        </p>
       )}
     </div>
   );

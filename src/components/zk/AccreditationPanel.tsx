@@ -6,7 +6,6 @@ import {
   getAllCredentials,
 } from "../../services/accreditationProofService";
 import { getMerkleRootBytes, MERKLE_ROOT_HEX } from "../../util/merkleTree";
-import { ShimmerButton } from "../ui/ShimmerButton";
 import "../../styles/zk.css";
 
 /**
@@ -227,12 +226,14 @@ export const AccreditationPanel: React.FC = () => {
             one-time setup that sets you as the admin who can later update the
             root.
           </p>
-          <ShimmerButton
+          <button
+            type="button"
             onClick={() => void handleInitialize()}
             disabled={!address || isLoading}
+            className="till-button till-button--primary"
           >
-            {isLoading ? "Initializing..." : "Initialize Accreditation"}
-          </ShimmerButton>
+            {isLoading ? "Initialising…" : "Initialise accreditation"}
+          </button>
         </div>
       )}
 
@@ -301,16 +302,18 @@ export const AccreditationPanel: React.FC = () => {
               it works without one.
             </p>
           )}
-          <ShimmerButton
+          <button
+            type="button"
             onClick={() => void handleVerify()}
             disabled={!address || generating || isLoading || verified}
+            className="till-button till-button--primary"
           >
             {generating
-              ? "Generating proof..."
+              ? "Generating proof…"
               : verified
-                ? "Verified!"
-                : "Prove Accreditation"}
-          </ShimmerButton>
+                ? "Verified"
+                : "Prove accreditation"}
+          </button>
         </div>
       )}
 

@@ -6,121 +6,61 @@
  *   2. Connect wallet
  *   3. Fund with testnet XLM (friendbot)
  *
- * Each step has a clear CTA and status indicator. Steps that are
- * already complete are collapsed. The whole helper disappears once
- * the wallet is connected and funded.
+ * Each step is a numbered row on the counter; done steps are ruled
+ * through. The whole helper disappears once the wallet is connected
+ * and funded.
  */
 import React, { useState, useCallback } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { useNotification } from "../hooks/useNotification";
 import { getFriendbotUrl } from "../util/friendbot";
+import "../styles/tournament.css";
+import "../styles/zk.css";
 
 type StepStatus = "done" | "active" | "todo";
 
 interface StepProps {
   status: StepStatus;
-  icon: string;
+  num: string;
   title: string;
   body: string;
   cta?: { label: string; onClick: () => void; disabled?: boolean };
-  children?: React.ReactNode;
 }
 
-const Step: React.FC<StepProps> = ({
-  status,
-  icon,
-  title,
-  body,
-  cta,
-  children,
-}) => {
+const Step: React.FC<StepProps> = ({ status, num, title, body, cta }) => {
   if (status === "done") {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          padding: "10px 16px",
-          borderRadius: "var(--radius-sm)",
-          background: "rgba(74, 222, 128, 0.06)",
-          border: "1px solid rgba(74, 222, 128, 0.15)",
-          fontFamily: "var(--font-body)",
-        }}
-      >
-        <span style={{ fontSize: "18px" }}>✅</span>
-        <span
-          style={{ fontSize: "var(--text-sm)", color: "var(--text-muted)" }}
-        >
-          {title}
-        </span>
+      <div className="zk-checkrow zk-checkrow--done">
+        <span className="zk-checkrow__num">done</span>
+        <div className="zk-checkrow__body">
+          <p className="zk-checkrow__title">{title}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div
-      style={{
-        padding: "16px",
-        borderRadius: "var(--legacy-radius-md)",
-        background:
-          status === "active" ? "rgba(102, 126, 234, 0.08)" : "transparent",
-        border:
-          status === "active"
-            ? "1px solid rgba(102, 126, 234, 0.25)"
-            : "1px solid var(--border-glass)",
-        fontFamily: "var(--font-body)",
-      }}
+      className={
+        status === "active" ? "zk-checkrow zk-checkrow--active" : "zk-checkrow"
+      }
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-        <span style={{ fontSize: "22px", flexShrink: 0 }}>{icon}</span>
-        <div style={{ flex: 1 }}>
-          <h4
-            style={{
-              margin: "0 0 4px",
-              fontSize: "var(--text-base)",
-              color: "var(--text-primary)",
-            }}
-          >
-            {title}
-          </h4>
-          <p
-            style={{
-              margin: 0,
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.4,
-            }}
-          >
-            {body}
-          </p>
-        </div>
-        {cta && (
-          <button
-            type="button"
-            onClick={cta.onClick}
-            disabled={cta.disabled}
-            style={{
-              flexShrink: 0,
-              background: "var(--accent-violet)",
-              color: "white",
-              border: "none",
-              borderRadius: "var(--radius-sm)",
-              padding: "8px 16px",
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              fontWeight: 600,
-              cursor: cta.disabled ? "not-allowed" : "pointer",
-              opacity: cta.disabled ? 0.5 : 1,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {cta.label}
-          </button>
-        )}
+      <span className="zk-checkrow__num">{num}</span>
+      <div className="zk-checkrow__body">
+        <p className="zk-checkrow__title">{title}</p>
+        <p className="zk-checkrow__text">{body}</p>
       </div>
-      {children}
+      {cta && (
+        <button
+          type="button"
+          onClick={cta.onClick}
+          disabled={cta.disabled}
+          className="till-button till-button--primary"
+        >
+          {cta.label}
+        </button>
+      )}
     </div>
   );
 };
@@ -185,49 +125,23 @@ export const WalletSetupHelper: React.FC = () => {
       : "active";
 
   return (
-    <div
-      className="glass-panel"
-      style={{
-        padding: "24px",
-        marginBottom: "24px",
-        maxWidth: "560px",
-        margin: "0 auto 24px",
-      }}
-    >
-      <h3
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "var(--text-xl)",
-          color: "var(--text-primary)",
-          margin: "0 0 4px",
-          textAlign: "center",
-        }}
-      >
-        🔧 Wallet Setup
-      </h3>
-      <p
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-sm)",
-          color: "var(--text-muted)",
-          textAlign: "center",
-          margin: "0 0 20px",
-        }}
-      >
-        3 steps to play for real — takes about 1 minute
+    <div className="zk-panel zk-setup">
+      <h3 className="zk-setup__title">Wallet setup</h3>
+      <p className="zk-setup__lede">
+        Three steps to play for real — takes about a minute.
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        {/* Step 1: Install Freighter */}
+      <div>
+        {/* Step 1: Install a wallet */}
         {step1Status !== "done" && (
           <Step
             status={step1Status}
-            icon="🦊"
+            num="1"
             title="Install a Stellar wallet (Freighter recommended)"
             body={
               freighterDetected === false
                 ? "Freighter is a free Stellar wallet browser extension and works best here. Other wallets in the connect modal are experimental on testnet."
-                : "Wallet detected! Click connect to link it to your account."
+                : "Wallet detected — press Connect in the bar above to link it."
             }
             cta={
               freighterDetected === false
@@ -249,8 +163,8 @@ export const WalletSetupHelper: React.FC = () => {
         {step1Status === "done" && step2Status !== "done" && (
           <Step
             status={step2Status}
-            icon="🔗"
-            title="Connect Your Wallet"
+            num="2"
+            title="Connect your wallet"
             body="Link your Freighter wallet to Latep so you can sign transactions."
           />
         )}
@@ -259,41 +173,22 @@ export const WalletSetupHelper: React.FC = () => {
         {address && !isFunded && (
           <Step
             status="active"
-            icon="💧"
-            title="Get Testnet XLM"
+            num="3"
+            title="Get testnet XLM"
             body="Fund your wallet with free testnet XLM — no real money needed. One click via Stellar Friendbot."
             cta={{
-              label: isFunding ? "Funding..." : "Get Free XLM",
+              label: isFunding ? "Funding…" : "Get free XLM",
               onClick: () => void handleFund(),
               disabled: isFunding || balanceLoading,
             }}
           />
         )}
 
-        {/* Success state */}
+        {/* All done */}
         {address && isFunded && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "16px",
-              borderRadius: "var(--legacy-radius-md)",
-              background: "rgba(74, 222, 128, 0.08)",
-              border: "1px solid rgba(74, 222, 128, 0.2)",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            <span style={{ fontSize: "24px" }}>🎉</span>
-            <p
-              style={{
-                margin: "8px 0 0",
-                fontSize: "var(--text-sm)",
-                color: "var(--accent-cooperate)",
-                fontWeight: 600,
-              }}
-            >
-              Wallet ready! You're all set to play.
-            </p>
-          </div>
+          <p className="zk-setup__lede">
+            Wallet ready — you're all set to play.
+          </p>
         )}
       </div>
     </div>
