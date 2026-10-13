@@ -676,7 +676,7 @@
 
 .zk-checkrow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-2xs);
   padding: var(--space-2xs) var(--space-sm);
   border: 1px solid var(--color-counter-rule);
@@ -704,6 +704,7 @@
   color: var(--color-counter-muted);
   flex-shrink: 0;
   width: 2.5em;
+  padding-top: 0.25em;
 }
 
 .zk-checkrow--done .zk-checkrow__num {
