@@ -20,10 +20,10 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         gap: "14px",
         padding: "20px 22px",
         background:
-          "linear-gradient(135deg, rgba(248, 113, 113, 0.12), var(--bg-glass))",
+          "linear-gradient(135deg, rgba(248, 113, 113, 0.12), var(--color-counter-2))",
         border: "1px solid rgba(248, 113, 113, 0.35)",
-        borderRadius: "var(--legacy-radius-md)",
-        boxShadow: "var(--shadow-md)",
+        borderRadius: "3px",
+        boxShadow: "var(--shadow-receipt)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
       }}
@@ -52,7 +52,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             fontFamily: "var(--font-body)",
             fontSize: "14px",
             lineHeight: 1.5,
-            color: "var(--text-primary)",
+            color: "var(--color-counter-text)",
           }}
         >
           {message}
@@ -65,8 +65,8 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
                 fontFamily: "var(--font-body)",
                 fontSize: "13px",
                 fontWeight: 500,
-                color: "var(--text-primary)",
-                background: "var(--accent-defect)",
+                color: "var(--color-counter-text)",
+                background: "var(--color-stamp)",
                 border: "none",
                 borderRadius: "8px",
                 padding: "8px 16px",
@@ -90,9 +90,9 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
                 fontFamily: "var(--font-body)",
                 fontSize: "13px",
                 fontWeight: 500,
-                color: "var(--text-secondary)",
-                background: "var(--bg-glass-light)",
-                border: "1px solid var(--border-glass)",
+                color: "var(--color-counter-text-2)",
+                background: "var(--color-counter-2)",
+                border: "1px solid var(--color-counter-rule)",
                 borderRadius: "8px",
                 padding: "8px 16px",
                 cursor: "pointer",

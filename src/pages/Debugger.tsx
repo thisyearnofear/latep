@@ -127,11 +127,9 @@ const Debugger: React.FC = () => {
                 <button
                   type="button"
                   style={{
-                    background: isActive
-                      ? "var(--accent-violet)"
-                      : "transparent",
-                    color: isActive ? "white" : "var(--text-secondary)",
-                    border: "1px solid var(--border-glass)",
+                    background: isActive ? "var(--color-you)" : "transparent",
+                    color: isActive ? "white" : "var(--color-counter-text-2)",
+                    border: "1px solid var(--color-counter-rule)",
                     borderRadius: "var(--radius-sm)",
                     padding: "4px 12px",
                     fontSize: "var(--text-sm)",
@@ -211,8 +209,8 @@ const Debugger: React.FC = () => {
                         justifySelf: "flex-end",
                         marginTop: "1rem",
                         background: "transparent",
-                        color: "var(--text-secondary)",
-                        border: "1px solid var(--border-glass)",
+                        color: "var(--color-counter-text-2)",
+                        border: "1px solid var(--color-counter-rule)",
                         borderRadius: "var(--radius-sm)",
                         padding: "4px 12px",
                         fontSize: "var(--text-sm)",

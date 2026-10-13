@@ -95,7 +95,7 @@ export const Character: React.FC<CharacterProps> = ({
             boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
             fontSize: "12px",
             fontFamily: "var(--font-body)",
-            color: "var(--text-primary)",
+            color: "var(--color-counter-text)",
             maxWidth: "200px",
             textAlign: "center",
             marginBottom: "5px",
@@ -162,7 +162,7 @@ export const Character: React.FC<CharacterProps> = ({
               borderRadius: "10px",
               fontSize: "8px",
               fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
+              color: "var(--color-counter-text)",
               fontWeight: "bold",
             }}
           >

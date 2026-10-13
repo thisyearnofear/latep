@@ -142,7 +142,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
             <h4
               style={{
                 margin: 0,
-                color: "var(--text-primary)",
+                color: "var(--color-counter-text)",
                 fontSize: "1rem",
               }}
             >
@@ -166,7 +166,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
           <p
             style={{
               margin: 0,
-              color: "var(--text-secondary)",
+              color: "var(--color-counter-text-2)",
               fontSize: "0.8rem",
             }}
           >
@@ -179,7 +179,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
           type="button"
           onClick={() => setShowPanel(!showPanel)}
           style={{
-            background: "var(--accent-violet)",
+            background: "var(--color-you)",
             color: "white",
             border: "none",
             borderRadius: "50%",
@@ -211,7 +211,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
             style={{
               display: "flex",
               alignItems: "center",
-              color: "var(--text-secondary)",
+              color: "var(--color-counter-text-2)",
             }}
           >
             <span style={{ marginRight: "10px", fontSize: "16px" }}>🤔</span>
@@ -230,7 +230,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
                   style={{
                     margin: 0,
                     fontSize: "0.7rem",
-                    color: "var(--text-muted)",
+                    color: "var(--color-counter-muted)",
                   }}
                 >
                   Powered by Venice AI
@@ -242,7 +242,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
           <p
             style={{
               margin: 0,
-              color: "var(--text-primary)",
+              color: "var(--color-counter-text)",
               fontSize: "0.9rem",
               lineHeight: "1.4",
             }}
@@ -265,7 +265,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
           onClick={requestAdvice}
           disabled={isThinking}
           style={{
-            background: "var(--accent-violet)",
+            background: "var(--color-you)",
             color: "white",
             border: "none",
             borderRadius: "var(--radius-sm)",
@@ -284,9 +284,9 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
           onClick={requestEncouragement}
           disabled={isThinking}
           style={{
-            background: "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
+            background: "var(--color-counter-2)",
+            color: "var(--color-counter-text)",
+            border: "1px solid var(--color-counter-rule)",
             borderRadius: "var(--radius-sm)",
             padding: "8px 12px",
             fontFamily: "var(--font-body)",
@@ -309,9 +309,9 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
           }
           disabled={isThinking}
           style={{
-            background: "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
+            background: "var(--color-counter-2)",
+            color: "var(--color-counter-text)",
+            border: "1px solid var(--color-counter-rule)",
             borderRadius: "var(--radius-sm)",
             padding: "8px 10px",
             fontFamily: "var(--font-body)",
@@ -329,7 +329,7 @@ export const AITutorPanel: React.FC<AITutorPanelProps> = ({
         <p
           style={{
             fontSize: "0.7rem",
-            color: "var(--text-muted)",
+            color: "var(--color-counter-muted)",
             textAlign: "center",
             marginTop: "8px",
             fontStyle: "italic",

@@ -57,10 +57,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           padding: "28px",
           maxWidth: "420px",
           width: "calc(100% - 32px)",
-          background: "var(--bg-glass)",
-          border: "1px solid var(--border-glass)",
-          borderRadius: "var(--legacy-radius-lg)",
-          boxShadow: "var(--shadow-md)",
+          background: "var(--color-counter-2)",
+          border: "1px solid var(--color-counter-rule)",
+          borderRadius: "3px",
+          boxShadow: "var(--shadow-receipt)",
           backdropFilter: "blur(20px)",
           WebkitBackdropFilter: "blur(20px)",
         }}
@@ -76,7 +76,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               fontFamily: "var(--font-display)",
               fontSize: "22px",
               fontWeight: 400,
-              color: "var(--text-primary)",
+              color: "var(--color-counter-text)",
               letterSpacing: "0.01em",
             }}
           >
@@ -88,7 +88,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               fontFamily: "var(--font-body)",
               fontSize: "14px",
               lineHeight: 1.5,
-              color: "var(--text-secondary)",
+              color: "var(--color-counter-text-2)",
             }}
           >
             {message}
@@ -104,9 +104,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               fontFamily: "var(--font-body)",
               fontSize: "14px",
               fontWeight: 500,
-              color: "var(--text-secondary)",
-              background: "var(--bg-glass-light)",
-              border: "1px solid var(--border-glass)",
+              color: "var(--color-counter-text-2)",
+              background: "var(--color-counter-2)",
+              border: "1px solid var(--color-counter-rule)",
               borderRadius: "10px",
               padding: "10px 18px",
               cursor: "pointer",
@@ -128,7 +128,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               fontSize: "14px",
               fontWeight: 600,
               color: "#ffffff",
-              background: "var(--accent-defect)",
+              background: "var(--color-stamp)",
               border: "none",
               borderRadius: "10px",
               padding: "10px 18px",
