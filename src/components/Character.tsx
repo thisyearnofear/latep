@@ -76,8 +76,7 @@ export const Character: React.FC<CharacterProps> = ({
     excited: "🤩",
   };
 
-  // ENHANCEMENT: Use persona avatar if available
-  const displayEmoji = persona?.avatar || emotionMap[emotion];
+  const displayEmoji = emotionMap[emotion];
 
   return (
     <div style={{ position: "relative", display: "inline-block" }}>
