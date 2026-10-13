@@ -48,6 +48,13 @@
   --color-stamp: oklch(55% 0.19 28);
   --color-focus: oklch(62% 0.17 255);
 
+  /* The modal scrim. An overlay must not erase the page behind it — losing
+     context is what makes a wizard feel like a wall — but a translucent
+     black is the only translucency allowed outside the shadow tokens, so it
+     lives here as a token rather than as an rgba() in a component.
+     (design.md §3, added with the quiz/wizard overlays.) */
+  --color-scrim: oklch(0% 0 0 / 0.62);
+
   /* --------------------------------------------------------------------------
    * Colour — charts (design.md §6)
    *

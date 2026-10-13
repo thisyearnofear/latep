@@ -1,0 +1,336 @@
+/* ============================================================================
+ * Repeat and Real Thing — lesson chapters (ticket A4 remainder).
+ *
+ * Two surfaces, never mixed on one element:
+ *   - the lesson column IS the receipt (.lesson-copy in learning.css), so the
+ *     scoreboard, prompt, outcome and result lines below take receipt tokens
+ *     and group with dashed rules rather than nested panels (design.md §5);
+ *   - the Round history and "Commit, reveal, resolve" bodies open in the lesson
+ *     dialog, which is counter stock, so they take counter tokens only.
+ *
+ * Receipt text rules are written as `.lesson-copy .repeat-*` /
+ * `.lesson-copy .realthing-*`: learning.css styles `.lesson-copy p` with a
+ * higher specificity than a bare class, so an unprefixed rule would silently
+ * lose its size and its faded ink.
+ * ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+ * The Repeat — scoreboard
+ *
+ * Blue is you and amber is your partner, always (design.md §3); on a receipt
+ * that is the print variant of each thread colour.
+ * -------------------------------------------------------------------------- */
+
+.repeat-scoreboard {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2xs) var(--space-sm);
+  margin: 0;
+}
+
+.repeat-stat {
+  min-width: 0;
+  margin: 0;
+}
+
+.lesson-copy .repeat-stat-label {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+  /* "TIT-FOR-TAT" is the longest label: it breaks inside its column instead of
+     pushing the receipt past 320px (design.md §10). */
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .repeat-stat-value {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-print);
+  font-size: var(--text-xl);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-receipt-ink);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.repeat-stat--you .repeat-stat-value {
+  color: var(--color-you-print);
+}
+
+.repeat-stat--partner .repeat-stat-value {
+  color: var(--color-partner-print);
+}
+
+/* ----------------------------------------------------------------------------
+ * The Repeat — prompt, outcome, result
+ * -------------------------------------------------------------------------- */
+
+.repeat-prompt-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  padding-top: var(--space-xs);
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+/* Exactly one of these three follows the scoreboard, and .lesson-copy only
+   draws a rule after a text element — so the rule is drawn here. */
+.lesson-copy > :is(.repeat-prompt-block, .repeat-outcome, .repeat-result) {
+  margin-top: 0;
+  padding-top: var(--space-xs);
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+/* Headings and lead lines are roman, never italic (design.md §4). */
+.lesson-copy .repeat-prompt {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+/* The helper lines under the move names, verbatim from vocabulary.ts. */
+.lesson-copy .repeat-help {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+.lesson-copy .repeat-help strong {
+  color: var(--color-receipt-ink);
+  font-weight: 700;
+}
+
+.lesson-copy .repeat-outcome {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.repeat-outcome:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.repeat-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  margin: 0;
+}
+
+.lesson-copy .repeat-result-title {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .repeat-result-note {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+/* ----------------------------------------------------------------------------
+ * The Repeat — round history, printed in the lesson dialog (the counter)
+ * -------------------------------------------------------------------------- */
+
+.repeat-history {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.repeat-history-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--space-3xs) var(--space-xs);
+  padding-block: var(--space-2xs);
+  border-top: 1px dashed var(--color-counter-rule);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+}
+
+.repeat-history-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.repeat-history-round {
+  color: var(--color-counter-muted);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+}
+
+/* The moves are the words the user reads, and the outcome word sits with them:
+   an outcome is never carried by colour alone (design.md §7). */
+.repeat-history-moves {
+  min-width: 0;
+  color: var(--color-counter-text);
+  overflow-wrap: anywhere;
+}
+
+.repeat-history-outcome {
+  color: var(--color-counter-muted);
+}
+
+.repeat-history-score {
+  color: var(--color-counter-text-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------------------
+ * The Real Thing — commit, reveal, resolve as counter objects
+ *
+ * The mark, the name and the everyday line come from content/primitives.ts;
+ * nothing is retyped here.
+ * -------------------------------------------------------------------------- */
+
+.lesson-copy .realthing-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.realthing-step {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: var(--space-3xs) var(--space-xs);
+  align-items: start;
+  padding-block: var(--space-xs);
+  border-top: 1px dashed var(--color-receipt-rule);
+}
+
+.realthing-step:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.realthing-step-mark {
+  display: inline-flex;
+  margin-top: var(--space-3xs);
+  color: var(--color-receipt-ink);
+}
+
+.realthing-step-body {
+  min-width: 0;
+}
+
+.lesson-copy .realthing-step-name {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-receipt-ink);
+}
+
+.lesson-copy .realthing-step-line {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+/* Which primitive this step is, in the source's own words. */
+.lesson-copy .realthing-step-primitive {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .realthing-lead {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+}
+
+/* Wallet state is a printed line item; the words carry it, and the address
+   breaks anywhere rather than pushing the receipt wide (design.md §10). */
+.lesson-copy .realthing-wallet {
+  margin: 0;
+  max-width: none;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.lesson-copy .realthing-wallet--connected {
+  color: var(--color-receipt-ink);
+}
+
+/* ----------------------------------------------------------------------------
+ * The Real Thing — the dialog body (the counter)
+ * -------------------------------------------------------------------------- */
+
+.realthing-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+.realthing-detail-step {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+.realthing-detail-step strong {
+  color: var(--color-counter-text);
+  font-weight: 700;
+}
+
+@media (max-width: 400px) {
+  .repeat-scoreboard {
+    gap: var(--space-3xs);
+  }
+
+  .lesson-copy .repeat-stat-value {
+    font-size: var(--text-lg);
+  }
+}

@@ -65,6 +65,7 @@ need a value that doesn't exist, add it to `tokens.css` and this table.
 | `--color-counter-text`   | `oklch(94% 0.010 85)` | Text on the counter                     |
 | `--color-counter-text-2` | `oklch(78% 0.012 80)` | Secondary text on the counter           |
 | `--color-counter-muted`  | `oklch(66% 0.012 75)` | Helper text on the counter (≥ 4.5:1)    |
+| `--color-scrim`          | `oklch(0% 0 0 / 0.62)` | Modal overlay: the page stays legible behind it |
 
 **Receipt (the light surface)**
 
@@ -99,7 +100,8 @@ Rules:
 - **The UI accent is the receipt itself:** light stock on a dark counter. The
   primary button is a receipt-coloured tile with ink text.
 - No gradients, glows, `backdrop-filter`, or glass. The only translucency
-  allowed is inside shadow tokens.
+  allowed is inside shadow tokens and `--color-scrim` (a modal must not erase
+  the page behind it).
 - Texture: one static, pre-rendered dither/grain image on receipts at ≤ 6 %
   opacity. No runtime shaders, canvas, or animated backgrounds.
 
