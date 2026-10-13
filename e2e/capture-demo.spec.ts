@@ -187,7 +187,7 @@ test.describe("Latep demo capture", () => {
     // Cast a wide net across all 15 known option labels (5 questions × 3
     // options each from PersonalityQuiz.tsx). Any of them is a valid click.
     const allOptionsRe =
-      /of course|maybe.*vibe|step aside|forgive|tit for tat|never trust|excited|cautious|nervous|always cooperate|start nice|mix it up|be more forgiving|account for it|assume the worst/i;
+      /of course|maybe.*vibe|step aside|forgive|tit for tat|never trust|excited|cautious|nervous|always lean in|start nice|mix it up|be more forgiving|account for it|assume the worst/i;
     for (let step = 0; step < 6; step++) {
       const progress = page.getByText(/Q\d+ of \d+/);
       const inQuestion = await progress.isVisible().catch(() => false);

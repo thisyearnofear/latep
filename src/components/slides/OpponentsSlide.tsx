@@ -14,6 +14,13 @@ import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
 import { LessonDetails } from "../learning/LessonDetails";
 import {
+  MOVE_HELPER,
+  MOVE_LABEL,
+  getOutcome,
+  type OutcomeId,
+} from "../../content/vocabulary";
+import "../../styles/slide-opponents.css";
+import {
   createStrategy,
   calculatePayoff,
   getStrategyInfo,
@@ -23,7 +30,18 @@ import {
   type StrategyId,
   type IteratedStrategy,
 } from "../../util/strategies";
-import { getOutcome, MOVE_LABEL } from "../../content/vocabulary";
+
+/**
+ * One plain line per outcome, keyed by the id in content/vocabulary.ts. The
+ * word the user reads (`outcome.word`) always comes from the table too, so the
+ * outcome is never carried by colour alone (design.md §7).
+ */
+const OUTCOME_NOTE: Record<OutcomeId, string> = {
+  held: "You both leaned in, and the thread twists one turn tighter.",
+  dropped: "You leaned in and they held back — you go over.",
+  taken: "They leaned in and you held back — the reward is yours.",
+  standoff: "You both held back, and nothing moves.",
+};
 
 export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [selected, setSelected] = useState<StrategyId | null>(null);
@@ -64,12 +82,7 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
     setTrustAltitude((h) => (move === "C" && aiMove === "C" ? h + 1 : 0));
 
     const outcome = getOutcome(move, aiMove);
-    if (outcome.id === "held") setLastResult("Held — you held each other up");
-    else if (outcome.id === "dropped")
-      setLastResult("Dropped — they stepped aside");
-    else if (outcome.id === "taken")
-      setLastResult("You took it — you held back while they leaned");
-    else setLastResult("Standoff — you both held back");
+    setLastResult(`${outcome.word} — ${OUTCOME_NOTE[outcome.id]}`);
   };
 
   const matchComplete = matchRound >= 3;
@@ -126,83 +139,23 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
       {/* Match view */}
       {selected && (
         <>
-          <div
-            className="lesson-scoreboard"
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "24px",
-              minWidth: 0,
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-muted)",
-                  margin: 0,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                You
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-2xl)",
-                  color: "var(--accent-violet)",
-                  margin: 0,
-                }}
-              >
+          <div className="lesson-scoreboard opponents-scoreboard">
+            <div className="opponents-stat opponents-stat--you">
+              <p className="opponents-stat-label">You</p>
+              <p className="opponents-stat-value">
                 {playerScore > 0 ? "+" : ""}
                 {playerScore}
               </p>
             </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-sm)",
-                  color: "var(--text-muted)",
-                  margin: 0,
-                }}
-              >
-                Round {matchRound || 1}/3
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-lg)",
-                  color: "var(--text-primary)",
-                  margin: 0,
-                }}
-              >
+            <div className="opponents-stat">
+              <p className="opponents-stat-label">Round {matchRound || 1}/3</p>
+              <p className="opponents-stat-value opponents-stat-name">
                 {getStrategyInfo(selected).name}
               </p>
             </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-muted)",
-                  margin: 0,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                Them
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-2xl)",
-                  color: "var(--accent-warm)",
-                  margin: 0,
-                }}
-              >
+            <div className="opponents-stat opponents-stat--partner">
+              <p className="opponents-stat-label">Them</p>
+              <p className="opponents-stat-value">
                 {aiScore > 0 ? "+" : ""}
                 {aiScore}
               </p>
@@ -210,42 +163,25 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
           </div>
 
           {lastResult && !matchComplete && (
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-lg)",
-                color: "var(--text-secondary)",
-              }}
-            >
+            <p tabIndex={-1} role="status" className="opponents-outcome">
               {lastResult}
             </p>
           )}
 
           {!matchComplete && (
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-muted)",
-              }}
-            >
-              Choose your next move
-            </p>
+            <div className="opponents-prompt-block">
+              <p className="opponents-prompt">Choose your next move</p>
+              <p className="opponents-help">
+                <strong>{MOVE_LABEL.C}</strong> — {MOVE_HELPER.C}
+              </p>
+              <p className="opponents-help">
+                <strong>{MOVE_LABEL.D}</strong> — {MOVE_HELPER.D}
+              </p>
+            </div>
           )}
 
           {matchComplete && (
-            <p
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "var(--text-lg)",
-                color:
-                  playerScore > aiScore
-                    ? "var(--accent-cooperate)"
-                    : playerScore === aiScore
-                      ? "var(--text-primary)"
-                      : "var(--accent-defect)",
-              }}
-            >
+            <p tabIndex={-1} role="status" className="opponents-verdict">
               {playerScore > aiScore
                 ? "You won this match."
                 : playerScore === aiScore
@@ -255,17 +191,8 @@ export const OpponentsSlide: React.FC<SlideProps> = ({ onNext }) => {
           )}
 
           {/* Strategy description */}
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              margin: 0,
-            }}
-          >
-            <strong style={{ color: "var(--text-primary)" }}>
-              {getStrategyInfo(selected).name}:
-            </strong>{" "}
+          <p className="opponents-note">
+            <strong>{getStrategyInfo(selected).name}:</strong>{" "}
             {getStrategyInfo(selected).description}
           </p>
         </>

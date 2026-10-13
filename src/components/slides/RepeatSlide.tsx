@@ -14,6 +14,13 @@ import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
 import { LessonDetails } from "../learning/LessonDetails";
 import {
+  MOVE_HELPER,
+  MOVE_LABEL,
+  getOutcome,
+  type OutcomeId,
+} from "../../content/vocabulary";
+import "../../styles/slide-repeat.css";
+import {
   createStrategy,
   calculatePayoff,
   NC_DEFAULT,
@@ -30,6 +37,18 @@ interface Round {
 }
 
 const MAX_ROUNDS = 5;
+
+/**
+ * One plain line per outcome, keyed by the id in content/vocabulary.ts. The
+ * word the user reads (`outcome.word`) always comes from the table too, so the
+ * outcome is never carried by colour alone (design.md §7).
+ */
+const OUTCOME_NOTE: Record<OutcomeId, string> = {
+  held: "You both leaned in, and the thread twists one turn tighter.",
+  dropped: "You leaned in and they held back — you go over.",
+  taken: "They leaned in and you held back — the reward is yours.",
+  standoff: "You both held back, and nothing moves.",
+};
 
 export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
   const [rounds, setRounds] = useState<Round[]>([]);
@@ -81,15 +100,8 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
       unlockAchievement("trust_streak_5");
     }
 
-    let label: string;
-    if (move === "C" && aiMove === "C")
-      label = "🤝 Mutual trust — you both caught each other";
-    else if (move === "C" && aiMove === "D")
-      label = "💥 They stepped aside — you fell";
-    else if (move === "D" && aiMove === "C")
-      label = "🏆 You stepped aside — they fell";
-    else label = "💀 Nobody caught anyone";
-    setLastOutcome(label);
+    const outcome = getOutcome(move, aiMove);
+    setLastOutcome(`${outcome.word} — ${OUTCOME_NOTE[outcome.id]}`);
   };
 
   const nextRound = () => {
@@ -128,87 +140,27 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
         />
       }
     >
-      {/* Score */}
-      <div
-        className="lesson-scoreboard"
-        style={{
-          display: "flex",
-          gap: "24px",
-        }}
-      >
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              margin: 0,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-          >
-            You
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-2xl)",
-              color: "var(--accent-violet)",
-              margin: 0,
-            }}
-          >
+      {/* Score — three printed figures on the lesson receipt */}
+      <div className="lesson-scoreboard repeat-scoreboard">
+        <div className="repeat-stat repeat-stat--you">
+          <p className="repeat-stat-label">You</p>
+          <p className="repeat-stat-value">
             {playerTotal > 0 ? "+" : ""}
             {playerTotal}
           </p>
         </div>
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              margin: 0,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-          >
-            Round
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-2xl)",
-              color: "var(--text-primary)",
-              margin: 0,
-            }}
-          >
+        <div className="repeat-stat">
+          <p className="repeat-stat-label">Round</p>
+          <p className="repeat-stat-value">
             {playerMove
               ? rounds.length
               : Math.min(rounds.length + 1, MAX_ROUNDS)}
             /{MAX_ROUNDS}
           </p>
         </div>
-        <div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-xs)",
-              color: "var(--text-muted)",
-              margin: 0,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-          >
-            TFT
-          </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-2xl)",
-              color: "var(--accent-warm)",
-              margin: 0,
-            }}
-          >
+        <div className="repeat-stat repeat-stat--partner">
+          <p className="repeat-stat-label">Partner</p>
+          <p className="repeat-stat-value">
             {aiTotal > 0 ? "+" : ""}
             {aiTotal}
           </p>
@@ -216,16 +168,17 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
       </div>
 
       {!isComplete && !playerMove && (
-        <p
-          style={{
-            fontFamily: "var(--font-display)",
-            fontStyle: "italic",
-            fontSize: "var(--text-lg)",
-            color: "var(--text-muted)",
-          }}
-        >
-          Does knowing you'll meet again change your choice?
-        </p>
+        <div className="repeat-prompt-block">
+          <p className="repeat-prompt">
+            Does knowing you&rsquo;ll meet again change your choice?
+          </p>
+          <p className="repeat-help">
+            <strong>{MOVE_LABEL.C}</strong> — {MOVE_HELPER.C}
+          </p>
+          <p className="repeat-help">
+            <strong>{MOVE_LABEL.D}</strong> — {MOVE_HELPER.D}
+          </p>
+        </div>
       )}
 
       {/* Choice or outcome */}
@@ -234,45 +187,25 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
           ref={resultRef}
           tabIndex={-1}
           role="status"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--text-lg)",
-            color: "var(--text-secondary)",
-          }}
+          className="repeat-outcome"
         >
           {lastOutcome}
         </p>
       )}
 
       {isComplete && (
-        <div className="glass-panel lesson-result">
-          <p
-            ref={resultRef}
-            tabIndex={-1}
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-xl)",
-              color: "var(--text-primary)",
-              marginBottom: "8px",
-            }}
-          >
+        <div className="repeat-result">
+          <p ref={resultRef} tabIndex={-1} className="repeat-result-title">
             {playerTotal > aiTotal
-              ? "You outscored Tit-for-Tat!"
+              ? "You outscored Tit-for-Tat"
               : playerTotal === aiTotal
                 ? "A perfect tie."
                 : "Tit-for-Tat outscored you."}
           </p>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontStyle: "italic",
-              fontSize: "var(--text-base)",
-              color: "var(--text-secondary)",
-            }}
-          >
+          <p className="repeat-result-note">
             {playerTotal === aiTotal && rounds.every((r) => r.player === "C")
-              ? "Five rounds of mutual trust. That's the best outcome for everyone."
-              : "When you'll meet again, betrayal has consequences. Tit-for-Tat punishes defection — and rewards cooperation."}
+              ? "Five rounds of mutual trust. That’s the best outcome for everyone."
+              : "When you’ll meet again, holding back has consequences. Tit-for-Tat starts kind and then copies your last move — lean in, and it leans in."}
           </p>
         </div>
       )}
@@ -280,40 +213,25 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
       {/* Round history */}
       {rounds.length > 0 && (
         <LessonDetails trigger="Round history" title="Round history">
-          <div className="glass-panel" style={{ padding: "16px" }}>
+          <ul className="repeat-history">
             {rounds.map((r) => (
-              <div
-                key={r.num}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "6px 0",
-                  borderBottom:
-                    r.num < rounds.length
-                      ? "1px solid var(--border-glass)"
-                      : "none",
-                  fontSize: "var(--text-sm)",
-                }}
-              >
-                <span style={{ color: "var(--text-muted)" }}>R{r.num}</span>
-                <span style={{ color: "var(--text-primary)" }}>
-                  {r.player === "C" ? "🤝" : "⚔️"} vs{" "}
-                  {r.ai === "C" ? "🤝" : "⚔️"}
+              <li key={r.num} className="repeat-history-row">
+                <span className="repeat-history-round">R{r.num}</span>
+                <span className="repeat-history-moves">
+                  {MOVE_LABEL[r.player]} · {MOVE_LABEL[r.ai]}
+                  <span className="repeat-history-outcome">
+                    {" — "}
+                    {getOutcome(r.player, r.ai).word}
+                  </span>
                 </span>
-                <span
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--text-secondary)",
-                  }}
-                >
+                <span className="repeat-history-score">
                   {r.playerPayout > 0 ? "+" : ""}
                   {r.playerPayout} / {r.aiPayout > 0 ? "+" : ""}
                   {r.aiPayout}
                 </span>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </LessonDetails>
       )}
 
@@ -332,14 +250,14 @@ export const RepeatSlide: React.FC<SlideProps> = ({ onNext }) => {
             className="learning-button learning-button-primary"
             onClick={() => playRound("C")}
           >
-            Cooperate
+            {MOVE_LABEL.C}
           </button>
           <button
             type="button"
             className="learning-button"
             onClick={() => playRound("D")}
           >
-            Defect
+            {MOVE_LABEL.D}
           </button>
         </LessonActions>
       )}

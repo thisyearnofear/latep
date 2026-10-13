@@ -219,18 +219,21 @@ p {
  * Glass surfaces — reusable component classes
  * ============================================================================ */
 
+/* A1 left this class as glass; design.md §3 allows no blur, no glow and no
+   glass at all. It stays as a flat counter strip only until every remaining
+   use moves onto a receipt (36 left, most of them in ticket A6/B7's files). */
 .glass-panel {
-  background: var(--bg-glass-light);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--legacy-radius-md);
-  transition: all var(--duration-normal) var(--ease-out);
+  background: var(--color-counter-2);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  transition:
+    background var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
 }
 
 .glass-panel:hover {
-  background: var(--bg-surface-hover);
-  border-color: var(--border-glass-hover);
+  background: var(--color-counter-2);
+  border-color: var(--color-counter-muted);
 }
 
 /* Interactive elements inside glass panels get a subtle solid backing
@@ -241,8 +244,8 @@ p {
 .glass-panel input[type="range"],
 .glass-panel select,
 .glass-panel textarea {
-  background: rgba(10, 14, 26, 0.6);
-  border: 1px solid var(--border-glass);
+  background: var(--color-counter);
+  border: 1px solid var(--color-counter-rule);
 }
 
 /* ============================================================================
