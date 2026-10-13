@@ -23,10 +23,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         textAlign: "center",
         gap: "14px",
         padding: "48px 32px",
-        background: "var(--bg-glass)",
-        border: "1px solid var(--border-glass)",
-        borderRadius: "var(--legacy-radius-lg)",
-        boxShadow: "var(--shadow-md)",
+        background: "var(--color-counter-2)",
+        border: "1px solid var(--color-counter-rule)",
+        borderRadius: "3px",
+        boxShadow: "var(--shadow-receipt)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
       }}
@@ -49,7 +49,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           fontFamily: "var(--font-display)",
           fontSize: "22px",
           fontWeight: 400,
-          color: "var(--text-secondary)",
+          color: "var(--color-counter-text-2)",
           letterSpacing: "0.01em",
         }}
       >
@@ -63,7 +63,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
             fontFamily: "var(--font-body)",
             fontSize: "14px",
             lineHeight: 1.5,
-            color: "var(--text-muted)",
+            color: "var(--color-counter-muted)",
           }}
         >
           {description}

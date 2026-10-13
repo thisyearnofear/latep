@@ -47,7 +47,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     left: 32,
     right: 32,
     height: 2,
-    background: "var(--border-glass)",
+    background: "var(--color-counter-rule)",
     zIndex: 0,
   };
 
@@ -62,7 +62,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     left: 32,
     width: `calc((100% - 64px) * ${progressPct / 100})`,
     height: 2,
-    background: "var(--accent-violet)",
+    background: "var(--color-you)",
     zIndex: 1,
     transition: "width 400ms ease",
   };
@@ -84,8 +84,8 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
     alignItems: "center",
     justifyContent: "center",
     fontSize: "1rem",
-    border: "2px solid var(--border-glass)",
-    background: "var(--bg-glass)",
+    border: "2px solid var(--color-counter-rule)",
+    background: "var(--color-counter-2)",
     transition: "all 220ms ease",
     marginBottom: 10,
   };
@@ -93,7 +93,7 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
   const labelStyle: CSSProperties = {
     fontFamily: "var(--font-display)",
     fontSize: "0.85rem",
-    color: "var(--text-secondary)",
+    color: "var(--color-counter-text-2)",
     textAlign: "center",
     margin: 0,
     maxWidth: 90,
@@ -122,28 +122,30 @@ const JourneyProgress: React.FC<JourneyProgressProps> = ({
           if (isCompleted) {
             dotStyle = {
               ...dotStyle,
-              background: "var(--accent-violet)",
-              borderColor: "var(--accent-violet)",
+              background: "var(--color-you)",
+              borderColor: "var(--color-you)",
               color: "#fff",
             };
           } else if (isCurrent) {
             dotStyle = {
               ...dotStyle,
-              background: "var(--bg-glass)",
-              borderColor: "var(--accent-warm)",
-              color: "var(--accent-warm)",
+              background: "var(--color-counter-2)",
+              borderColor: "var(--color-partner)",
+              color: "var(--color-partner)",
               animation: "journey-pulse 2s ease-in-out infinite",
             };
           } else {
             dotStyle = {
               ...dotStyle,
-              color: "var(--text-muted)",
+              color: "var(--color-counter-muted)",
             };
           }
 
           const stepLabelStyle: CSSProperties = {
             ...labelStyle,
-            color: isFuture ? "var(--text-muted)" : "var(--text-secondary)",
+            color: isFuture
+              ? "var(--color-counter-muted)"
+              : "var(--color-counter-text-2)",
           };
 
           const clickableHere = clickable && (isCompleted || isCurrent);

@@ -37,7 +37,7 @@
 
 .sandbox-lede {
   font-family: var(--font-body);
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   color: var(--color-counter-muted);
   max-width: 480px;
   margin: 0;

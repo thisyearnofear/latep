@@ -1,95 +1,13 @@
 /* ============================================================================
  * Latep — Design System
  *
- * Tokens live in styles/tokens.css (imported here, below). This file is the
- * legacy stylesheet: the old purple/glass look plus a temporary alias block
- * that points the old token names at the new system so the ~941 inline styles
- * pick up the new colours without being rewritten first.
+ * Tokens live in styles/tokens.css. This file is what remains of the legacy
+ * stylesheet: class rules that older surfaces still pick up. Every reference
+ * to the old token names was resolved in Phase 4 (ticket A7) — the alias
+ * block is gone, and new work should never need this file.
  *
  * See ../design.md and docs/REDESIGN_PLAN.md ticket A1.
  * ========================================================================== */
-
-/* ============================================================================
- * Design Tokens (see styles/tokens.css for the full system)
- * ========================================================================== */
-
-/* ============================================================================
- * LEGACY: removed in Phase 4 (ticket A7)
- *
- * Two kinds of entry, and the difference matters:
- *
- *   1. Aliased names, spelled the SAME as the new scale. These stay real
- *      aliases, so a change in tokens.css propagates through all ~900 inline
- *      styles at once. This is the point of the exercise.
- *
- *   2. `--legacy-*` names. These are the old spacing and radius steps, which
- *      would otherwise COLLIDE with the new scale: custom properties on the
- *      same element are last-declaration-wins, so a legacy `--space-md: 16px`
- *      here silently overrode tokens.css's 24px for every stylesheet in the
- *      app, including the new ones. Renaming them means `--space-md` means
- *      24px everywhere, new CSS is written against the real scale, and A7 is
- *      just deleting this block.
- * ========================================================================== */
-
-:root {
-  /* --- 1. Aliases (no collision) ----------------------------------------- */
-
-  --font-mono: var(--font-print);
-  --text-base: var(--text-md);
-  --text-4xl: var(--text-3xl);
-
-  --bg-deep: var(--color-counter);
-  --bg-mid: var(--color-counter-2);
-  --bg-surface: var(--color-counter-2);
-  --bg-surface-hover: var(--color-counter-rule);
-  --bg-glass: var(--color-counter-2);
-  --bg-glass-light: var(--color-counter-2);
-
-  --border-glass: var(--color-counter-rule);
-  --border-glass-hover: var(--color-counter-muted);
-
-  --text-primary: var(--color-counter-text);
-  --text-secondary: var(--color-counter-text-2);
-  --text-muted: var(--color-counter-muted);
-
-  /* Old purple #667eea → #764ba2 and the cooperate/defect greens and reds all
-     collapse onto the two thread colours. Blue is you, amber is your partner;
-     stamp red is reserved for stamps and errors. */
-  --accent-violet: var(--color-you);
-  --accent-purple: var(--color-you);
-  --accent-cool: var(--color-you);
-  --accent-cooperate: var(--color-you);
-  --accent-warm: var(--color-partner);
-  --accent-defect: var(--color-partner);
-
-  /* Glows are gone. --shadow-sm doubles as a contact shadow. */
-  --shadow-sm: var(--shadow-receipt);
-  --shadow-md: var(--shadow-receipt);
-  --shadow-lg: var(--shadow-receipt);
-  --shadow-glow-violet: none;
-  --shadow-glow-warm: none;
-
-  --ease-spring: var(--ease-out);
-  --duration-fast: var(--dur-short);
-  --duration-normal: var(--dur-long);
-  --duration-slow: var(--dur-scene);
-
-  /* --- 2. Legacy steps, renamed so they cannot shadow the new scale ----- */
-
-  /* Old spacing steps, preserved verbatim so existing layouts don't move
-     when the new scale arrives. */
-  --legacy-space-xs: 4px;
-  --legacy-space-sm: 8px;
-  --legacy-space-md: 16px;
-  --legacy-space-lg: 24px;
-  --legacy-space-xl: 40px;
-
-  /* 3px everywhere: receipts tear instead of rounding, and no pill survives
-     except the network badge. */
-  --legacy-radius-md: 3px;
-  --legacy-radius-lg: 3px;
-  --legacy-radius-xl: 3px;
-}
 
 /* ============================================================================
  * Base
@@ -132,14 +50,14 @@ body {
 .slide-card {
   max-width: 900px;
   margin: 0 auto;
-  padding: var(--legacy-space-xl) var(--legacy-space-lg);
-  background: var(--bg-glass);
+  padding: 40px 24px;
+  background: var(--color-counter-2);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--legacy-radius-xl);
-  margin-top: var(--legacy-space-lg);
-  box-shadow: var(--shadow-lg), var(--shadow-glow-violet);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: 3px;
+  margin-top: 24px;
+  box-shadow: var(--shadow-receipt), none;
   position: relative;
   z-index: 2;
   overflow: hidden;
@@ -179,12 +97,12 @@ h4 {
   font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: -0.02em;
-  color: var(--text-primary);
+  color: var(--color-counter-text);
   margin: 0;
 }
 
 h1 {
-  font-size: var(--text-4xl);
+  font-size: var(--text-3xl);
   line-height: 1.05;
 }
 
@@ -205,7 +123,7 @@ h4 {
 
 p {
   font-family: var(--font-body);
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
   line-height: 1.7;
 }
 
@@ -255,19 +173,19 @@ p {
 /* Card lift on hover */
 .lift-on-hover {
   transition:
-    transform var(--duration-normal) var(--ease-out),
-    box-shadow var(--duration-normal) var(--ease-out);
+    transform var(--dur-long) var(--ease-out),
+    box-shadow var(--dur-long) var(--ease-out);
   will-change: transform;
 }
 
 .lift-on-hover:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-receipt);
 }
 
 /* Button press feedback */
 .press-feedback {
-  transition: transform var(--duration-fast) var(--ease-out);
+  transition: transform var(--dur-short) var(--ease-out);
 }
 
 .press-feedback:active {
@@ -283,8 +201,8 @@ p {
   height: 72px;
   border-radius: 50%;
   display: inline-block;
-  margin: var(--legacy-space-sm);
-  transition: transform var(--duration-normal) var(--ease-spring);
+  margin: 8px;
+  transition: transform var(--dur-long) var(--ease-out);
   cursor: pointer;
   position: relative;
 }
@@ -294,12 +212,12 @@ p {
 }
 
 .cooperator {
-  background: var(--accent-cooperate);
+  background: var(--color-you);
   box-shadow: 0 0 24px rgba(74, 222, 128, 0.3);
 }
 
 .defector {
-  background: var(--accent-defect);
+  background: var(--color-stamp);
   box-shadow: 0 0 24px rgba(248, 113, 113, 0.3);
 }
 
@@ -323,19 +241,19 @@ p {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr 1fr;
-  gap: var(--legacy-space-sm);
+  gap: 8px;
   max-width: 400px;
-  margin: var(--legacy-space-lg) auto;
+  margin: 24px auto;
   font-family: var(--font-body);
 }
 
 .payoff-cell {
-  padding: var(--legacy-space-md);
+  padding: 16px;
   text-align: center;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: var(--text-sm);
-  transition: transform var(--duration-fast) var(--ease-out);
+  transition: transform var(--dur-short) var(--ease-out);
 }
 
 .payoff-cell:hover {
@@ -344,22 +262,22 @@ p {
 
 .payoff-header {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
 }
 
 .payoff-cooperate {
   background: rgba(74, 222, 128, 0.12);
-  color: var(--accent-cooperate);
+  color: var(--color-you);
 }
 
 .payoff-defect {
   background: rgba(248, 113, 113, 0.12);
-  color: var(--accent-defect);
+  color: var(--color-stamp);
 }
 
 .payoff-mixed {
   background: rgba(240, 160, 32, 0.12);
-  color: var(--accent-warm);
+  color: var(--color-partner);
 }
 
 /* ============================================================================
@@ -422,8 +340,8 @@ p {
 .tf-height-bar {
   background: linear-gradient(
     180deg,
-    var(--accent-violet) 0%,
-    var(--accent-purple) 100%
+    var(--color-you) 0%,
+    var(--color-you) 100%
   );
   border-radius: var(--radius-sm);
   transition: height 0.6s var(--ease-out);
@@ -435,7 +353,7 @@ p {
   border-radius: var(--radius-sm);
   overflow: hidden;
   position: relative;
-  border: 1px solid var(--border-glass);
+  border: 1px solid var(--color-counter-rule);
 }
 
 .tf-ground-line {
@@ -734,7 +652,7 @@ p {
 
 .tf-pop-in {
   animation: tf-pop-in 0.4s
-    var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
+    var(--ease-out)) both;
 }
 
 /* Airborne hover — the figure drifts while the proof wait plays out */
@@ -839,7 +757,7 @@ p {
 
   .zk-page-container {
     max-width: 100% !important;
-    padding: var(--legacy-space-md) !important;
+    padding: 16px !important;
   }
 
   .zk-card-container {
@@ -862,8 +780,8 @@ p {
   }
 
   .slide-card {
-    padding: var(--legacy-space-lg) var(--legacy-space-md);
-    margin-top: var(--legacy-space-md);
+    padding: 24px 16px;
+    margin-top: 16px;
   }
 }
 
@@ -874,8 +792,8 @@ p {
 .text-gradient {
   background: linear-gradient(
     135deg,
-    var(--accent-violet) 0%,
-    var(--accent-warm) 100%
+    var(--color-you) 0%,
+    var(--color-partner) 100%
   );
   -webkit-background-clip: text;
   background-clip: text;
@@ -883,19 +801,19 @@ p {
 }
 
 .text-cooperate {
-  color: var(--accent-cooperate);
+  color: var(--color-you);
 }
 
 .text-defect {
-  color: var(--accent-defect);
+  color: var(--color-stamp);
 }
 
 .text-warm {
-  color: var(--accent-warm);
+  color: var(--color-partner);
 }
 
 .text-secondary {
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
 }
 
 /* The shell's own rules live in styles/shell.css (ticket A2). The block that
@@ -904,7 +822,7 @@ p {
    It also carried the old glass-nav hover overrides. */
 
 .text-muted {
-  color: var(--text-muted);
+  color: var(--color-counter-muted);
 }
 
 div#root {

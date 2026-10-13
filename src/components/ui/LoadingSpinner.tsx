@@ -32,10 +32,10 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
         justifyContent: "center",
         gap: size === "lg" ? "20px" : "14px",
         padding: size === "lg" ? "40px" : "28px",
-        background: "var(--bg-glass)",
-        border: "1px solid var(--border-glass)",
-        borderRadius: "var(--legacy-radius-lg)",
-        boxShadow: "var(--shadow-md)",
+        background: "var(--color-counter-2)",
+        border: "1px solid var(--color-counter-rule)",
+        borderRadius: "3px",
+        boxShadow: "var(--shadow-receipt)",
         backdropFilter: "blur(16px)",
         WebkitBackdropFilter: "blur(16px)",
       }}
@@ -45,9 +45,9 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           width: `${spinnerSize}px`,
           height: `${spinnerSize}px`,
           borderRadius: "50%",
-          border: `${Math.max(2, spinnerSize / 16)}px solid var(--bg-glass-light)`,
-          borderTopColor: "var(--accent-violet)",
-          borderRightColor: "var(--accent-violet)",
+          border: `${Math.max(2, spinnerSize / 16)}px solid var(--color-counter-2)`,
+          borderTopColor: "var(--color-you)",
+          borderRightColor: "var(--color-you)",
           animation: "tf-spin 0.8s linear infinite",
         }}
       />
@@ -56,7 +56,7 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           style={{
             fontFamily: "var(--font-body)",
             fontSize: labelSizeMap[size],
-            color: "var(--text-secondary)",
+            color: "var(--color-counter-text-2)",
             letterSpacing: "0.02em",
           }}
         >

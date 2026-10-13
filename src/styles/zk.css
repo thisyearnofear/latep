@@ -435,7 +435,7 @@
 
 .zk-move__name {
   display: block;
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   font-weight: 600;
   color: var(--color-receipt-ink);
 }
@@ -834,7 +834,7 @@
 .zk-submit {
   width: 100%;
   min-height: 48px;
-  font-size: var(--text-base);
+  font-size: var(--text-md);
 }
 
 .zk-row__right {
@@ -888,7 +888,7 @@
 .zk-verified__label {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   color: var(--color-receipt-ink);
   margin: var(--space-2xs) 0 var(--space-3xs);
 }
