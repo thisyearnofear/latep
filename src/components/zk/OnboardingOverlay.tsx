@@ -6,12 +6,11 @@ import "../../styles/zk.css";
 const STORAGE_KEY = "zk_onboarding_seen";
 
 /**
- * 3-step onboarding overlay shown on first visit to /play.
- * Explains the ZK commit-reveal flow to new users.
+ * One-slip onboarding shown on first visit to /play.
+ * The whole commit-reveal flow as three printed lines — one click to dismiss.
  * Dismissed state persisted in localStorage.
  */
 export const OnboardingOverlay: React.FC = () => {
-  const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(() => {
     try {
       return localStorage.getItem(STORAGE_KEY) !== "true";
@@ -31,27 +30,23 @@ export const OnboardingOverlay: React.FC = () => {
     setVisible(false);
   };
 
-  const steps = [
+  const rows = [
     {
       Mark: MARKS.seal,
       title: "Stand at the edge",
-      body: `Pick your move — lean in (hold them up) or hold back (step aside). Your move is kept secret; they can't see it.`,
+      body: "Pick your move — lean in or hold back. It stays sealed where they can't see it.",
     },
     {
       Mark: MARKS.seal,
       title: "Let go — the math catches you",
-      body: "Your browser generates a proof that your move is valid, binding you to it. This takes a few seconds — that's the fall.",
+      body: "Your browser proves the move is valid and binds you to it. A few seconds — that's the fall.",
     },
     {
       Mark: MARKS.handshake,
       title: "The catch or the drop",
-      body: "Both players reveal. If you both leaned in, you're held — trust rewarded. If someone held back, someone is dropped.",
+      body: "Both players reveal. Two leans are held; a held-back partner drops someone.",
     },
   ];
-
-  const current = steps[step];
-  const isLast = step === steps.length - 1;
-  const Mark = current.Mark;
 
   return (
     <div className="zk-scrim" onClick={dismiss}>
@@ -61,53 +56,31 @@ export const OnboardingOverlay: React.FC = () => {
         role="dialog"
         aria-label="How sealed rounds work"
       >
-        <div key={step}>
-          <div className="zk-onboard__mark">
-            <Mark size={56} />
-          </div>
+        <h3 className="zk-onboard__title">How a sealed round works</h3>
 
-          <h3 className="zk-onboard__title">{current.title}</h3>
-
-          <p className="zk-onboard__body">{current.body}</p>
-        </div>
-
-        {/* Steps as a printed counter — "2 of 3" — not dots. */}
-        <p className="zk-onboard__count">
-          Step {step + 1} of {steps.length}
-        </p>
+        <ul className="zk-onboard__rows">
+          {rows.map(({ Mark, title, body }) => (
+            <li key={title} className="zk-onboard__row">
+              <span className="zk-onboard__row-mark">
+                <Mark size={40} />
+              </span>
+              <span className="zk-onboard__row-copy">
+                <strong>{title}</strong>
+                {body}
+              </span>
+            </li>
+          ))}
+        </ul>
 
         <div className="zk-onboard__actions">
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={() => setStep(step - 1)}
-              className="payoff-preset"
-            >
-              ← Back
-            </button>
-          )}
-          {isLast ? (
-            <button
-              type="button"
-              onClick={dismiss}
-              className="payoff-preset payoff-preset--active"
-            >
-              Play
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setStep(step + 1)}
-              className="payoff-preset payoff-preset--active"
-            >
-              Next →
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={dismiss}
+            className="payoff-preset payoff-preset--active"
+          >
+            Play
+          </button>
         </div>
-
-        <button type="button" onClick={dismiss} className="zk-onboard__skip">
-          Skip the intro
-        </button>
       </div>
     </div>
   );
