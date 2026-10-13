@@ -50,10 +50,6 @@
   transition: opacity 0.3s var(--ease-out);
 }
 
-.trust-actor[data-wind-affected] .trust-actor-inner {
-  filter: drop-shadow(0 0 10px rgba(240, 160, 32, 0.45));
-}
-
 .trust-experiment {
   box-sizing: border-box;
   max-width: 1000px;
