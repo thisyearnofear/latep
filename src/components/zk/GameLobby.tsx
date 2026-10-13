@@ -4,6 +4,8 @@ import { useZKDilemma, type GameListItem } from "../../hooks/useZKDilemma";
 import { useGameStats, type GameRecord } from "../../hooks/useGameStats";
 import { useFirstRun } from "../../hooks/useFirstRun";
 import { StatsDisplay } from "./StatsDisplay";
+import "../../styles/tournament.css";
+import "../../styles/zk.css";
 
 type StakeFilter = "all" | "le1" | "1to5" | "gt5";
 
@@ -37,29 +39,6 @@ interface GameLobbyProps {
   onCreateGame: () => void;
   onCreateMatch?: () => void;
 }
-
-/** Card-like div with consistent styling */
-const CardDiv: React.FC<{
-  children: React.ReactNode;
-  onClick?: () => void;
-  onMouseEnter?: React.MouseEventHandler;
-  onMouseLeave?: React.MouseEventHandler;
-  style?: React.CSSProperties;
-}> = ({ children, onClick, onMouseEnter, onMouseLeave, style }) => (
-  <div
-    className="glass-panel"
-    onClick={onClick}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-    style={{
-      borderRadius: "12px",
-      padding: "16px",
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
 
 export const GameLobby: React.FC<GameLobbyProps> = ({
   onSelectGame,
@@ -111,259 +90,103 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
   const isMyGame = (game: GameListItem): boolean => game.player1 === address;
 
   return (
-    <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+    <div className="zk-page">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "24px",
-        }}
-      >
+      <header className="zk-head">
         <div>
-          <h2
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "rgba(255,255,255,0.95)",
-              margin: 0,
-            }}
-          >
-            🎮 ZK Multiplayer Lobby
-          </h2>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-muted)",
-              marginTop: "6px",
-            }}
-          >
-            Zero-knowledge Prisoner's Dilemma — prove your move without
-            revealing it
+          <h2 className="zk-title">The lobby</h2>
+          <p className="zk-lede">
+            Play a sealed-move round on-chain — your move is proven without
+            being shown until the reveal.
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div className="zk-actions">
           <button
             type="button"
             onClick={refresh}
             disabled={isLoading}
-            style={{
-              background: "transparent",
-              color: "var(--text-secondary)",
-              border: "1px solid var(--border-glass)",
-              borderRadius: "var(--radius-sm)",
-              padding: "8px 16px",
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              cursor: "pointer",
-            }}
+            className="till-button"
           >
-            🔄 Refresh
+            Refresh
           </button>
           {onCreateMatch && !isFirstTime && (
             <button
               type="button"
               onClick={onCreateMatch}
               disabled={!address}
-              style={{
-                background: "var(--bg-glass-light)",
-                color: "var(--text-primary)",
-                border: "1px solid var(--border-glass)",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
+              className="till-button"
             >
-              🏟️ Create Match
+              Create a match
             </button>
           )}
           <button
             type="button"
             onClick={onCreateGame}
             disabled={!address}
-            style={{
-              background: "var(--accent-violet)",
-              color: "white",
-              border: "none",
-              borderRadius: "var(--radius-sm)",
-              padding: "8px 16px",
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              cursor: "pointer",
-            }}
+            className="till-button till-button--primary"
           >
-            ➕ Start a Trustfall
+            Start a round
           </button>
         </div>
-      </div>
+      </header>
 
       {error && (
-        <div
-          style={{
-            background: "var(--bg-glass-light)",
-            borderRadius: "8px",
-            padding: "12px 16px",
-            marginBottom: "16px",
-            color: "#f87171",
-            fontFamily: "var(--font-body)",
-            fontSize: "14px",
-          }}
-        >
-          ⚠️ {error}
-        </div>
+        <p className="zk-error" role="alert">
+          {error}
+        </p>
       )}
 
       {/* Persistent stats panel — hidden for first-time users */}
       {!isFirstTime && <StatsDisplay stats={getStats()} />}
 
-      {/* First-time welcome banner */}
+      {/* First-time welcome */}
       {isFirstTime && address && (
-        <CardDiv
-          style={{
-            textAlign: "center",
-            padding: "28px 24px",
-            marginBottom: "24px",
-            background: "rgba(102, 126, 234, 0.06)",
-            border: "1px solid rgba(102, 126, 234, 0.2)",
-          }}
-        >
-          <div style={{ fontSize: "40px", marginBottom: "12px" }}>🎮</div>
-          <h3
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-xl)",
-              color: "var(--text-primary)",
-              margin: "0 0 8px",
-            }}
-          >
-            Ready to Play!
-          </h3>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.5,
-              margin: "0 0 16px",
-            }}
-          >
-            Create a new game and invite a friend, or join an open game from the
-            list below. Your move is proven with a zero-knowledge proof — your
-            opponent can't see it until reveal time.
+        <div className="zk-panel zk-panel--centred">
+          <h3 className="zk-title">Ready when you are.</h3>
+          <p className="zk-lede">
+            Create a round and invite a friend, or join an open one below. Your
+            move is proven with a zero-knowledge proof — your opponent can't see
+            it until reveal time.
           </p>
-        </CardDiv>
+        </div>
       )}
 
       {/* My Active Games */}
       {myActiveGames.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h3
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-secondary)",
-              marginBottom: "12px",
-            }}
-          >
-            🔥 My Active Games
-          </h3>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+        <section aria-label="Your active games">
+          <h3 className="zk-section-title">Your active games</h3>
+          <div className="zk-list">
             {myActiveGames.map((game) => (
-              <CardDiv
+              <button
                 key={game.id}
+                type="button"
+                className="zk-row zk-row--click"
                 onClick={() => onSelectGame(game.id)}
-                onMouseEnter={(e: React.MouseEvent) => {
-                  (e.currentTarget as HTMLDivElement).style.transform =
-                    "translateY(-2px)";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow =
-                    "0 6px 20px rgba(0,0,0,0.3)";
-                }}
-                onMouseLeave={(e: React.MouseEvent) => {
-                  (e.currentTarget as HTMLDivElement).style.transform = "";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "";
-                }}
-                style={{
-                  cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    fontFamily: "var(--font-body)",
-                  }}
-                >
-                  <div>
-                    <p
-                      style={{
-                        fontWeight: "bold",
-                        margin: 0,
-                        color: "var(--text-primary)",
-                        fontSize: "16px",
-                      }}
-                    >
-                      Game #{game.id}
-                    </p>
-                    <p
-                      style={{
-                        margin: "4px 0 0 0",
-                        color: "var(--text-secondary)",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {isMyGame(game) ? "You" : game.player1.slice(0, 8)}... vs
-                      ?
-                    </p>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "var(--color-you)",
-                        fontWeight: "bold",
-                        fontSize: "14px",
-                        fontFamily: "var(--font-body)",
-                      }}
-                    >
-                      {formatStake(game.stake)}
-                    </p>
-                    <StatusBadge status={game.status} />
-                  </div>
+                <div>
+                  <p className="zk-row__name">Game #{game.id}</p>
+                  <p className="zk-row__sub">
+                    {isMyGame(game) ? "You" : game.player1.slice(0, 8)}… vs ?
+                  </p>
                 </div>
-              </CardDiv>
+                <div className="zk-row__right">
+                  <p className="zk-row__stake">{formatStake(game.stake)}</p>
+                  <StatusBadge status={game.status} />
+                </div>
+              </button>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Open Games (available to join) */}
-      <div style={{ marginBottom: "24px" }}>
-        <h3
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-secondary)",
-            marginBottom: "12px",
-          }}
-        >
-          🚪 Open Trustfalls to Join
-        </h3>
+      <section aria-label="Open games">
+        <h3 className="zk-section-title">Open rounds to join</h3>
 
         {/* Stake range filter pills — hidden for first-time users */}
         {!isFirstTime && (
-          <div
-            style={{
-              display: "flex",
-              gap: "8px",
-              flexWrap: "wrap",
-              marginBottom: "12px",
-            }}
-          >
+          <div className="zk-pills" role="group" aria-label="Filter by stake">
             {STAKE_FILTERS.map((f) => {
               const active = stakeFilter === f.key;
               return (
@@ -371,22 +194,8 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
                   key={f.key}
                   type="button"
                   onClick={() => setStakeFilter(f.key)}
-                  style={{
-                    padding: "6px 14px",
-                    borderRadius: "99px",
-                    border: "1px solid var(--border-glass)",
-                    background: active
-                      ? "var(--accent-violet)"
-                      : "var(--bg-glass-light)",
-                    color: active ? "#fff" : "var(--text-secondary)",
-                    fontFamily: "var(--font-body)",
-                    fontSize: "13px",
-                    fontWeight: active ? 600 : 400,
-                    cursor: "pointer",
-                    transition:
-                      "background 0.3s var(--ease-out), color 0.3s var(--ease-out), border-color 0.3s var(--ease-out)",
-                    backdropFilter: "blur(12px)",
-                  }}
+                  aria-pressed={active}
+                  className={active ? "zk-pill zk-pill--active" : "zk-pill"}
                 >
                   {f.label}
                 </button>
@@ -396,226 +205,75 @@ export const GameLobby: React.FC<GameLobbyProps> = ({
         )}
 
         {isLoading ? (
-          <div style={{ textAlign: "center", padding: "40px" }}>
-            <p
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "var(--text-muted)",
-              }}
-            >
-              Loading games...
-            </p>
+          <div className="zk-loading">
+            <p>Loading games…</p>
           </div>
         ) : openGames.length === 0 ? (
-          <CardDiv
-            style={{
-              textAlign: "center",
-              padding: "32px",
-              color: "var(--text-secondary)",
-            }}
-          >
-            <div style={{ fontSize: "48px", marginBottom: "12px" }}>🎲</div>
-            <p
-              style={{
-                margin: 0,
-                fontSize: "16px",
-                fontFamily: "var(--font-body)",
-              }}
-            >
+          <div className="zk-panel zk-panel--centred">
+            <p className="zk-row__name">
               {stakeFilter === "all"
-                ? "No open games right now"
-                : "No open games in this stake range"}
+                ? "No open rounds right now"
+                : "No open rounds in this stake range"}
             </p>
-            <p
-              style={{
-                marginTop: "8px",
-                fontSize: "14px",
-                color: "var(--text-muted)",
-                fontFamily: "var(--font-body)",
-              }}
-            >
+            <p className="zk-row__sub">
               {stakeFilter === "all"
-                ? "Create a new game to challenge someone!"
-                : "Try a different filter or create a new game."}
+                ? "Start one and someone can join you."
+                : "Try a different filter, or start a new round."}
             </p>
-          </CardDiv>
+          </div>
         ) : (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-          >
+          <div className="zk-list">
             {openGames.map((game) => (
-              <CardDiv
-                key={game.id}
-                onClick={() => onSelectGame(game.id)}
-                onMouseEnter={(e: React.MouseEvent) => {
-                  (e.currentTarget as HTMLDivElement).style.transform =
-                    "translateY(-2px)";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow =
-                    "0 6px 20px rgba(0,0,0,0.2)";
-                }}
-                onMouseLeave={(e: React.MouseEvent) => {
-                  (e.currentTarget as HTMLDivElement).style.transform = "";
-                  (e.currentTarget as HTMLDivElement).style.boxShadow = "";
-                }}
-                style={{
-                  cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                  fontFamily: "var(--font-body)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div>
-                    <p
-                      style={{
-                        fontWeight: "bold",
-                        margin: 0,
-                        color: "var(--text-primary)",
-                        fontSize: "16px",
-                      }}
-                    >
-                      Game #{game.id}
-                    </p>
-                    <p
-                      style={{
-                        margin: "4px 0 0 0",
-                        color: "var(--text-secondary)",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Host: {game.player1.slice(0, 8)}...
-                      {game.player1.slice(-4)}
-                    </p>
-                    <p
-                      style={{
-                        margin: "2px 0 0 0",
-                        color: "var(--text-muted)",
-                        fontSize: "12px",
-                      }}
-                    >
-                      Created: {formatDate(game.created_at)}
-                    </p>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <p
-                      style={{
-                        margin: 0,
-                        color: "var(--color-you)",
-                        fontWeight: "bold",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {formatStake(game.stake)}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={(e: React.MouseEvent) => {
-                        e.stopPropagation();
-                        onSelectGame(game.id);
-                      }}
-                      disabled={!address}
-                      style={{
-                        background: "var(--accent-violet)",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "var(--radius-sm)",
-                        padding: "8px 16px",
-                        fontFamily: "var(--font-body)",
-                        fontSize: "var(--text-sm)",
-                        cursor: "pointer",
-                        marginTop: "6px",
-                      }}
-                    >
-                      Join
-                    </button>
-                  </div>
+              <div key={game.id} className="zk-row">
+                <div>
+                  <p className="zk-row__name">Game #{game.id}</p>
+                  <p className="zk-row__sub">
+                    Host: {game.player1.slice(0, 8)}…{game.player1.slice(-4)}
+                  </p>
+                  <p className="zk-row__sub">
+                    Created: {formatDate(game.created_at)}
+                  </p>
                 </div>
-              </CardDiv>
+                <div className="zk-row__right">
+                  <p className="zk-row__stake">{formatStake(game.stake)}</p>
+                  <button
+                    type="button"
+                    onClick={() => onSelectGame(game.id)}
+                    disabled={!address}
+                    className="till-button till-button--primary zk-row__btn"
+                  >
+                    Join
+                  </button>
+                </div>
+              </div>
             ))}
           </div>
         )}
-      </div>
+      </section>
 
       {/* Recent game history — hidden for first-time users */}
       {!isFirstTime && <RecentHistory history={getStats().history} />}
 
       {/* How it works */}
-      <CardDiv
-        style={{
-          fontFamily: "var(--font-body)",
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.15)",
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: "var(--text-secondary)",
-            lineHeight: "1.5",
-            fontSize: "14px",
-          }}
-        >
-          <strong>🔐 Zero-Knowledge Flow:</strong> Commit your move as a hash
-          with a ZK proof → Wait for opponent → Reveal your move → Contract
-          verifies it matches the commitment → Payouts settled automatically.
-        </p>
-      </CardDiv>
+      <p className="zk-note">
+        <strong>The sealed-move flow:</strong> commit your move as a hash with a
+        proof → wait for your opponent → reveal your move → the contract
+        verifies it matches the commitment → the escrow settles itself.
+      </p>
     </div>
   );
 };
 
-/** Status badge for game state */
+/** Status badge for game state — a word, never colour alone. */
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const config: Record<string, { label: string; color: string; bg: string }> = {
-    AwaitingPlayer2: {
-      label: "Waiting for player 2",
-      color: "#f59e0b",
-      bg: "rgba(245, 158, 11, 0.1)",
-    },
-    BothCommitted: {
-      label: "Both committed — reveal now!",
-      color: "#3b82f6",
-      bg: "rgba(59, 130, 246, 0.1)",
-    },
-    Resolved: {
-      label: "Resolved",
-      color: "#10b981",
-      bg: "rgba(16, 185, 129, 0.1)",
-    },
-    Forfeited: {
-      label: "Forfeited",
-      color: "#ef4444",
-      bg: "rgba(239, 68, 68, 0.1)",
-    },
+  const labels: Record<string, string> = {
+    AwaitingPlayer2: "Waiting for player 2",
+    BothCommitted: "Both sealed — reveal now",
+    Resolved: "Resolved",
+    Forfeited: "Forfeited",
   };
 
-  const c = config[status] || {
-    label: status,
-    color: "var(--text-secondary)",
-    bg: "transparent",
-  };
-
-  return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "2px 8px",
-        borderRadius: "12px",
-        fontSize: "11px",
-        fontWeight: "bold",
-        color: c.color,
-        background: c.bg,
-        marginTop: "4px",
-      }}
-    >
-      {c.label}
-    </span>
-  );
+  return <span className="zk-status">{labels[status] ?? status}</span>;
 };
 
 /** Recent game history panel (last few resolved games). */
@@ -626,7 +284,7 @@ const RecentHistory: React.FC<{ history: GameRecord[] }> = ({ history }) => {
 
   const formatOpponent = (addr: string): string => {
     if (!addr) return "—";
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+    return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
   };
 
   const formatTime = (ts: number): string => {
@@ -640,101 +298,32 @@ const RecentHistory: React.FC<{ history: GameRecord[] }> = ({ history }) => {
     return `${days}d ago`;
   };
 
-  const outcomeConfig: Record<
-    GameRecord["outcome"],
-    { label: string; color: string; emoji: string }
-  > = {
-    win: { label: "Win", color: "#4ade80", emoji: "🏆" },
-    lose: { label: "Loss", color: "#f87171", emoji: "😔" },
-    tie: { label: "Tie", color: "var(--text-secondary)", emoji: "🤝" },
+  const outcomeLabel: Record<GameRecord["outcome"], string> = {
+    win: "Win",
+    lose: "Loss",
+    tie: "Tie",
   };
 
   return (
-    <div style={{ marginBottom: "24px" }}>
-      <h3
-        style={{
-          fontFamily: "var(--font-body)",
-          color: "var(--text-secondary)",
-          marginBottom: "12px",
-        }}
-      >
-        📜 Recent Games
-      </h3>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}
-      >
+    <section aria-label="Recent games">
+      <h3 className="zk-section-title">Recent games</h3>
+      <div className="zk-list">
         {recent.map((rec) => {
-          const oc = outcomeConfig[rec.outcome];
           const payoutSign = rec.payout > 0 ? "+" : "";
           return (
-            <div
-              key={`${rec.gameId}-${rec.timestamp}`}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                padding: "12px 16px",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--bg-glass-light)",
-                border: "1px solid var(--border-glass)",
-                fontFamily: "var(--font-body)",
-                backdropFilter: "blur(12px)",
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                <span style={{ fontSize: "18px" }}>{oc.emoji}</span>
-                <div>
-                  <p
-                    style={{
-                      margin: 0,
-                      color: "var(--text-primary)",
-                      fontSize: "14px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    vs {formatOpponent(rec.opponent)}
-                  </p>
-                  <p
-                    style={{
-                      margin: "2px 0 0",
-                      color: "var(--text-muted)",
-                      fontSize: "12px",
-                    }}
-                  >
-                    {rec.yourMove === "C" ? "Cooperated" : "Defected"} ·{" "}
-                    {formatTime(rec.timestamp)}
-                  </p>
-                </div>
-              </div>
-              <div style={{ textAlign: "right" }}>
-                <p
-                  style={{
-                    margin: 0,
-                    color: oc.color,
-                    fontSize: "13px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {oc.label}
+            <div key={`${rec.gameId}-${rec.timestamp}`} className="zk-row">
+              <div>
+                <p className="zk-row__name">
+                  vs {formatOpponent(rec.opponent)}
                 </p>
-                <p
-                  style={{
-                    margin: "2px 0 0",
-                    color:
-                      rec.payout > 0
-                        ? "#4ade80"
-                        : rec.payout < 0
-                          ? "#f87171"
-                          : "var(--text-muted)",
-                    fontSize: "12px",
-                  }}
-                >
+                <p className="zk-row__sub">
+                  You {rec.yourMove === "C" ? "leaned in" : "held back"} ·{" "}
+                  {formatTime(rec.timestamp)}
+                </p>
+              </div>
+              <div className="zk-row__right">
+                <p className="zk-row__stake">{outcomeLabel[rec.outcome]}</p>
+                <p className="zk-row__sub">
                   {payoutSign}
                   {rec.payout.toFixed(2)} XLM
                 </p>
@@ -743,6 +332,6 @@ const RecentHistory: React.FC<{ history: GameRecord[] }> = ({ history }) => {
           );
         })}
       </div>
-    </div>
+    </section>
   );
 };

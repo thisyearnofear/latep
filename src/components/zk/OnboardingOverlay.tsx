@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { MARKS } from "../marks";
+import "../../styles/tournament.css";
+import "../../styles/zk.css";
 
 const STORAGE_KEY = "zk_onboarding_seen";
 
@@ -30,137 +33,55 @@ export const OnboardingOverlay: React.FC = () => {
 
   const steps = [
     {
-      icon: "🧍",
-      title: "Stand at the Edge",
-      body: "Pick Cooperate (catch them) or Defect (step aside). Your move is kept secret — they can't see it.",
+      Mark: MARKS.seal,
+      title: "Stand at the edge",
+      body: `Pick your move — lean in (hold them up) or hold back (step aside). Your move is kept secret; they can't see it.`,
     },
     {
-      icon: "🔐",
-      title: "Let Go — The Math Catches You",
-      body: "Your browser generates a ZK proof that your move is valid, binding you to it. This takes a few seconds — that's the fall.",
+      Mark: MARKS.seal,
+      title: "Let go — the math catches you",
+      body: "Your browser generates a proof that your move is valid, binding you to it. This takes a few seconds — that's the fall.",
     },
     {
-      icon: "🤝",
-      title: "The Catch or the Impact",
-      body: "Both players reveal. If you both cooperated, you're caught — trust rewarded. If someone defected, someone hits the ground.",
+      Mark: MARKS.handshake,
+      title: "The catch or the drop",
+      body: "Both players reveal. If you both leaned in, you're held — trust rewarded. If someone held back, someone is dropped.",
     },
   ];
 
   const current = steps[step];
   const isLast = step === steps.length - 1;
+  const Mark = current.Mark;
 
   return (
-    <div
-      className="tf-bg-in"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.7)",
-        backdropFilter: "blur(8px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-        padding: "20px",
-      }}
-      onClick={dismiss}
-    >
+    <div className="zk-scrim" onClick={dismiss}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="tf-pop-in"
-        style={{
-          background: "var(--bg-glass)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          border: "1px solid var(--border-glass)",
-          borderRadius: "var(--legacy-radius-xl)",
-          padding: "40px",
-          maxWidth: "440px",
-          width: "100%",
-          textAlign: "center",
-          boxShadow: "var(--shadow-lg), var(--shadow-glow-violet)",
-        }}
+        className="receipt receipt-edge zk-onboard"
+        role="dialog"
+        aria-label="How sealed rounds work"
       >
-        <div key={step} className="tf-fade-in-up">
-          <div
-            style={{
-              fontSize: "56px",
-              marginBottom: "16px",
-              filter: "drop-shadow(0 0 24px rgba(102,126,234,0.3))",
-            }}
-          >
-            {current.icon}
+        <div key={step}>
+          <div className="zk-onboard__mark">
+            <Mark size={56} />
           </div>
 
-          <h3
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-2xl)",
-              margin: "0 0 12px",
-              color: "var(--text-primary)",
-            }}
-          >
-            {current.title}
-          </h3>
+          <h3 className="zk-onboard__title">{current.title}</h3>
 
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.6,
-              margin: "0 0 28px",
-            }}
-          >
-            {current.body}
-          </p>
+          <p className="zk-onboard__body">{current.body}</p>
         </div>
 
-        {/* Step indicator */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "8px",
-            marginBottom: "24px",
-          }}
-        >
-          {steps.map((s, i) => (
-            <div
-              key={s.title}
-              style={{
-                width: i === step ? "28px" : "8px",
-                height: "8px",
-                borderRadius: "4px",
-                background:
-                  i === step
-                    ? "var(--accent-violet)"
-                    : i < step
-                      ? "rgba(102,126,234,0.4)"
-                      : "rgba(255,255,255,0.12)",
-                transition: "all 0.3s var(--ease-out)",
-              }}
-            />
-          ))}
-        </div>
+        {/* Steps as a printed counter — "2 of 3" — not dots. */}
+        <p className="zk-onboard__count">
+          Step {step + 1} of {steps.length}
+        </p>
 
-        <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+        <div className="zk-onboard__actions">
           {step > 0 && (
             <button
               type="button"
               onClick={() => setStep(step - 1)}
-              style={{
-                background: "transparent",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border-glass)",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
+              className="payoff-preset"
             >
               ← Back
             </button>
@@ -169,53 +90,23 @@ export const OnboardingOverlay: React.FC = () => {
             <button
               type="button"
               onClick={dismiss}
-              style={{
-                background: "var(--accent-violet)",
-                color: "white",
-                border: "none",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
+              className="payoff-preset payoff-preset--active"
             >
-              Let's Play →
+              Play
             </button>
           ) : (
             <button
               type="button"
               onClick={() => setStep(step + 1)}
-              style={{
-                background: "var(--accent-violet)",
-                color: "white",
-                border: "none",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
+              className="payoff-preset payoff-preset--active"
             >
               Next →
             </button>
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={dismiss}
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-muted)",
-            cursor: "pointer",
-            fontSize: "var(--text-xs)",
-            marginTop: "20px",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          Skip tutorial
+        <button type="button" onClick={dismiss} className="zk-onboard__skip">
+          Skip the intro
         </button>
       </div>
     </div>

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Input } from "@stellar/design-system";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
 import {
@@ -7,11 +6,15 @@ import {
   generateNonce,
   generateProof,
 } from "../../services/noirProofService";
-import { ShimmerButton } from "../ui/ShimmerButton";
+import { MOVE_HELPER, MOVE_LABEL } from "../../content/vocabulary";
+import { ReceiptLine, TearLine } from "../receipt";
+import { shortTx } from "../receipt/helpers";
 import { VerifiedOnChainCard } from "./VerifiedOnChainCard";
 import { NonceCard } from "./NonceCard";
 import { PayoffMatrixReminder } from "./PayoffMatrixReminder";
 import { persistSecrets } from "../../services/localSecretStore";
+import "../../styles/tournament.css";
+import "../../styles/zk.css";
 
 /** Stake preset options for quick selection */
 const STAKE_PRESETS = ["1", "5", "10"] as const;
@@ -25,23 +28,6 @@ interface CommitMoveProps {
   onComplete: (gameId: number) => void;
   onBack: () => void;
 }
-
-/** Card-like div */
-const CardDiv: React.FC<{
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-}> = ({ children, style }) => (
-  <div
-    className="glass-panel"
-    style={{
-      borderRadius: "12px",
-      padding: "24px",
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
 
 export const CommitMove: React.FC<CommitMoveProps> = ({
   mode,
@@ -189,15 +175,8 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
 
   if (!address) {
     return (
-      <div style={{ textAlign: "center", padding: "40px" }}>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-secondary)",
-          }}
-        >
-          Connect your wallet to commit a move
-        </p>
+      <div className="zk-loading">
+        <p>Connect your wallet to commit a move</p>
       </div>
     );
   }
@@ -206,322 +185,131 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
     status === "generating" || status === "submitting" || status === "verified";
 
   return (
-    <div
-      className="zk-card-container"
-      style={{ maxWidth: "600px", margin: "0 auto" }}
-    >
-      {/* Back button */}
+    <div className="zk-page">
       <button
         type="button"
         onClick={onBack}
         disabled={isLoadingState}
-        style={{
-          background: "none",
-          border: "none",
-          color: "var(--text-muted)",
-          cursor: isLoadingState ? "not-allowed" : "pointer",
-          fontFamily: "var(--font-body)",
-          fontSize: "16px",
-          padding: "8px 0",
-          marginBottom: "16px",
-          opacity: isLoadingState ? 0.5 : 1,
-        }}
+        className="zk-back"
       >
-        ← Back to Lobby
+        ← Lobby
       </button>
 
-      <CardDiv>
-        <h3
-          style={{
-            margin: "0 0 8px 0",
-            color: "var(--text-primary)",
-            textAlign: "center",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {mode === "create" ? "🧍 Stand at the Edge" : "🧍 Step to the Edge"}
+      {/* Choosing a move is a form — a form is read closely, so it prints
+          on stock. */}
+      <div className="receipt receipt-edge zk-commit">
+        <h3 className="zk-commit__title">
+          {mode === "create" ? "Stand at the edge." : "Step to the edge."}
         </h3>
 
-        <p
-          style={{
-            margin: "0 0 24px 0",
-            color: "var(--text-secondary)",
-            textAlign: "center",
-            fontFamily: "var(--font-body)",
-          }}
-        >
+        <p className="zk-commit__lede">
           {mode === "create"
-            ? "Choose your move. When you let go, a ZK proof binds you — no take-backs."
-            : `Game #${gameId} — ${hostAddress?.slice(0, 8)}... is waiting. Will you catch them?`}
+            ? "Choose your move. When you let go, a proof binds you — no take-backs."
+            : `Game #${gameId} — ${hostAddress?.slice(0, 8)}… is waiting. Will you catch them?`}
         </p>
 
-        {/* Move Selection */}
-        <div style={{ marginBottom: "24px" }}>
-          <p
-            style={{
-              margin: "0 0 12px 0",
-              color: "var(--text-primary)",
-              fontWeight: "bold",
-              fontFamily: "var(--font-body)",
-            }}
+        {/* Move tiles */}
+        <p className="zk-commit__label">Your move</p>
+        <div className="zk-choices">
+          <button
+            type="button"
+            onClick={() => setSelectedMove("C")}
+            disabled={isLoadingState}
+            aria-pressed={selectedMove === "C"}
+            className={
+              selectedMove === "C" ? "zk-move zk-move--picked" : "zk-move"
+            }
           >
-            Choose Your Move
-          </p>
-          <div
-            className="zk-move-buttons"
-            style={{
-              display: "flex",
-              gap: "12px",
-              justifyContent: "center",
-            }}
+            <span className="zk-move__name">{MOVE_LABEL.C}</span>
+            <span className="zk-move__note">{MOVE_HELPER.C}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedMove("D")}
+            disabled={isLoadingState}
+            aria-pressed={selectedMove === "D"}
+            className={
+              selectedMove === "D" ? "zk-move zk-move--picked" : "zk-move"
+            }
           >
-            <button
-              type="button"
-              onClick={() => setSelectedMove("C")}
-              disabled={isLoadingState}
-              style={{
-                flex: 1,
-                padding: "20px",
-                borderRadius: "12px",
-                border:
-                  selectedMove === "C"
-                    ? "3px solid #4CAF50"
-                    : "2px solid var(--border-glass)",
-                background:
-                  selectedMove === "C"
-                    ? "rgba(76, 175, 80, 0.1)"
-                    : "var(--bg-glass-light)",
-                cursor: isLoadingState ? "not-allowed" : "pointer",
-                transition: "transform 0.2s ease, all 0.2s",
-                fontFamily: "var(--font-body)",
-                opacity: isLoadingState ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoadingState)
-                  e.currentTarget.style.transform =
-                    "translateY(-4px) rotate(-3deg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "";
-              }}
-            >
-              <div style={{ fontSize: "32px", marginBottom: "8px" }}>🤝</div>
-              <div
-                style={{
-                  fontWeight: "bold",
-                  color:
-                    selectedMove === "C" ? "#4CAF50" : "var(--text-primary)",
-                }}
-              >
-                Cooperate
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  marginTop: "4px",
-                }}
-              >
-                You'll catch them
-              </div>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setSelectedMove("D")}
-              disabled={isLoadingState}
-              style={{
-                flex: 1,
-                padding: "20px",
-                borderRadius: "12px",
-                border:
-                  selectedMove === "D"
-                    ? "3px solid #F44336"
-                    : "2px solid var(--border-glass)",
-                background:
-                  selectedMove === "D"
-                    ? "rgba(244, 67, 54, 0.1)"
-                    : "var(--bg-glass-light)",
-                cursor: isLoadingState ? "not-allowed" : "pointer",
-                transition: "transform 0.2s ease, all 0.2s",
-                fontFamily: "var(--font-body)",
-                opacity: isLoadingState ? 0.6 : 1,
-              }}
-              onMouseEnter={(e) => {
-                if (!isLoadingState)
-                  e.currentTarget.style.transform =
-                    "translateY(4px) rotate(3deg)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "";
-              }}
-            >
-              <div style={{ fontSize: "32px", marginBottom: "8px" }}>⚔️</div>
-              <div
-                style={{
-                  fontWeight: "bold",
-                  color:
-                    selectedMove === "D" ? "#F44336" : "var(--text-primary)",
-                }}
-              >
-                Defect
-              </div>
-              <div
-                style={{
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  marginTop: "4px",
-                }}
-              >
-                You'll step aside
-              </div>
-            </button>
-          </div>
+            <span className="zk-move__name">{MOVE_LABEL.D}</span>
+            <span className="zk-move__note">{MOVE_HELPER.D}</span>
+          </button>
         </div>
 
-        {/* Stake Input (only for create mode) */}
+        {/* Stake (create mode only) */}
         {mode === "create" && (
-          <div style={{ marginBottom: "24px" }}>
-            <p
-              style={{
-                margin: "0 0 8px 0",
-                color: "var(--text-primary)",
-                fontWeight: "bold",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              Stake (XLM) — the height of your fall
-            </p>
+          <div className="till-field">
+            <p className="zk-commit__label">Stake (XLM) — the height of it</p>
 
-            {/* Stake presets */}
-            <div
-              style={{
-                display: "flex",
-                gap: "8px",
-                flexWrap: "wrap",
-                alignItems: "center",
-                marginBottom: "10px",
-              }}
-            >
+            <div className="zk-stake-row">
               {STAKE_PRESETS.map((preset) => {
                 const isSelected = !showCustomStake && stake === preset;
-                const isRecommended = preset === RECOMMENDED_STAKE;
                 return (
-                  <ShimmerButton
+                  <button
                     key={preset}
-                    size="sm"
+                    type="button"
                     onClick={() => {
                       setShowCustomStake(false);
                       setStake(preset);
                     }}
-                    style={
+                    className={
                       isSelected
-                        ? {
-                            background: "var(--accent-violet)",
-                            color: "#fff",
-                            borderColor: "var(--accent-violet)",
-                            fontWeight: 600,
-                          }
-                        : undefined
+                        ? "payoff-preset payoff-preset--active"
+                        : "payoff-preset"
                     }
                   >
-                    {preset} XLM{isRecommended ? " 💡" : ""}
-                  </ShimmerButton>
+                    {preset} XLM
+                  </button>
                 );
               })}
-              <ShimmerButton
-                size="sm"
+              <button
+                type="button"
                 onClick={() => setShowCustomStake(true)}
-                style={
+                className={
                   showCustomStake
-                    ? {
-                        background: "var(--accent-violet)",
-                        color: "#fff",
-                        borderColor: "var(--accent-violet)",
-                        fontWeight: 600,
-                      }
-                    : undefined
+                    ? "payoff-preset payoff-preset--active"
+                    : "payoff-preset"
                 }
               >
                 Custom
-              </ShimmerButton>
+              </button>
             </div>
 
-            {/* Recommended indicator + tooltip */}
-            {!showCustomStake && stake === RECOMMENDED_STAKE && (
-              <div
-                title="Low enough for casual play, high enough to matter"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  marginBottom: "10px",
-                  padding: "4px 10px",
-                  borderRadius: "99px",
-                  background: "var(--bg-glass-light)",
-                  border: "1px solid var(--border-glass)",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  cursor: "help",
-                }}
-              >
-                <span>💡</span>
-                <span>Recommended: {RECOMMENDED_STAKE} XLM</span>
-              </div>
-            )}
-
-            {/* Manual stake input — shown when Custom is selected */}
             {showCustomStake && (
-              <Input
-                id="stake-input"
-                fieldSize="md"
+              <input
+                aria-label="Stake in XLM"
                 value={stake}
                 onChange={(e) => setStake(e.target.value)}
                 type="number"
                 min="0.1"
                 step="0.1"
                 disabled={isLoadingState}
-                style={{ textAlign: "center", fontFamily: "var(--font-body)" }}
+                className="payoff-input zk-stake-input"
               />
             )}
-            {/* Height visual — stake as fall height */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "flex-end",
-                gap: "8px",
-                marginTop: "12px",
-                height: "60px",
-              }}
-            >
-              <div
-                className="tf-height-track"
-                style={{
-                  flex: 1,
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "flex-end",
-                }}
+            {!showCustomStake && stake === RECOMMENDED_STAKE && (
+              <span
+                className="zk-recommended"
+                title="Low enough for casual play, high enough to matter"
               >
+                Recommended — {RECOMMENDED_STAKE} XLM
+              </span>
+            )}
+
+            {/* The stake as a height sketch — an inked bar in a dashed
+                frame, printed like the charts. */}
+            <div className="zk-height">
+              <div className="zk-height__track">
                 <div
-                  className="tf-height-bar"
+                  className="zk-height__bar"
                   style={{
-                    width: "100%",
                     height: `${Math.min(100, Math.max(8, (parseFloat(stake) || 0) * 5))}%`,
                   }}
                 />
               </div>
-              <div style={{ fontSize: "24px", lineHeight: "50px" }}>🧍</div>
             </div>
-            <p
-              style={{
-                margin: "4px 0 0",
-                color: "var(--text-muted)",
-                textAlign: "center",
-                fontFamily: "var(--font-body)",
-              }}
-            >
+            <p className="zk-height__caption">
               {(() => {
                 const s = parseFloat(stake) || 0;
                 if (s <= 0) return "Enter a stake to see the height";
@@ -537,105 +325,49 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
 
         <PayoffMatrixReminder />
 
-        <NonceCard nonce={savedNonce} />
-
-        {/* On-chain celebration beat */}
-        {status === "verified" && <VerifiedOnChainCard hash={verifiedTxHash} />}
-
-        {/* Status / Debug info */}
-        {status !== "choose" && status !== "verified" && (
-          <div
-            style={{
-              background: "var(--bg-glass-light)",
-              borderRadius: "8px",
-              padding: "16px",
-              marginBottom: "16px",
-              fontSize: "12px",
-              color: "var(--text-primary)",
-              fontFamily: "monospace",
-              textAlign: "center",
-              overflow: "hidden",
-            }}
-          >
+        {/* The commit stub: below the tear line, each line prints only when
+            the state behind it is real. Sealing… while the proof generates,
+            then proof generated, submitted, confirmed. */}
+        {status !== "choose" && (
+          <div className="zk-stub" aria-live="polite">
+            <TearLine label="The seal" />
+            <ReceiptLine
+              label="Seal"
+              value={status === "generating" ? "Sealing…" : "Sealed"}
+            />
+            <ReceiptLine
+              label="Proof"
+              value={status === "generating" ? "—" : "generated"}
+            />
+            <ReceiptLine
+              label="Submitted"
+              value={
+                verifiedTxHash
+                  ? shortTx(verifiedTxHash)
+                  : status === "submitting"
+                    ? "sending…"
+                    : "—"
+              }
+            />
             {status === "generating" && (
-              <div>
-                <div
-                  className="tf-falling"
-                  style={{
-                    fontSize: "36px",
-                    marginBottom: "8px",
-                    display: "inline-block",
-                  }}
-                >
-                  🧍
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "14px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  You're falling... your ZK proof is binding your move.
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                    marginTop: "4px",
-                  }}
-                >
-                  Creating a zero-knowledge proof that your move is valid — this
-                  takes a few seconds.
-                </div>
-              </div>
+              <p className="zk-stub__hint">
+                Proving your move is valid without showing it — this takes a few
+                seconds.
+              </p>
             )}
             {status === "submitting" && (
-              <div>
-                <div
-                  className="tf-suspended"
-                  style={{
-                    fontSize: "36px",
-                    marginBottom: "8px",
-                    display: "inline-block",
-                  }}
-                >
-                  🕳️
-                </div>
-                <div
-                  style={{
-                    fontFamily: "var(--font-body)",
-                    fontSize: "14px",
-                    color: "var(--text-secondary)",
-                  }}
-                >
-                  Suspended in the air — committing to the blockchain...
-                </div>
-              </div>
+              <p className="zk-stub__hint">
+                Sending the sealed move to the contract…
+              </p>
             )}
             {showTech && commitDebug && (
-              <div style={{ marginTop: "4px", color: "var(--text-secondary)" }}>
-                {commitDebug}
-              </div>
+              <p className="zk-tech__log">{commitDebug}</p>
             )}
           </div>
         )}
 
         {status !== "choose" && status !== "verified" && (
-          <label
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-              marginBottom: "16px",
-              fontFamily: "var(--font-body)",
-              fontSize: "12px",
-              color: "var(--text-muted)",
-              cursor: "pointer",
-            }}
-          >
+          <label className="zk-tech">
             <input
               type="checkbox"
               checked={showTech}
@@ -645,80 +377,44 @@ export const CommitMove: React.FC<CommitMoveProps> = ({
           </label>
         )}
 
+        <NonceCard nonce={savedNonce} />
+
+        {/* On-chain celebration beat */}
+        {status === "verified" && <VerifiedOnChainCard hash={verifiedTxHash} />}
+
         {txError && (
-          <p
-            style={{
-              color: "#F44336",
-              marginBottom: "16px",
-              textAlign: "center",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            ⚠️ {txError}
+          <p className="zk-error" role="alert">
+            {txError}
           </p>
         )}
 
         {error && (
-          <p
-            style={{
-              color: "#F44336",
-              marginBottom: "16px",
-              textAlign: "center",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            ⚠️ {error}
+          <p className="zk-error" role="alert">
+            {error}
           </p>
         )}
 
-        {/* Submit */}
         <button
           type="button"
           onClick={() => void handleCommit()}
           disabled={!canSubmit || isLoadingState}
-          style={{
-            background: "var(--accent-violet)",
-            color: "white",
-            border: "none",
-            borderRadius: "var(--radius-sm)",
-            padding: "14px",
-            fontFamily: "var(--font-body)",
-            fontSize: "18px",
-            cursor: "pointer",
-            width: "100%",
-          }}
+          className="till-button till-button--primary zk-submit"
         >
           {isLoadingState
             ? status === "generating"
-              ? " Falling..."
+              ? "Sealing…"
               : status === "submitting"
-                ? " Committing..."
-                : "✓ Verified!"
-            : "✋ Let go"}
+                ? "Committing…"
+                : "Sealed"
+            : "Let go"}
         </button>
-      </CardDiv>
+      </div>
 
-      {/* ZK Info */}
-      <CardDiv
-        style={{
-          marginTop: "16px",
-          fontFamily: "var(--font-body)",
-          background: "rgba(255,255,255,0.08)",
-          border: "1px solid rgba(255,255,255,0.15)",
-        }}
-      >
-        <p
-          style={{
-            margin: 0,
-            color: "var(--text-secondary)",
-            lineHeight: "1.5",
-          }}
-        >
-          <strong>🔒 The math catches you:</strong> Your move is zero-knowledge
-          proven before you let go — the contract knows your commitment is real,
-          but can't see your move until you reveal it.
-        </p>
-      </CardDiv>
+      <p className="zk-note">
+        <strong>The math catches you:</strong> your move is zero-knowledge
+        proven before you let go — the contract knows your commitment is real,
+        but can't see your move until you reveal it.
+      </p>
     </div>
   );
 };
