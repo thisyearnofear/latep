@@ -20,7 +20,7 @@ A third pattern — **private reputation** (prove a track record without reveali
 
 ## Find Your Way (Stellar, General Track)
 
-Entered as the education + games story: playable wallet-free tutorial/tournament plus two on-chain-verified ZK patterns (commitment binding, private accreditation). Submit by Oct 13, 0:59 — ship as-is, no new patterns; write-up stresses "real ZK verification runs on Stellar today."
+Entered as the education + games story: playable wallet-free tutorial/tournament plus two on-chain-verified ZK patterns (commitment binding, private accreditation). Submit by Oct 14, 0:59 — ship as-is, no new patterns; write-up stresses "real ZK verification runs on Stellar today."
 
 ## Docs
 

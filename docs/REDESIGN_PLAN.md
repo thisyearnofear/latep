@@ -68,7 +68,7 @@ Four product shifts carry most of the impact. The restyle supports them:
 
 ## 2. Ground rules for the team
 
-1. **Main is frozen for the hackathon submission (Oct 13, 00:59).** All
+1. **Main is frozen for the hackathon submission (Oct 14, 00:59).** All
    redesign work happens on the integration branch `redesign`. Ticket branches
    come off `redesign` and merge back into it via PR. `redesign` merges to
    `main` only at the end of Phase 3, after review.
@@ -643,7 +643,7 @@ Locked by the project owner (2026-10-12):
   the ZK commit/reveal beats. Unblocks B2 and B3.
 - **Decision 2 — nav labels are "Everyday"** (`/real-life`) **and "Play with a
   friend"** (`/play`). Unblocks A2.
-- **Decision 3 — merge timing.** `main` is frozen until after the Oct 13
+- **Decision 3 — merge timing.** `main` is frozen until after the Oct 14
   submission. All redesign work lands on `redesign`; `redesign` merges to `main`
   after Phase 4 review. A winner-announcement hotfix on `main` is not a
   conflict risk: rebase the ticket branches forward when it lands.
