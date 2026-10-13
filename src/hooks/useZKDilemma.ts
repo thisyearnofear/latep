@@ -407,19 +407,20 @@ export function useZKDilemma() {
    * Resolve a game (both moves revealed).
    */
   const resolveGame = useCallback(
-    async (gameId: number): Promise<{ payout1: bigint; payout2: bigint }> => {
+    async (
+      gameId: number,
+    ): Promise<{ payout1: bigint; payout2: bigint; hash?: string }> => {
       setIsLoading(true);
       setError(null);
 
       try {
         const client = createClient();
         const tx = await client.resolve_game({ game_id: BigInt(gameId) });
-        const result = (await sas(tx)).value as
-          | readonly [bigint, bigint]
-          | null;
+        const sent = await sas(tx);
+        const result = sent.value as readonly [bigint, bigint] | null;
         const [payout1, payout2] = result ?? [BigInt(0), BigInt(0)];
         await fetchGame(gameId);
-        return { payout1, payout2 };
+        return { payout1, payout2, hash: sent.hash };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Failed to resolve game: ${message}`);

@@ -5,6 +5,17 @@ import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
 import { useGameStats, type GameRecord } from "../../hooks/useGameStats";
 import { unlockAchievement } from "../ui/AchievementBadge";
 import { TrustFallCharacter } from "../TrustFallCharacter";
+import { RoundReceipt } from "../receipt/RoundReceipt";
+import { Receipt, ReceiptLine, Stamp } from "../receipt";
+import { Thread } from "../receipt/Thread";
+import { txExplorerUrl } from "../../contracts/util";
+import {
+  getOutcome,
+  MOVE_LABEL,
+  STAMPS,
+  type ThreadState,
+} from "../../content/vocabulary";
+import "../../styles/zk.css";
 
 interface GameResultProps {
   gameId: number;
@@ -22,29 +33,6 @@ interface GameResultProps {
   onPlayAgain?: () => void;
 }
 
-/** Card-like div with consistent styling */
-const CardDiv: React.FC<{
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-  className?: string;
-}> = ({ children, style, className }) => (
-  <div
-    className={className}
-    style={{
-      background: "var(--bg-glass)",
-      backdropFilter: "blur(16px) saturate(160%)",
-      border: "1px solid var(--border-glass)",
-      borderRadius: "var(--legacy-radius-md)",
-      padding: "24px",
-      boxShadow: "var(--shadow-md)",
-      fontFamily: "var(--font-body)",
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
-
 export const GameResult: React.FC<GameResultProps> = ({
   gameId,
   gameState,
@@ -57,6 +45,7 @@ export const GameResult: React.FC<GameResultProps> = ({
   const [result, setResult] = useState<{
     payout1: bigint;
     payout2: bigint;
+    hash?: string;
   } | null>(null);
   const [txError, setTxError] = useState<string | null>(null);
   const recordedRef = useRef<string | null>(null);
@@ -100,8 +89,8 @@ export const GameResult: React.FC<GameResultProps> = ({
   const handleResolve = async () => {
     setTxError(null);
     try {
-      const payouts = await resolveGame(gameId);
-      setResult(payouts);
+      const resolveResult = await resolveGame(gameId);
+      setResult(resolveResult);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setTxError(message);
@@ -126,57 +115,31 @@ export const GameResult: React.FC<GameResultProps> = ({
   const formatAddress = (addr: string): string =>
     `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
-  const getMoveLabel = (move: GameMove | null): string => {
-    if (move === "C") return "Cooperated";
-    if (move === "D") return "Defected";
-    return "Not revealed";
-  };
+  // Moves from this viewer's perspective: "you" is the connected player,
+  // "partner" is the other side. A spectator sees player 1 on the left.
+  const yourMove: GameMove | null = isPlayer
+    ? isPlayer1
+      ? gameState.move1
+      : gameState.move2
+    : gameState.move1;
+  const partnerMove: GameMove | null = isPlayer
+    ? isPlayer1
+      ? gameState.move2
+      : gameState.move1
+    : gameState.move2;
 
-  const getOutcomeEmoji = (
-    playerMove: GameMove | null,
-    opponentMove: GameMove | null,
-  ): string => {
-    if (!playerMove || !opponentMove) return "⏳";
-    if (playerMove === "C" && opponentMove === "C") return "🌟";
-    if (playerMove === "D" && opponentMove === "D") return "💥";
-    if (playerMove === "D" && opponentMove === "C") return "🏆";
-    return "😔";
-  };
+  // The settled outcome, worded by the shared table — never recomputed here.
+  const outcome =
+    bothRevealed && yourMove && partnerMove
+      ? getOutcome(yourMove, partnerMove)
+      : null;
 
-  // Trustfall outcome classification
-  const bothCooperated = gameState.move1 === "C" && gameState.move2 === "C";
-  const bothDefected = gameState.move1 === "D" && gameState.move2 === "D";
-  const youWereBetrayed =
-    isPlayer &&
-    ((isPlayer1 && gameState.move1 === "C" && gameState.move2 === "D") ||
-      (isPlayer2 && gameState.move2 === "C" && gameState.move1 === "D"));
-  const youBetrayed =
-    isPlayer &&
-    ((isPlayer1 && gameState.move1 === "D" && gameState.move2 === "C") ||
-      (isPlayer2 && gameState.move2 === "D" && gameState.move1 === "C"));
-
-  const outcomeClass = bothCooperated
-    ? "tf-catch"
-    : bothDefected
-      ? "tf-impact"
-      : youWereBetrayed
-        ? "tf-shake"
-        : youBetrayed
-          ? "tf-fade-in-up"
-          : "";
-
-  const outcomeBg = bothCooperated
-    ? "linear-gradient(135deg, rgba(255, 180, 80, 0.12), rgba(255, 140, 60, 0.08))"
-    : bothDefected || youWereBetrayed
-      ? "linear-gradient(135deg, rgba(100, 120, 160, 0.12), rgba(60, 80, 120, 0.08))"
-      : "linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(76, 175, 80, 0.08))";
-
-  const outcomeGlow = bothCooperated ? "tf-glow-warm" : "";
+  const threadState: ThreadState = outcome ? outcome.thread : "loose";
 
   const getOutcomeHeadline = (): { title: string; subtitle: string } => {
     if (!bothRevealed && !isResolved && !isForfeited)
       return {
-        title: "Suspended in the air...",
+        title: "Suspended in the air…",
         subtitle: "Waiting for the reveal",
       };
     if (isForfeited)
@@ -184,30 +147,56 @@ export const GameResult: React.FC<GameResultProps> = ({
         title: "No one caught anyone",
         subtitle: "Someone didn't show up for the reveal",
       };
-    if (bothCooperated)
-      return {
-        title: "Caught",
-        subtitle: "You both showed up. Trust rewarded.",
-      };
-    if (bothDefected)
-      return {
-        title: "Mutual Destruction",
-        subtitle: "You both stepped aside. Nobody caught anyone.",
-      };
-    if (youWereBetrayed)
-      return {
-        title: "You Hit the Ground",
-        subtitle: "You reached out. They stepped aside.",
-      };
-    if (youBetrayed)
-      return {
-        title: "You Stepped Aside",
-        subtitle: "They reached out. You let them fall.",
-      };
-    return { title: "The Moment of Truth", subtitle: "" };
+    if (outcome) {
+      switch (outcome.id) {
+        case "held":
+          return {
+            title: "Held",
+            subtitle: "You both showed up. Trust rewarded.",
+          };
+        case "standoff":
+          return {
+            title: "Standoff",
+            subtitle: "You both stepped aside. Nobody caught anyone.",
+          };
+        case "dropped":
+          return {
+            title: "Dropped",
+            subtitle: "You reached out. They stepped aside.",
+          };
+        case "taken":
+          return {
+            title: "You took it",
+            subtitle: "They reached out. You let them fall.",
+          };
+      }
+    }
+    return { title: "The moment of truth", subtitle: "" };
   };
 
   const headline = getOutcomeHeadline();
+
+  const stakeXlm = Number(BigInt(gameState.stake)) / 10_000_000;
+
+  // Net XLM for each player, only once the contract has told us the payouts.
+  const net1 = result ? Number(result.payout1) / 10_000_000 - stakeXlm : null;
+  const net2 = result ? Number(result.payout2) / 10_000_000 - stakeXlm : null;
+  const netYou =
+    net1 !== null && net2 !== null ? (isPlayer1 ? net1 : net2) : null;
+  const netPartner =
+    net1 !== null && net2 !== null ? (isPlayer1 ? net2 : net1) : null;
+
+  // The full receipt prints only when the numbers are real: a player who
+  // resolved here gets the RoundReceipt. A spectator, or a game resolved on
+  // another device, gets the same receipt minus the figures we can't prove.
+  const canPrintReceipt =
+    isResolved &&
+    bothRevealed &&
+    isPlayer &&
+    yourMove !== null &&
+    partnerMove !== null &&
+    netYou !== null &&
+    netPartner !== null;
 
   // Record the resolved game into persistent stats (once per game id).
   useEffect(() => {
@@ -220,25 +209,25 @@ export const GameResult: React.FC<GameResultProps> = ({
     if (recordedRef.current === recordKey) return;
     recordedRef.current = recordKey;
 
-    const yourMove: GameMove | null = isPlayer1
+    const yourMoveStat: GameMove | null = isPlayer1
       ? gameState.move1
       : gameState.move2;
-    const opponentMove: GameMove | null = isPlayer1
+    const opponentMoveStat: GameMove | null = isPlayer1
       ? gameState.move2
       : gameState.move1;
-    if (!yourMove || !opponentMove) return;
+    if (!yourMoveStat || !opponentMoveStat) return;
 
     const opponent = isPlayer1 ? gameState.player2 || "" : gameState.player1;
 
     // Determine outcome from the player's perspective.
-    let outcome: GameRecord["outcome"] = "tie";
-    if (yourMove === "C" && opponentMove === "D") outcome = "lose";
-    else if (yourMove === "D" && opponentMove === "C") outcome = "win";
-    else outcome = "tie"; // both C or both D → tie in trustfall framing
+    let outcomeStat: GameRecord["outcome"] = "tie";
+    if (yourMoveStat === "C" && opponentMoveStat === "D") outcomeStat = "lose";
+    else if (yourMoveStat === "D" && opponentMoveStat === "C")
+      outcomeStat = "win";
+    else outcomeStat = "tie"; // both C or both D → tie in trustfall framing
 
     // Compute net payout in XLM. Prefer the on-chain resolve result when
     // available; otherwise estimate from stake + outcome.
-    const stakeXlm = Number(BigInt(gameState.stake)) / 10_000_000;
     let payoutXlm = 0;
     if (result) {
       const yourPayout = isPlayer1 ? result.payout1 : result.payout2;
@@ -246,15 +235,19 @@ export const GameResult: React.FC<GameResultProps> = ({
     } else {
       // Estimate: win → +stake, lose → -stake, tie → 0
       payoutXlm =
-        outcome === "win" ? stakeXlm : outcome === "lose" ? -stakeXlm : 0;
+        outcomeStat === "win"
+          ? stakeXlm
+          : outcomeStat === "lose"
+            ? -stakeXlm
+            : 0;
     }
 
     recordGame({
       gameId: String(gameId),
       opponent,
-      yourMove,
-      opponentMove,
-      outcome,
+      yourMove: yourMoveStat,
+      opponentMove: opponentMoveStat,
+      outcome: outcomeStat,
       stake: stakeXlm,
       payout: payoutXlm,
       timestamp: Date.now(),
@@ -262,7 +255,7 @@ export const GameResult: React.FC<GameResultProps> = ({
 
     // Unlock ZK achievements
     unlockAchievement("zk_player");
-    if (outcome === "win") {
+    if (outcomeStat === "win") {
       unlockAchievement("zk_winner");
     }
   }, [
@@ -279,365 +272,183 @@ export const GameResult: React.FC<GameResultProps> = ({
     isPlayer1,
     result,
     recordGame,
+    stakeXlm,
   ]);
 
+  const moveWord = (m: GameMove | null): string =>
+    m ? MOVE_LABEL[m] : "Not revealed";
+
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto" }}>
-      <CardDiv>
-        <h3
-          style={{
-            margin: "0 0 8px 0",
-            color: "var(--text-primary)",
-            textAlign: "center",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          {isResolved || isForfeited ? headline.title : "The Moment of Truth"}
+    <div className="zk-result">
+      <div className="zk-panel">
+        <h3 className="zk-result__title">
+          {isResolved || isForfeited ? headline.title : "The moment of truth"}
         </h3>
-        <p
-          style={{
-            margin: "0 0 20px 0",
-            color: "var(--text-secondary)",
-            textAlign: "center",
-            fontFamily: "var(--font-body)",
-          }}
-        >
+        <p className="zk-result__sub">
           Game #{gameId} —{" "}
           {headline.subtitle ||
             (isResolved
               ? "Resolved"
               : isForfeited
                 ? "Forfeited"
-                : "In Progress")}
+                : "In progress")}
         </p>
 
-        {/* The Moment of Truth — catch/impact visual */}
-        <div
-          className={outcomeClass}
-          style={{
-            background: outcomeBg,
-            borderRadius: "16px",
-            padding: "32px 20px",
-            marginBottom: "24px",
-            textAlign: "center",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* Two figures facing each other */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "40px",
-              marginBottom: "16px",
-            }}
-          >
-            {/* Player 1 figure */}
-            <div style={{ textAlign: "center" }}>
-              <div
-                style={{
-                  marginBottom: "4px",
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              >
-                <TrustFallCharacter
-                  state={
-                    !isResolved
-                      ? "standing"
-                      : gameState.move1 === "C"
-                        ? "caught"
-                        : "impact"
-                  }
-                  color={
-                    !isResolved
-                      ? "neutral"
-                      : gameState.move1 === "C"
-                        ? "cooperator"
-                        : "defector"
-                  }
-                  size="lg"
-                />
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: isPlayer1 ? "#4CAF50" : "#999",
-                  fontWeight: "bold",
-                }}
-              >
-                P1{isPlayer1 ? " (You)" : ""}
-              </div>
-              <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-                {formatAddress(gameState.player1)}
-              </div>
-            </div>
-
-            {/* Center outcome */}
-            <div
-              className={outcomeGlow}
-              style={{
-                fontSize: "56px",
-                borderRadius: "50%",
-                padding: "8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                minWidth: "80px",
-                minHeight: "80px",
-              }}
+        {/* The landing: two figures and the thread between them. The thread's
+            state comes from the outcome table — never computed from moves. */}
+        <div className="zk-figures">
+          <div className="zk-figure">
+            <TrustFallCharacter
+              state={
+                !isResolved
+                  ? "standing"
+                  : gameState.move1 === "C"
+                    ? "caught"
+                    : "impact"
+              }
+              color={isPlayer1 ? "you" : "opponent"}
+              size="lg"
+            />
+            <p
+              className={
+                isPlayer1
+                  ? "zk-figure__name zk-figure__name--you"
+                  : "zk-figure__name"
+              }
             >
-              {getOutcomeEmoji(gameState.move1, gameState.move2)}
-            </div>
-
-            {/* Player 2 figure */}
-            <div style={{ textAlign: "center" }}>
-              <div
-                style={{
-                  marginBottom: "4px",
-                  display: "flex",
-                  justifyContent: "center",
-                }}
-              >
-                <TrustFallCharacter
-                  state={
-                    !gameState.player2
-                      ? "waiting"
-                      : !isResolved
-                        ? "standing"
-                        : gameState.move2 === "C"
-                          ? "caught"
-                          : "impact"
-                  }
-                  color={
-                    !gameState.player2
-                      ? "neutral"
-                      : gameState.move2 === "C"
-                        ? "cooperator"
-                        : "defector"
-                  }
-                  size="lg"
-                />
-              </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: isPlayer2 ? "#F44336" : "#999",
-                  fontWeight: "bold",
-                }}
-              >
-                P2{isPlayer2 ? " (You)" : ""}
-              </div>
-              <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-                {gameState.player2
-                  ? formatAddress(gameState.player2)
-                  : "Waiting..."}
-              </div>
-            </div>
+              Player 1{isPlayer1 ? " (you)" : ""}
+            </p>
+            <p className="zk-figure__addr">
+              {formatAddress(gameState.player1)}
+            </p>
           </div>
 
-          {/* Move labels */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "40px",
-              fontSize: "13px",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            <span
-              style={{
-                color:
-                  gameState.move1 === "C"
-                    ? "#4CAF50"
-                    : gameState.move1 === "D"
-                      ? "#F44336"
-                      : "#999",
-              }}
+          <Thread
+            state={threadState}
+            twists={outcome?.id === "held" ? 1 : 0}
+            surface="counter"
+            width={72}
+            height={48}
+          />
+
+          <div className="zk-figure">
+            <TrustFallCharacter
+              state={
+                !gameState.player2
+                  ? "waiting"
+                  : !isResolved
+                    ? "standing"
+                    : gameState.move2 === "C"
+                      ? "caught"
+                      : "impact"
+              }
+              color={isPlayer2 ? "you" : "opponent"}
+              size="lg"
+            />
+            <p
+              className={
+                isPlayer2
+                  ? "zk-figure__name zk-figure__name--you"
+                  : "zk-figure__name"
+              }
             >
-              {getMoveLabel(gameState.move1)}
-            </span>
-            <span
-              style={{
-                color:
-                  gameState.move2 === "C"
-                    ? "#4CAF50"
-                    : gameState.move2 === "D"
-                      ? "#F44336"
-                      : "#999",
-              }}
-            >
-              {gameState.player2 ? getMoveLabel(gameState.move2) : "—"}
-            </span>
+              {gameState.player2
+                ? `Player 2${isPlayer2 ? " (you)" : ""}`
+                : "Waiting…"}
+            </p>
+            <p className="zk-figure__addr">
+              {gameState.player2 ? formatAddress(gameState.player2) : "—"}
+            </p>
           </div>
         </div>
 
-        {/* Payouts (if resolved) — the landing */}
-        {(isResolved || result) && (
-          <CardDiv
-            className="tf-fade-in-up"
-            style={{
-              background: bothCooperated
-                ? "linear-gradient(135deg, rgba(255, 180, 80, 0.12), rgba(255, 140, 60, 0.06))"
-                : "linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(76, 175, 80, 0.06))",
-              border: bothCooperated
-                ? "1px solid rgba(255, 180, 80, 0.3)"
-                : "1px solid rgba(102, 126, 234, 0.15)",
-              marginBottom: "16px",
-            }}
-          >
-            <h4
-              style={{
-                margin: "0 0 12px 0",
-                color: "var(--text-primary)",
-                textAlign: "center",
-                fontFamily: "var(--font-body)",
-              }}
-            >
-              {bothCooperated ? "💰 You both landed soft" : "💰 The landing"}
-            </h4>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                textAlign: "center",
-              }}
-            >
-              <div>
-                <p
-                  style={{ margin: "0 0 4px", color: "var(--text-secondary)" }}
-                >
-                  Player 1{isPlayer1 ? " (You)" : ""}
-                </p>
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#4CAF50",
-                    fontWeight: "bold",
-                  }}
-                >
-                  +{result ? formatXLM(result.payout1) : "—"}
-                </p>
-              </div>
-              <div>
-                <p
-                  style={{ margin: "0 0 4px", color: "var(--text-secondary)" }}
-                >
-                  Player 2{isPlayer2 ? " (You)" : ""}
-                </p>
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#4CAF50",
-                    fontWeight: "bold",
-                  }}
-                >
-                  +{result ? formatXLM(result.payout2) : "—"}
-                </p>
-              </div>
+        <div className="zk-figures__moves">
+          <span className="zk-moves-line">{moveWord(gameState.move1)}</span>
+          <span className="zk-moves-line">
+            {gameState.player2 ? moveWord(gameState.move2) : "—"}
+          </span>
+        </div>
+
+        {/* The receipt prints once the round is closed. Payouts come from the
+            resolve transaction — a receipt never prints numbers it can't
+            prove, so a game resolved elsewhere shows lines without figures. */}
+        {canPrintReceipt && (
+          <RoundReceipt
+            roundNumber={1}
+            mode="zk"
+            you={yourMove}
+            partner={partnerMove}
+            pointsYou={Number(netYou.toFixed(4))}
+            pointsPartner={Number(netPartner.toFixed(4))}
+            txId={result?.hash}
+            confirmed={Boolean(result?.hash)}
+            explorerUrl={txExplorerUrl}
+            stakeLabel={formatXLM(gameState.stake)}
+            settlementLabel="Escrow settled"
+            primitiveId="net"
+            feeding
+          />
+        )}
+
+        {(isResolved || isForfeited) && !canPrintReceipt && bothRevealed && (
+          <Receipt title={`Game ${gameId}`} className="zk-solo-receipt">
+            <ReceiptLine
+              label="Player 1"
+              value={
+                gameState.move1 ? MOVE_LABEL[gameState.move1] : "Not revealed"
+              }
+            />
+            <ReceiptLine
+              label="Player 2"
+              value={
+                gameState.move2 ? MOVE_LABEL[gameState.move2] : "Not revealed"
+              }
+            />
+            <ReceiptLine label="Stake" value={formatXLM(gameState.stake)} />
+            <ReceiptLine
+              label="Settlement"
+              value={isResolved ? "Settled on-chain" : STAMPS.pending}
+            />
+            <div className="round-receipt-stamps">
+              {outcome && <Stamp text={STAMPS[outcome.id]} />}
             </div>
-            <p
-              style={{
-                margin: "8px 0 0",
-                color: "var(--text-muted)",
-                textAlign: "center",
-              }}
-            >
-              Stake per player: {formatXLM(gameState.stake)}
-            </p>
-          </CardDiv>
+          </Receipt>
         )}
 
-        {/* Forfeited info */}
         {isForfeited && (
-          <CardDiv
-            style={{
-              marginBottom: "16px",
-              textAlign: "center",
-              background: "rgba(100, 120, 160, 0.06)",
-              border: "1px solid rgba(100, 120, 160, 0.2)",
-            }}
-          >
-            <p
-              style={{
-                margin: 0,
-                color: "var(--color-you)",
-                fontWeight: "bold",
-              }}
-            >
-              🏴 Nobody caught anyone — one player didn't show up for the reveal
+          <div className="zk-banner">
+            <p className="zk-banner__line zk-banner__line--bad">
+              Nobody caught anyone — one player didn't show up for the reveal.
             </p>
-          </CardDiv>
+          </div>
         )}
 
-        {/* Error */}
         {txError && (
-          <p
-            style={{
-              color: "#F44336",
-              marginBottom: "12px",
-              textAlign: "center",
-            }}
-          >
-            ⚠️ {txError}
+          <p className="zk-error" role="alert">
+            {txError}
           </p>
         )}
 
         {error && (
-          <p
-            style={{
-              color: "#F44336",
-              marginBottom: "12px",
-              textAlign: "center",
-            }}
-          >
-            ⚠️ {error}
+          <p className="zk-error" role="alert">
+            {error}
           </p>
         )}
 
-        {/* Action Buttons */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            justifyContent: "center",
-            flexWrap: "wrap",
-          }}
-        >
+        <div className="zk-result__actions">
           {canResolve && (
-            <div style={{ flex: 1, minWidth: 200 }}>
+            <div>
               <button
                 type="button"
                 onClick={() => void handleResolve()}
                 disabled={isLoading}
-                style={{
-                  background: "var(--accent-violet)",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "var(--radius-sm)",
-                  padding: "10px 16px",
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-sm)",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                  width: "100%",
-                }}
+                className="till-button till-button--primary"
               >
-                {isLoading ? "⏳ Landing..." : "🪙 Resolve the Landing"}
+                {isLoading ? "Landing…" : "Resolve the landing"}
               </button>
-              <p
-                style={{
-                  margin: "6px 0 0",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-secondary)",
-                  textAlign: "center",
-                }}
-              >
-                The contract verifies both proofs and pays out — press to settle
+              <p className="zk-result__hint">
+                The contract verifies both proofs and pays out — press to
+                settle.
               </p>
             </div>
           )}
@@ -647,102 +458,44 @@ export const GameResult: React.FC<GameResultProps> = ({
               type="button"
               onClick={() => void handleClaimForfeit()}
               disabled={isLoading}
-              style={{
-                background: "var(--bg-glass-light)",
-                color: "#F44336",
-                border: "1px solid var(--border-glass)",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-                flex: 1,
-                minWidth: 200,
-              }}
+              className="till-button"
             >
-              {isLoading ? "⏳ Claiming..." : "🏴 Claim the Fall"}
+              {isLoading ? "Claiming…" : "Claim the fall"}
             </button>
           )}
 
           {/* Post-resolution actions */}
           {(isResolved || isForfeited) && onPlayAgain && (
-            <div
-              style={{
-                display: "flex",
-                gap: "12px",
-                justifyContent: "center",
-                width: "100%",
-                flexWrap: "wrap",
-                marginTop: "8px",
-              }}
-            >
+            <>
               <button
                 type="button"
                 onClick={onPlayAgain}
                 className="till-button till-button--primary"
-                style={{ minWidth: 200 }}
               >
                 Play again
               </button>
-              <button
-                type="button"
-                onClick={onBack}
-                className="till-button"
-              >
+              <button type="button" onClick={onBack} className="till-button">
                 Back to lobby
               </button>
-            </div>
-          )}
-
-          {/* Relatability bridge: game mechanic -> everyday trust problems */}
-          {isResolved && (
-            <Link
-              to="/real-life"
-              className="tf-fade-in-up"
-              style={{
-                display: "block",
-                width: "100%",
-                boxSizing: "border-box",
-                padding: "14px 18px",
-                borderRadius: "var(--legacy-radius-md)",
-                border: "1px solid var(--border-glass)",
-                background: "var(--bg-glass, rgba(255,255,255,0.04))",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                color: "var(--text-secondary)",
-                lineHeight: 1.6,
-                textDecoration: "none",
-                textAlign: "center",
-              }}
-            >
-              🌍 That wasn&apos;t just a game — sealed votes, group-buy deposits
-              and members-only drops run on this exact math.{" "}
-              <span style={{ color: "var(--accent-violet)", fontWeight: 600 }}>
-                See where you&apos;ll meet this again →
-              </span>
-            </Link>
+            </>
           )}
 
           {!isResolved && !isForfeited && (
-            <button
-              type="button"
-              onClick={onBack}
-              style={{
-                background: "transparent",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border-glass)",
-                borderRadius: "var(--radius-sm)",
-                padding: "8px 16px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
-            >
+            <button type="button" onClick={onBack} className="till-button">
               ← Back
             </button>
           )}
         </div>
-      </CardDiv>
+
+        {/* Relatability bridge: game mechanic -> everyday trust problems */}
+        {isResolved && (
+          <Link to="/real-life" className="zk-result__bridge">
+            That wasn&apos;t just a game — sealed votes, group-buy deposits and
+            members-only drops run on this exact math.{" "}
+            <strong>See where you&apos;ll meet this again →</strong>
+          </Link>
+        )}
+      </div>
     </div>
   );
 };

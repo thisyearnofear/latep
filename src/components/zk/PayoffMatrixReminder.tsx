@@ -1,124 +1,27 @@
 import React from "react";
-import { TrustFallCharacter } from "../TrustFallCharacter";
+import { MOVE_LABEL } from "../../content/vocabulary";
+import "../../styles/zk.css";
 
-/** Compact payoff-matrix reminder shown above the commit CTA. */
+/**
+ * Compact payoff-matrix reminder printed above the commit CTA.
+ *
+ * Lives inside the commit receipt, so it is a dashed-rule section on the same
+ * stock — never its own panel. The moves are named, not coloured (design.md
+ * §7: nothing is carried by colour alone).
+ */
 export const PayoffMatrixReminder: React.FC = () => (
-  <div
-    style={{
-      marginBottom: "24px",
-      background: "var(--color-counter)",
-      border: "1px solid var(--border-glass)",
-      borderRadius: "var(--legacy-radius-md)",
-      padding: "16px",
-    }}
-  >
-    <p
-      style={{
-        margin: "0 0 12px",
-        fontSize: "var(--text-xs)",
-        color: "var(--text-secondary)",
-        textTransform: "uppercase",
-        letterSpacing: "0.1em",
-        fontWeight: 600,
-        textAlign: "center",
-      }}
-    >
-      Payoff Matrix
-    </p>
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "auto 1fr 1fr",
-        gap: "6px",
-        textAlign: "center",
-        fontFamily: "var(--font-mono)",
-      }}
-    >
+  <div className="zk-matrix">
+    <p className="zk-matrix__title">Payoff matrix</p>
+    <div className="zk-matrix__grid">
       <div />
-      <div
-        style={{
-          fontWeight: 700,
-          color: "var(--accent-cooperate)",
-          fontSize: "var(--text-sm)",
-        }}
-      >
-        🤝 They C
-      </div>
-      <div
-        style={{
-          fontWeight: 700,
-          color: "var(--accent-defect)",
-          fontSize: "var(--text-sm)",
-        }}
-      >
-        ⚔️ They D
-      </div>
-      <div
-        style={{
-          fontWeight: 700,
-          color: "var(--accent-cooperate)",
-          fontSize: "var(--text-sm)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          paddingRight: "6px",
-          gap: "4px",
-        }}
-      >
-        You C
-        <TrustFallCharacter state="standing" color="cooperator" size="sm" />
-      </div>
-      <div
-        style={{
-          color: "#4ade80",
-          fontWeight: 700,
-          fontSize: "var(--text-base)",
-        }}
-      >
-        +2 / +2
-      </div>
-      <div
-        style={{
-          color: "#f87171",
-          fontWeight: 700,
-          fontSize: "var(--text-base)",
-        }}
-      >
-        0 / +3
-      </div>
-      <div
-        style={{
-          fontWeight: 700,
-          color: "var(--accent-defect)",
-          fontSize: "var(--text-sm)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          paddingRight: "6px",
-          gap: "4px",
-        }}
-      >
-        You D
-        <TrustFallCharacter state="standing" color="defector" size="sm" />
-      </div>
-      <div
-        style={{
-          color: "#fbbf24",
-          fontWeight: 700,
-          fontSize: "var(--text-base)",
-        }}
-      >
-        +3 / 0
-      </div>
-      <div
-        style={{
-          color: "#ef4444",
-          fontWeight: 700,
-          fontSize: "var(--text-base)",
-        }}
-      >
-        0 / 0
-      </div>
+      <div className="zk-matrix__head">They {MOVE_LABEL.C.toLowerCase()}</div>
+      <div className="zk-matrix__head">They {MOVE_LABEL.D.toLowerCase()}</div>
+      <div className="zk-matrix__side">You {MOVE_LABEL.C.toLowerCase()}</div>
+      <div>+2 / +2</div>
+      <div>0 / +3</div>
+      <div className="zk-matrix__side">You {MOVE_LABEL.D.toLowerCase()}</div>
+      <div>+3 / 0</div>
+      <div>0 / 0</div>
     </div>
   </div>
 );
