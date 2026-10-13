@@ -251,7 +251,7 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
               right: "-12px",
               fontSize: "16px",
               fontFamily: "var(--font-print, monospace)",
-              color: "var(--color-counter-muted, #888)",
+              color: "var(--color-counter-muted)",
               animation: "tf-sway 2s ease-in-out infinite",
             }}
           >
@@ -269,7 +269,7 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
               right: "-8px",
               fontSize: "14px",
               fontFamily: "var(--font-print, monospace)",
-              color: "var(--color-counter-muted, #888)",
+              color: "var(--color-counter-muted)",
               animation: "tf-waiting-pulse 1.5s ease-in-out infinite",
             }}
           >

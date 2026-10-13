@@ -300,7 +300,7 @@
   padding: 16px;
   border: 1px solid var(--color-counter-rule);
   border-radius: var(--radius-sm);
-  background: rgba(10, 14, 26, 0.85);
+  background: var(--color-scrim);
   overflow-x: auto;
 }
 
@@ -612,7 +612,7 @@
 }
 
 .lesson-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--color-scrim);
 }
 
 .lesson-dialog-header {
