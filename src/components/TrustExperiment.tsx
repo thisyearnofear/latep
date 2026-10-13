@@ -150,17 +150,17 @@ export function TrustExperiment() {
     }
     const sounds = {
       click: new Howl({
-        src: ["/assets/sounds/button1.mp3"],
+        src: ["/assets/sounds/button1.webm", "/assets/sounds/button1.mp3"],
         preload: true,
         volume: 0.18,
       }),
       cooperate: new Howl({
-        src: ["/assets/sounds/coin_get.mp3"],
+        src: ["/assets/sounds/coin_get.webm", "/assets/sounds/coin_get.mp3"],
         preload: true,
         volume: 0.2,
       }),
       lose: new Howl({
-        src: ["/assets/sounds/thump.mp3"],
+        src: ["/assets/sounds/thump.webm", "/assets/sounds/thump.mp3"],
         preload: true,
         volume: 0.15,
       }),

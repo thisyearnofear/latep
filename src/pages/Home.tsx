@@ -28,6 +28,7 @@ import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
 import { MARKS } from "../components/marks";
 import { PRIMITIVES } from "../content/primitives";
+import { prefetchRoute } from "../App";
 import "../styles/home.css";
 
 /**
@@ -130,6 +131,8 @@ const Home: React.FC = () => {
               <Link
                 to={item.to}
                 className="home-next-row"
+                onMouseEnter={() => prefetchRoute(item.to)}
+                onFocus={() => prefetchRoute(item.to)}
                 onClick={() => {
                   if (item.to.startsWith("/learn")) unlock("visited_learn");
                 }}

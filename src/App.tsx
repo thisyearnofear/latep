@@ -13,6 +13,15 @@ import { ReactiveMascot } from "./components/ReactiveMascot";
 // - ZKGamePage (multiplayer) loads lazily — pulls in bb.js/noir_js only when
 //   the user navigates to /play, keeping the initial bundle ~200KB
 // - Debugger loads lazily — rarely used, keeps it out of the main bundle
+//
+// prefetchRoute warms the light routes (sandbox, tournament) on link hover
+// so they feel instant. /play is deliberately NOT prefetched: that pulls in
+// the ~7MB ZK prover chunk, which stays cold until the user commits to it.
+export function prefetchRoute(to: string) {
+  if (to === "/learn/play") void import("./pages/TutorialSandbox.tsx");
+  else if (to === "/tournament") void import("./pages/TournamentPage.tsx");
+  else if (to === "/learn") void import("./pages/LearnJourney.tsx");
+}
 const LearnJourney = lazy(() => import("./pages/LearnJourney.tsx"));
 const TutorialSandbox = lazy(() =>
   import("./pages/TutorialSandbox.tsx").then((m) => ({

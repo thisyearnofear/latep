@@ -1,0 +1,51 @@
+/* ============================================================================
+ * Latep — self-hosted fonts (Fontsource woff2, latin subset)
+ *
+ * Bricolage Grotesque 700 (display) · Atkinson Hyperlegible Next 400/700
+ * (body) · Martian Mono 400/600 (print). Loaded from /fonts so first paint
+ * never waits on fonts.googleapis.com. font-display: swap keeps text
+ * visible during load. See design.md §4.
+ * ========================================================================== */
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque-latin-700-normal.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/atkinson-hyperlegible-next-latin-700-normal.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "Martian Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/martian-mono-latin-400-normal.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Martian Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/martian-mono-latin-600-normal.woff2") format("woff2");
+}
