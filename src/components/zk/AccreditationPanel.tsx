@@ -6,6 +6,7 @@ import {
   getAllCredentials,
 } from "../../services/accreditationProofService";
 import { getMerkleRootBytes, MERKLE_ROOT_HEX } from "../../util/merkleTree";
+import { MARKS } from "../marks";
 import "../../styles/zk.css";
 
 /**
@@ -18,23 +19,11 @@ import "../../styles/zk.css";
  * The ZK proof proves "I hold a credential in the Merkle tree" without
  * revealing which credential is mine. The contract verifies the proof
  * on-chain and records a nullifier to prevent replay.
+ *
+ * This is the Pass primitive: "verified: on the list · which entry: hidden".
  */
 
-const CardDiv: React.FC<{
-  children: React.ReactNode;
-  style?: React.CSSProperties;
-}> = ({ children, style }) => (
-  <div
-    className="glass-panel"
-    style={{
-      borderRadius: "12px",
-      padding: "24px",
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
+const PassMark = MARKS.pass;
 
 export const AccreditationPanel: React.FC = () => {
   const { address } = useWallet();
@@ -131,156 +120,88 @@ export const AccreditationPanel: React.FC = () => {
     }
   };
 
+  const statusClass = proofStatus.startsWith("Error")
+    ? "zk-status-msg zk-status-msg--bad"
+    : verified
+      ? "zk-status-msg zk-status-msg--ok"
+      : "zk-status-msg";
+
   return (
-    <CardDiv style={{ marginBottom: "20px" }}>
-      <h3 style={{ margin: "0 0 8px 0", fontSize: "1.3rem", color: "#e0e7ff" }}>
-        Private Accreditation (ZK Allowlist Proof)
-      </h3>
-      <p
-        style={{
-          margin: "0 0 16px 0",
-          fontSize: "0.9rem",
-          color: "#94a3b8",
-          lineHeight: 1.5,
-        }}
-      >
-        Prove you're on the accredited allowlist{" "}
-        <strong>without revealing which credential is yours</strong>. Uses a
-        Poseidon Merkle tree (Stellar Protocol 25 native host function) +
-        UltraHonk ZK proof verified on-chain. The nullifier prevents replay
-        without linking to your identity.
+    <div className="zk-panel">
+      <div className="zk-head">
+        <h3 className="zk-pass__title">Private accreditation</h3>
+        <PassMark size={28} />
+      </div>
+      <p className="zk-lede">
+        Prove you&apos;re on the accredited allowlist{" "}
+        <strong>without revealing which credential is yours</strong>. A Poseidon
+        Merkle tree plus an UltraHonk proof, verified on-chain — the nullifier
+        prevents replay without linking to your identity.
       </p>
 
-      {/* Status display */}
-      <div
-        style={{
-          marginBottom: "16px",
-          display: "flex",
-          gap: "12px",
-          flexWrap: "wrap",
-        }}
-      >
-        <div
-          style={{
-            padding: "6px 12px",
-            borderRadius: "8px",
-            fontSize: "0.85rem",
-            background: accreditationReady
-              ? "rgba(34,197,94,0.15)"
-              : "rgba(239,68,68,0.15)",
-            border: `1px solid ${accreditationReady ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
-            color: accreditationReady ? "#4ade80" : "#f87171",
-          }}
+      {/* Status display — chips carry words, never colour alone */}
+      <div className="zk-pass__statuses">
+        <span
+          className={
+            accreditationReady ? "zk-chip zk-chip--ok" : "zk-chip zk-chip--bad"
+          }
         >
           {accreditationReady
-            ? "Accreditation Active"
-            : "Accreditation Not Initialized"}
-        </div>
+            ? "Accreditation active"
+            : "Accreditation not initialized"}
+        </span>
         {onChainRoot && (
-          <div
-            style={{
-              padding: "6px 12px",
-              borderRadius: "8px",
-              fontSize: "0.8rem",
-              fontFamily: "monospace",
-              background: "rgba(99,102,241,0.15)",
-              border: "1px solid rgba(99,102,241,0.3)",
-              color: "#a5b4fc",
-            }}
-          >
-            Root: {onChainRoot.slice(0, 12)}...{onChainRoot.slice(-8)}
-          </div>
+          <span className="zk-chip zk-chip--mono">
+            Root: {onChainRoot.slice(0, 12)}…{onChainRoot.slice(-8)}
+          </span>
         )}
         {verified && (
-          <div
-            style={{
-              padding: "6px 12px",
-              borderRadius: "8px",
-              fontSize: "0.85rem",
-              background: "rgba(34,197,94,0.2)",
-              border: "1px solid rgba(34,197,94,0.4)",
-              color: "#4ade80",
-            }}
-          >
-            You are accredited!
-          </div>
+          <span className="zk-chip zk-chip--ok">
+            Verified — on the list, which entry hidden
+          </span>
         )}
       </div>
 
       {/* Admin section */}
       {!accreditationReady && (
-        <div style={{ marginBottom: "16px" }}>
-          <h4
-            style={{ margin: "0 0 8px 0", fontSize: "1rem", color: "#c7d2fe" }}
-          >
-            Admin: Initialize Accreditation
-          </h4>
-          <p
-            style={{
-              margin: "0 0 12px 0",
-              fontSize: "0.85rem",
-              color: "#94a3b8",
-            }}
-          >
+        <div className="zk-pass__section">
+          <h4 className="zk-pass__subtitle">Admin: initialize accreditation</h4>
+          <p className="zk-status-line">
             Deploy the accreditation VK and Merkle root on-chain. This is a
             one-time setup that sets you as the admin who can later update the
             root.
           </p>
-          <button
-            type="button"
-            onClick={() => void handleInitialize()}
-            disabled={!address || isLoading}
-            className="till-button till-button--primary"
-          >
-            {isLoading ? "Initialising…" : "Initialise accreditation"}
-          </button>
+          <div className="zk-panel__actions">
+            <button
+              type="button"
+              onClick={() => void handleInitialize()}
+              disabled={!address || isLoading}
+              className="till-button till-button--primary"
+            >
+              {isLoading ? "Initialising…" : "Initialise accreditation"}
+            </button>
+          </div>
         </div>
       )}
 
       {/* Player section */}
       {accreditationReady && (
-        <div>
-          <h4
-            style={{ margin: "0 0 8px 0", fontSize: "1rem", color: "#c7d2fe" }}
-          >
-            Player: Prove Accreditation
-          </h4>
-          <p
-            style={{
-              margin: "0 0 12px 0",
-              fontSize: "0.85rem",
-              color: "#94a3b8",
-            }}
-          >
-            Select your credential and generate a ZK proof. The proof proves
-            your credential is in the Merkle tree without revealing which one.
-            The contract verifies it on-chain.
+        <div className="zk-pass__section">
+          <h4 className="zk-pass__subtitle">Player: prove accreditation</h4>
+          <p className="zk-status-line">
+            Select your credential and generate a ZK proof. The proof shows your
+            credential is in the Merkle tree without revealing which one. The
+            contract verifies it on-chain.
           </p>
 
-          <div style={{ marginBottom: "12px" }}>
-            <label
-              style={{
-                display: "block",
-                marginBottom: "6px",
-                fontSize: "0.85rem",
-                color: "#cbd5e1",
-              }}
-            >
-              Your credential:
-            </label>
+          <div className="zk-pass__field">
+            <label htmlFor="zk-credential">Your credential:</label>
             <select
+              id="zk-credential"
               value={selectedCredential}
               onChange={(e) => setSelectedCredential(Number(e.target.value))}
               disabled={generating || isLoading}
-              style={{
-                width: "100%",
-                padding: "8px 12px",
-                borderRadius: "8px",
-                background: "rgba(15,23,42,0.6)",
-                border: "1px solid rgba(99,102,241,0.3)",
-                color: "#e0e7ff",
-                fontSize: "0.9rem",
-              }}
+              className="zk-select"
             >
               {credentials.map((cred, i) => (
                 <option key={cred.credentialId} value={i}>
@@ -302,86 +223,43 @@ export const AccreditationPanel: React.FC = () => {
               it works without one.
             </p>
           )}
-          <button
-            type="button"
-            onClick={() => void handleVerify()}
-            disabled={!address || generating || isLoading || verified}
-            className="till-button till-button--primary"
-          >
-            {generating
-              ? "Generating proof…"
-              : verified
-                ? "Verified"
-                : "Prove accreditation"}
-          </button>
+          <div className="zk-panel__actions">
+            <button
+              type="button"
+              onClick={() => void handleVerify()}
+              disabled={!address || generating || isLoading || verified}
+              className="till-button till-button--primary"
+            >
+              {generating
+                ? "Generating proof…"
+                : verified
+                  ? "Verified"
+                  : "Prove accreditation"}
+            </button>
+          </div>
         </div>
       )}
 
       {/* Status / error messages */}
       {proofStatus && (
-        <div
-          style={{
-            marginTop: "12px",
-            padding: "10px 14px",
-            borderRadius: "8px",
-            fontSize: "0.85rem",
-            background: proofStatus.startsWith("Error")
-              ? "rgba(239,68,68,0.1)"
-              : verified
-                ? "rgba(34,197,94,0.1)"
-                : "rgba(99,102,241,0.1)",
-            border: `1px solid ${
-              proofStatus.startsWith("Error")
-                ? "rgba(239,68,68,0.2)"
-                : verified
-                  ? "rgba(34,197,94,0.2)"
-                  : "rgba(99,102,241,0.2)"
-            }`,
-            color: proofStatus.startsWith("Error")
-              ? "#fca5a5"
-              : verified
-                ? "#4ade80"
-                : "#a5b4fc",
-          }}
-        >
+        <p className={statusClass} role="status">
           {proofStatus}
-        </div>
+        </p>
       )}
 
       {error && (
-        <div
-          style={{
-            marginTop: "8px",
-            padding: "8px 12px",
-            borderRadius: "8px",
-            fontSize: "0.85rem",
-            background: "rgba(239,68,68,0.1)",
-            border: "1px solid rgba(239,68,68,0.2)",
-            color: "#fca5a5",
-          }}
-        >
+        <p className="zk-status-msg zk-status-msg--bad" role="alert">
           {error}
-        </div>
+        </p>
       )}
 
       {/* Technical details */}
-      <details style={{ marginTop: "16px" }}>
-        <summary
-          style={{ cursor: "pointer", fontSize: "0.85rem", color: "#818cf8" }}
-        >
-          Technical details
-        </summary>
-        <div
-          style={{
-            marginTop: "8px",
-            fontSize: "0.8rem",
-            color: "#94a3b8",
-            lineHeight: 1.6,
-          }}
-        >
+      <details className="zk-pass__details">
+        <summary>Technical details</summary>
+        <div className="zk-pass__tech">
           <p>
             <strong>Circuit:</strong>{" "}
-            <code>circuits/allowlist_membership/</code> -- Noir circuit proving
+            <code>circuits/allowlist_membership/</code> — Noir circuit proving
             Poseidon Merkle tree membership with nullifier.
           </p>
           <p>
@@ -390,13 +268,12 @@ export const AccreditationPanel: React.FC = () => {
           </p>
           <p>
             <strong>Hash:</strong> Poseidon (BN254) from{" "}
-            <code>noir-lang/poseidon</code>. Stellar Protocol 25 "X-Ray" added
-            native Poseidon host functions.
+            <code>noir-lang/poseidon</code>. Stellar Protocol 25
+            &quot;X-Ray&quot; added native Poseidon host functions.
           </p>
           <p>
             <strong>Proof:</strong> UltraHonk (14,592 bytes), verified on-chain
-            via
-            <code>ultrahonk_soroban_verifier</code>.
+            via <code>ultrahonk_soroban_verifier</code>.
           </p>
           <p>
             <strong>Privacy:</strong> The contract learns only the Merkle root
@@ -408,6 +285,6 @@ export const AccreditationPanel: React.FC = () => {
           </p>
         </div>
       </details>
-    </CardDiv>
+    </div>
   );
 };
