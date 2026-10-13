@@ -11,6 +11,62 @@
  * ========================================================================== */
 
 /* ----------------------------------------------------------------------------
+ * The pick list: strategy rows printed ON the lesson receipt
+ *
+ * `StrategyCard` (visual/StrategyCard.tsx, ticket B6) is built as a COUNTER
+ * card: counter-2 fill, counter text. On the tournament page that is correct;
+ * dropped into this chapter it put nine dark panels inside a light receipt,
+ * with near-white names on a near-white page. `.narrative-strategies` is used
+ * by this slide only, so the fix lives here and touches no other file: the
+ * cards stop being panels and become printed rows — no fill, a dashed rule
+ * between them, the tint left to the swatch and the thread rule alone
+ * (design.md §5 and §6). Selecting one is a row on stock, not a lifted card.
+ * -------------------------------------------------------------------------- */
+
+.lesson-copy .narrative-strategies .strategy-card {
+  background: transparent;
+  border: none;
+  border-left: 3px solid currentColor;
+  border-radius: 0;
+  padding: var(--space-2xs) 0 var(--space-3xs) var(--space-xs);
+  overflow: visible;
+  transition: background-color var(--dur-short) var(--ease-out);
+}
+
+/* One full-width rule closes the pick list; the grid's own gaps separate the
+   rows, so no rule is drawn per card (a per-card rule would break against the
+   column count, which learning.css changes at two widths). */
+.lesson-copy > .narrative-strategies {
+  padding-bottom: var(--space-2xs);
+  border-bottom: 1px dashed var(--color-receipt-rule);
+}
+
+.lesson-copy .narrative-strategies .strategy-card--interactive:hover {
+  transform: none;
+  background: var(--color-receipt-2);
+}
+
+.lesson-copy .narrative-strategies .strategy-card__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+/* The pattern swatch is the card's only decoration; the tint that
+   `chart-tint-N` puts on `currentColor` is what it and the left rule print in,
+   so the name stays ink and never relies on a tint for meaning (design.md §6). */
+.lesson-copy .narrative-strategies .strategy-card__swatch {
+  width: 32px;
+  height: 3px;
+  margin: 0 0 var(--space-3xs);
+}
+
+/* ----------------------------------------------------------------------------
  * Scoreboard
  *
  * Blue is you and amber is your partner, always (design.md §3); on a receipt
