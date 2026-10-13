@@ -5,9 +5,10 @@
  * three game modes as tabs. Now a standalone page at /learn/play focused
  * solely on the tutorial (vs AI) experience.
  *
- * Features: 9 stateful strategies, trust altitude, noise slider,
- * payoff matrix editor, strategy inspector, AI tutor feedback,
- * move history, session summary.
+ * Workbench layout (ticket A5): settings on a straight receipt in the left
+ * column, the scene in the main column, and the move history as a strip of
+ * round receipts joined by the thread — with a compact table toggle for
+ * long sessions.
  */
 
 import React, { useMemo, useRef, useState } from "react";
@@ -34,9 +35,15 @@ import {
   calculatePayoff,
   NC_DEFAULT,
 } from "../util/strategies";
+import { MOVE_HELPER, MOVE_LABEL, getOutcome } from "../content/vocabulary";
+import { RoundReceipt } from "../components/receipt/RoundReceipt";
+import { Thread } from "../components/receipt/Thread";
+import { primitiveForRound } from "../components/receipt/helpers";
 import { PayoffMatrixEditor } from "../components/slides/PayoffMatrixEditor";
 import { StrategyInspector } from "../components/slides/StrategyInspector";
 import "../styles/learning.css";
+import "../styles/tournament.css";
+import "../styles/sandbox.css";
 
 interface RoundRecord {
   round: number;
@@ -50,8 +57,6 @@ interface RoundRecord {
 
 interface AIPersona {
   name: string;
-  emoji: string;
-  color: string;
   personality: string;
 }
 
@@ -70,6 +75,9 @@ export const TutorialSandbox: React.FC = () => {
   const [payoffMatrix, setPayoffMatrix] = useState<PayoffMatrix>(NC_DEFAULT);
   const [noise, setNoise] = useState(0);
   const [showPayoffEditor, setShowPayoffEditor] = useState(false);
+  const [historyView, setHistoryView] = useState<"receipts" | "table">(
+    "receipts",
+  );
   const [inspectedStrategy, setInspectedStrategy] = useState<StrategyId | null>(
     null,
   );
@@ -80,26 +88,14 @@ export const TutorialSandbox: React.FC = () => {
   const [aiPersona] = useState<AIPersona>(() => {
     const fallback: AIPersona = {
       name: "The Tutor",
-      emoji: "🎓",
-      color: "#667eea",
       personality: "Educational and supportive guide",
     };
     try {
       const personas = Object.values(AI_PERSONAS);
       const selected = personas[Math.floor(Math.random() * personas.length)];
       if (selected && "name" in selected) {
-        const colors: Record<string, string> = {
-          nash: "#6366f1",
-          rousseau: "#8b5cf6",
-          darwin: "#ec4899",
-          pareto: "#f59e0b",
-          cournot: "#3b82f6",
-          rapoport: "#10b981",
-        };
         return {
           name: selected.name,
-          emoji: selected.avatar,
-          color: colors[selected.id] || "#667eea",
           personality: selected.personality,
         };
       }
@@ -276,19 +272,10 @@ export const TutorialSandbox: React.FC = () => {
       }
       if (playerMove === "C") audioManager.playSound("cooperate");
       else audioManager.playSound("defect");
-      const playerMoveText = playerMove === "C" ? "Cooperated" : "Defected";
-      const aiMoveText = aiMove === "C" ? "Cooperated" : "Defected";
-      const newCumulativePlayer = cumulativePlayer + playerPayout;
-      const newCumulativeAI = cumulativeAI + aiPayout;
-      const outcomeLabel = {
-        caught: "🤝 Caught — you both showed up!",
-        betrayed: "💥 You hit the ground — they stepped aside",
-        exploited: "🏆 You stepped aside — they fell",
-        "mutual-destruction": "💥 Mutual destruction — nobody caught anyone",
-      }[outcome];
-      const newAltitude = outcome === "caught" ? trustAltitude + 1 : 0;
+      // The aria-live line says what the receipt prints, in the same words.
+      const word = getOutcome(playerMove, aiMove).word;
       setResult(
-        `Round ${roundNum}: You ${playerMoveText} | ${strategyRef.current.name} ${aiMoveText}${noiseFlipped ? "\n💨 The wind caught someone — a move was flipped by noise!" : ""}\n${outcomeLabel}\nThis round: You ${playerPayout} points | AI ${aiPayout} points\nTotal: You ${newCumulativePlayer} points | AI ${newCumulativeAI} points${newAltitude > 0 ? `\n🏔️ Trust altitude: ${newAltitude}` : ""}`,
+        `Round ${roundNum}: ${word}. You chose ${MOVE_LABEL[playerMove]}, ${strategyRef.current.name} chose ${MOVE_LABEL[aiMove]}.${noiseFlipped ? " The wind caught someone — a move was flipped." : ""}`,
       );
       void generateAIFeedback(record);
       const wasFirstTutorial = !milestones.played_tutorial;
@@ -327,767 +314,479 @@ export const TutorialSandbox: React.FC = () => {
       : { phase: "choose" };
 
   return (
-    <div className="tutorial-workbench">
-      {/* Header */}
-      <div style={{ marginBottom: "32px", textAlign: "center" }}>
-        <h2
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--text-3xl)",
-            marginBottom: "8px",
-          }}
-        >
-          See how trust changes.
-        </h2>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-base)",
-            color: "var(--text-secondary)",
-            maxWidth: "480px",
-            margin: "0 auto",
-          }}
-        >
-          Play the iterated Prisoner's Dilemma against 9 stateful strategies.
-          Local simulation. Scores are practice points; no wallet or funds.
-        </p>
-      </div>
-
-      {/* Tutor toggle */}
-      <div
-        style={{
-          position: "static",
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: "12px",
-        }}
-      >
+    <div className="sandbox">
+      <header className="sandbox-head">
+        <div>
+          <h1 className="sandbox-title">See how trust changes.</h1>
+          <p className="sandbox-lede">
+            Play the iterated dilemma against 9 stateful strategies. Local
+            simulation — scores are practice points; no wallet or funds.
+          </p>
+        </div>
         <button
           type="button"
           onClick={() => setShowTutor(!showTutor)}
-          aria-label="Toggle AI tutor"
-          aria-expanded={showTutor}
-          style={{
-            width: "40px",
-            height: "40px",
-            borderRadius: "50%",
-            border: "1px solid var(--border-glass)",
-            fontSize: "16px",
-            background: showTutor
-              ? "rgba(102, 126, 234, 0.2)"
-              : "var(--bg-glass-light)",
-            cursor: "pointer",
-            backdropFilter: "blur(12px)",
-          }}
-        >
-          🧙‍♂️
-        </button>
-      </div>
-
-      {/* Strategy selector */}
-      <div style={{ marginBottom: "20px" }}>
-        <label
-          htmlFor="tutorial-strategy"
-          style={{
-            display: "block",
-            fontFamily: "var(--font-body)",
-            color: "var(--text-muted)",
-            margin: "0 0 8px 0",
-            fontSize: "var(--text-sm)",
-          }}
-        >
-          Choose your opponent
-        </label>
-        <select
-          id="tutorial-strategy"
-          value={aiStrategyId}
-          onChange={(e) => handleStrategyChange(e.target.value as StrategyId)}
-          disabled={loading}
-          style={{
-            fontFamily: "var(--font-body)",
-            padding: "8px",
-            marginBottom: "10px",
-            width: "100%",
-            background: "var(--bg-glass-light)",
-            color: "var(--text-primary)",
-            border: "1px solid var(--border-glass)",
-            borderRadius: "var(--radius-sm)",
-          }}
-        >
-          {ALL_STRATEGY_IDS.map((id) => {
-            const info = getStrategyInfo(id);
-            return (
-              <option key={id} value={id}>
-                {info.emoji} {info.name} — {info.description}
-              </option>
-            );
-          })}
-        </select>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            color: "var(--text-muted)",
-            margin: 0,
-            fontSize: "var(--text-xs)",
-            fontStyle: "italic",
-          }}
-        >
-          {strategyInfo.description}
-        </p>
-      </div>
-
-      {/* Character display */}
-      <section className="tutorial-round-panel" aria-label="Tutorial round">
-        <div className="tutorial-round-meta">
-          <span>
-            Round{" "}
-            {result && latestRound ? latestRound.round : rounds.length + 1}
-          </span>
-          <span>{strategyInfo.name}</span>
-        </div>
-        {/* Trust Altitude Visual */}
-        <TrustStage
-          state={stageState}
-          opponentLabel={strategyInfo.name}
-          roundKey={rounds.length}
-          trustAltitude={trustAltitude}
-          noise={noise}
-          noiseEvent={
-            result && latestRound ? latestRound.noiseEvent : undefined
+          aria-pressed={showTutor}
+          className={
+            showTutor ? "till-button till-button--active" : "till-button"
           }
-        />
-
-        {/* Move buttons */}
-        <div
-          className="trust-choices"
-          style={{ maxWidth: "460px", margin: "16px auto 20px" }}
         >
-          <button
-            type="button"
-            className="trust-btn trust-btn-primary"
-            aria-pressed={move === "cooperate"}
-            disabled={loading}
-            onClick={() => {
-              setMove("cooperate");
-              setResult("");
-              audioManager.playSound("click");
-            }}
-          >
-            Cooperate
-          </button>
-          <button
-            type="button"
-            className="trust-btn trust-btn-secondary"
-            aria-pressed={move === "defect"}
-            disabled={loading}
-            onClick={() => {
-              setMove("defect");
-              setResult("");
-              audioManager.playSound("click");
-            }}
-          >
-            Defect
-          </button>
-        </div>
-        <p className="tutorial-selection" aria-live="polite">
-          {move
-            ? `Selected: ${move === "cooperate" ? "Cooperate" : "Defect"} — now press Play round below.`
-            : "Select a move first."}
-        </p>
+          {showTutor ? "Tutor on" : "Tutor off"}
+        </button>
+      </header>
 
-        {/* Action buttons */}
-        <div className="learning-actions" style={{ marginBottom: "20px" }}>
-          <button
-            type="button"
-            className={`learning-button learning-button-primary${
-              move && !loading ? " tf-cta-pulse" : ""
-            }`}
-            onClick={() => void playRound()}
-            disabled={!move || loading}
-          >
-            {loading
-              ? "Playing..."
-              : !move
-                ? "Select a move first"
-                : `▶ Play round · ${move === "cooperate" ? "Cooperate" : "Defect"}`}
-          </button>
-          {rounds.length > 0 && (
-            <>
-              <button
-                type="button"
-                className="learning-button"
-                onClick={() => {
-                  setMove("");
-                  setResult("");
-                  audioManager.playSound("click");
-                }}
+      <div className="sandbox-grid">
+        <div className="sandbox-side">
+          {/* Left column — the workbench settings, on a straight receipt. */}
+          <aside className="sandbox-settings receipt receipt-edge">
+            <p className="till-settings__title">Workbench settings</p>
+
+            <div className="till-field">
+              <label
+                htmlFor="tutorial-strategy"
+                className="till-field__label sandbox-label"
               >
-                Clear Move
-              </button>
-              <button
-                type="button"
-                className="learning-button"
-                onClick={newOpponent}
+                Opponent
+              </label>
+              <select
+                id="tutorial-strategy"
+                value={aiStrategyId}
+                onChange={(e) =>
+                  handleStrategyChange(e.target.value as StrategyId)
+                }
+                disabled={loading}
+                className="sandbox-select"
               >
-                🔄 New Opponent
-              </button>
-              <button
-                type="button"
-                className="learning-button"
-                onClick={() => setShowSummary(!showSummary)}
+                {ALL_STRATEGY_IDS.map((id) => {
+                  const info = getStrategyInfo(id);
+                  return (
+                    <option key={id} value={id}>
+                      {info.name} — {info.description}
+                    </option>
+                  );
+                })}
+              </select>
+              <p className="till-field__hint">{strategyInfo.description}</p>
+            </div>
+
+            <div className="till-field">
+              <label
+                htmlFor="tutorial-stake"
+                className="till-field__label sandbox-label"
               >
-                📊 Summary
-              </button>
-            </>
-          )}
-        </div>
-
-        {txError && (
-          <div
-            className="glass-panel"
-            style={{
-              padding: "12px",
-              marginBottom: "10px",
-              borderColor: "var(--accent-defect)",
-              color: "var(--accent-defect)",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            ⚠️ {txError}
-          </div>
-        )}
-
-        {/* Latest round result */}
-        {result && (
-          <div
-            className="glass-panel"
-            style={{
-              padding: "15px",
-              whiteSpace: "pre-line",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-primary)",
-              textAlign: "left",
-              lineHeight: 1.6,
-            }}
-          >
-            {result}
-          </div>
-        )}
-      </section>
-
-      <details className="tutorial-settings">
-        <summary>Experiment settings</summary>
-
-        {/* Payoff Matrix */}
-        <div
-          className="payoff-matrix"
-          style={{ fontSize: "12px", margin: "20px auto" }}
-        >
-          <div className="payoff-cell payoff-header"></div>
-          <div className="payoff-cell payoff-header">AI Cooperates</div>
-          <div className="payoff-cell payoff-header">AI Defects</div>
-          <div className="payoff-cell payoff-header">You Cooperate</div>
-          <div className="payoff-cell payoff-cooperate">
-            Both get {payoffMatrix.R}×
-          </div>
-          <div className="payoff-cell payoff-mixed">
-            You: {payoffMatrix.S}×, AI: {payoffMatrix.T}×
-          </div>
-          <div className="payoff-cell payoff-header">You Defect</div>
-          <div className="payoff-cell payoff-mixed">
-            You: {payoffMatrix.T}×, AI: {payoffMatrix.S}×
-          </div>
-          <div className="payoff-cell payoff-defect">
-            Both get {payoffMatrix.P}×
-          </div>
-        </div>
-
-        {/* Stake input */}
-        <div style={{ marginBottom: "20px", marginTop: "16px" }}>
-          <input
-            value={stake}
-            onChange={(e) => setStake(e.target.value || "1")}
-            aria-label="Practice stake"
-            placeholder="Practice stake (points)"
-            type="number"
-            min="0.1"
-            step="0.1"
-            disabled={loading}
-            style={{
-              fontFamily: "var(--font-body)",
-              padding: "10px",
-              width: "100%",
-              textAlign: "center",
-              background: "var(--bg-glass-light)",
-              color: "var(--text-primary)",
-              border: "1px solid var(--border-glass)",
-              borderRadius: "var(--radius-sm)",
-            }}
-          />
-        </div>
-
-        {/* Noise slider */}
-        <div
-          className="glass-panel"
-          style={{ padding: "12px", marginBottom: "20px" }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "4px",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color: "var(--text-secondary)",
-                fontSize: "var(--text-sm)",
-              }}
-            >
-              💨 Noise — "the wind caught you"
-            </span>
-            <span
-              style={{
-                fontFamily: "var(--font-body)",
-                color:
-                  noise > 0.1 ? "var(--accent-warm)" : "var(--text-secondary)",
-                fontSize: "var(--text-sm)",
-                fontWeight: "bold",
-              }}
-            >
-              {(noise * 100).toFixed(0)}%
-            </span>
-          </div>
-          <input
-            type="range"
-            min="0"
-            max="0.5"
-            step="0.01"
-            value={noise}
-            aria-label="Noise level"
-            onChange={(e) => setNoise(parseFloat(e.target.value))}
-            disabled={loading}
-            style={{ width: "100%", accentColor: "var(--accent-violet)" }}
-          />
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-muted)",
-              margin: "4px 0 0 0",
-              fontSize: "var(--text-xs)",
-              textAlign: "left",
-            }}
-          >
-            {noise === 0
-              ? "No mistakes — your move is your move"
-              : noise < 0.05
-                ? "Rare slips — sometimes your hand slips"
-                : noise < 0.15
-                  ? "Frequent mistakes — trust is harder to build"
-                  : "Chaos — noise drowns out intention"}
-          </p>
-        </div>
-
-        {/* Payoff matrix editor toggle */}
-        <div style={{ marginBottom: "20px" }}>
-          <button
-            type="button"
-            onClick={() => setShowPayoffEditor(!showPayoffEditor)}
-            style={{
-              fontFamily: "var(--font-body)",
-              width: "100%",
-              padding: "10px",
-              borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-glass)",
-              background: showPayoffEditor
-                ? "rgba(102, 126, 234, 0.15)"
-                : "var(--bg-glass-light)",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-          >
-            🎛️ {showPayoffEditor ? "Hide" : "Edit"} Payoff Matrix
-          </button>
-          {showPayoffEditor && (
-            <div style={{ marginTop: "10px" }}>
-              <PayoffMatrixEditor
-                payoffs={payoffMatrix}
-                onChange={setPayoffMatrix}
-                compact
+                Practice stake (points)
+              </label>
+              <input
+                id="tutorial-stake"
+                value={stake}
+                onChange={(e) => setStake(e.target.value || "1")}
+                type="number"
+                min="0.1"
+                step="0.1"
+                disabled={loading}
+                className="payoff-input sandbox-stake"
               />
             </div>
-          )}
-        </div>
 
-        {/* Strategy inspector toggle */}
-        <div style={{ marginBottom: "20px" }}>
-          <button
-            type="button"
-            onClick={() =>
-              setInspectedStrategy(inspectedStrategy ? null : aiStrategyId)
-            }
-            style={{
-              fontFamily: "var(--font-body)",
-              width: "100%",
-              padding: "10px",
-              borderRadius: "var(--radius-sm)",
-              border: "1px solid var(--border-glass)",
-              background: inspectedStrategy
-                ? "rgba(102, 126, 234, 0.15)"
-                : "var(--bg-glass-light)",
-              color: "var(--text-secondary)",
-              cursor: "pointer",
-            }}
-          >
-            🔍 {inspectedStrategy ? "Hide" : "Inspect"} {strategyInfo.name}
-          </button>
+            <div className="till-field">
+              <div className="till-field__row">
+                <span className="till-field__label">
+                  Noise — the wind caught you
+                </span>
+                <span
+                  className={
+                    noise > 0.1
+                      ? "till-field__value till-field__value--loud"
+                      : "till-field__value"
+                  }
+                >
+                  {(noise * 100).toFixed(0)}%
+                </span>
+              </div>
+              <input
+                type="range"
+                min="0"
+                max="0.5"
+                step="0.01"
+                value={noise}
+                aria-label="Noise level"
+                onChange={(e) => setNoise(parseFloat(e.target.value))}
+                disabled={loading}
+              />
+              <p className="till-field__hint">
+                {noise === 0
+                  ? "No mistakes — your move is your move"
+                  : noise < 0.05
+                    ? "Rare slips — sometimes your hand slips"
+                    : noise < 0.15
+                      ? "Frequent mistakes — trust is harder to build"
+                      : "Chaos — noise drowns out intention"}
+              </p>
+            </div>
+
+            <div className="till-field">
+              <button
+                type="button"
+                onClick={() => setShowPayoffEditor(!showPayoffEditor)}
+                aria-expanded={showPayoffEditor}
+                className="payoff-preset sandbox-toggle"
+              >
+                {showPayoffEditor ? "Hide" : "Edit"} payoff matrix
+              </button>
+              {showPayoffEditor && (
+                <div className="sandbox-editor">
+                  <PayoffMatrixEditor
+                    payoffs={payoffMatrix}
+                    onChange={setPayoffMatrix}
+                    compact
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="till-field">
+              <button
+                type="button"
+                onClick={() =>
+                  setInspectedStrategy(inspectedStrategy ? null : aiStrategyId)
+                }
+                aria-expanded={!!inspectedStrategy}
+                className="payoff-preset sandbox-toggle"
+              >
+                {inspectedStrategy ? "Hide" : "Inspect"} {strategyInfo.name}
+              </button>
+            </div>
+          </aside>
+
+          {/* Inspector gets its own receipt — never nested inside settings. */}
           {inspectedStrategy && (
-            <StrategyInspector strategyId={inspectedStrategy} />
+            <div className="sandbox-inspector">
+              <StrategyInspector strategyId={inspectedStrategy} />
+            </div>
           )}
         </div>
-      </details>
 
-      {/* Move History Table */}
-      {rounds.length > 0 && (
-        <div
-          className="glass-panel"
-          style={{
-            padding: "16px",
-            marginTop: "20px",
-            maxHeight: "300px",
-            overflowY: "auto",
-            overflowX: "auto",
-          }}
-        >
-          <h4
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
-              margin: "0 0 12px 0",
-              textAlign: "center",
-              fontSize: "var(--text-sm)",
-            }}
-          >
-            📜 Move History — {rounds.length} round
-            {rounds.length > 1 ? "s" : ""}
-          </h4>
-          <table
-            aria-label="Tutorial move history"
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "13px",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border-glass)" }}>
-                {[
-                  ["round", "#"],
-                  ["you-move", "You"],
-                  ["ai-move", "AI"],
-                  ["you-points", "You"],
-                  ["ai-points", "AI"],
-                  ["outcome", "Outcome"],
-                ].map(([key, h]) => (
-                  <th
-                    key={key}
-                    style={{
-                      padding: "6px 4px",
-                      color: "var(--text-secondary)",
+        {/* Main column — the scene and the receipts it prints. */}
+        <main className="sandbox-main">
+          <section className="sandbox-round" aria-label="Tutorial round">
+            <div className="sandbox-round__meta">
+              <span>
+                Round{" "}
+                {result && latestRound ? latestRound.round : rounds.length + 1}
+              </span>
+              <span>{strategyInfo.name}</span>
+            </div>
+
+            <TrustStage
+              state={stageState}
+              opponentLabel={strategyInfo.name}
+              roundKey={rounds.length}
+              trustAltitude={trustAltitude}
+              noise={noise}
+              noiseEvent={
+                result && latestRound ? latestRound.noiseEvent : undefined
+              }
+            />
+
+            {/* Move tiles */}
+            <div className="trust-choices sandbox-choices">
+              <div className="trust-choice">
+                <button
+                  type="button"
+                  className="trust-btn trust-btn-primary"
+                  aria-pressed={move === "cooperate"}
+                  disabled={loading}
+                  onClick={() => {
+                    setMove("cooperate");
+                    setResult("");
+                    audioManager.playSound("click");
+                  }}
+                >
+                  {MOVE_LABEL.C}
+                </button>
+                <span className="trust-choice-note">{MOVE_HELPER.C}</span>
+              </div>
+              <div className="trust-choice">
+                <button
+                  type="button"
+                  className="trust-btn trust-btn-secondary"
+                  aria-pressed={move === "defect"}
+                  disabled={loading}
+                  onClick={() => {
+                    setMove("defect");
+                    setResult("");
+                    audioManager.playSound("click");
+                  }}
+                >
+                  {MOVE_LABEL.D}
+                </button>
+                <span className="trust-choice-note">{MOVE_HELPER.D}</span>
+              </div>
+            </div>
+            <p className="tutorial-selection" aria-live="polite">
+              {result
+                ? result
+                : move
+                  ? `Selected: ${move === "cooperate" ? MOVE_LABEL.C : MOVE_LABEL.D} — now press Play round below.`
+                  : "Select a move first."}
+            </p>
+
+            {/* Actions */}
+            <div className="learning-actions sandbox-actions">
+              <button
+                type="button"
+                className="learning-button learning-button-primary"
+                onClick={() => void playRound()}
+                disabled={!move || loading}
+              >
+                {loading
+                  ? "Playing…"
+                  : !move
+                    ? "Select a move first"
+                    : `Play round — ${move === "cooperate" ? MOVE_LABEL.C : MOVE_LABEL.D}`}
+              </button>
+              {rounds.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    className="learning-button"
+                    onClick={() => {
+                      setMove("");
+                      setResult("");
+                      audioManager.playSound("click");
                     }}
                   >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rounds
-                .slice()
-                .reverse()
-                .map((r) => (
-                  <tr
-                    key={r.round}
-                    style={{ borderBottom: "1px solid var(--border-glass)" }}
+                    Clear move
+                  </button>
+                  <button
+                    type="button"
+                    className="learning-button"
+                    onClick={newOpponent}
                   >
-                    <td
-                      style={{ padding: "6px 4px", color: "var(--text-muted)" }}
-                    >
-                      {r.round}
-                    </td>
-                    <td
-                      style={{ padding: "6px 4px" }}
-                      aria-label={r.playerMove === "C" ? "Cooperate" : "Defect"}
-                    >
-                      {r.playerMove === "C" ? "🤝" : "⚔️"}
-                    </td>
-                    <td
-                      style={{ padding: "6px 4px" }}
-                      aria-label={r.aiMove === "C" ? "Cooperate" : "Defect"}
-                    >
-                      {r.aiMove === "C" ? "🤝" : "⚔️"}
-                    </td>
-                    <td
-                      style={{
-                        padding: "6px 4px",
-                        color:
-                          r.playerPayout > 0
-                            ? "var(--accent-cooperate)"
-                            : "var(--text-muted)",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {r.playerPayout}
-                    </td>
-                    <td
-                      style={{
-                        padding: "6px 4px",
-                        color:
-                          r.aiPayout > 0
-                            ? "var(--accent-cooperate)"
-                            : "var(--text-muted)",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {r.aiPayout}
-                    </td>
-                    <td style={{ padding: "6px 4px", fontSize: "11px" }}>
-                      {r.outcome === "caught" && "🤝 Caught"}
-                      {r.outcome === "betrayed" && "💥 Fell"}
-                      {r.outcome === "exploited" && "🏆 Stepped aside"}
-                      {r.outcome === "mutual-destruction" && "💥 Both fell"}
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-          {/* Cumulative totals */}
-          <div
-            style={{
-              marginTop: "12px",
-              display: "flex",
-              justifyContent: "space-around",
-              borderTop: "1px solid var(--border-glass)",
-              paddingTop: "10px",
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-secondary)",
-                  fontSize: "var(--text-xs)",
-                }}
-              >
-                Your total
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontWeight: "bold",
-                  color:
-                    cumulativePlayer > cumulativeAI
-                      ? "var(--accent-cooperate)"
-                      : "var(--text-primary)",
-                }}
-              >
-                {cumulativePlayer} points
-              </p>
+                    New opponent
+                  </button>
+                  <button
+                    type="button"
+                    className="learning-button"
+                    onClick={() => setShowSummary(!showSummary)}
+                  >
+                    Summary
+                  </button>
+                </>
+              )}
             </div>
-            <div>
-              <p
-                style={{
-                  margin: 0,
-                  color: "var(--text-secondary)",
-                  fontSize: "var(--text-xs)",
-                }}
-              >
-                AI total
-              </p>
-              <p
-                style={{
-                  margin: 0,
-                  fontWeight: "bold",
-                  color:
-                    cumulativeAI > cumulativePlayer
-                      ? "var(--accent-defect)"
-                      : "var(--text-primary)",
-                }}
-              >
-                {cumulativeAI} points
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* AI Tutor Feedback */}
-      {result && aiMessage && showTutor && (
-        <div
-          className="glass-panel"
-          style={{
-            padding: "20px",
-            marginTop: "20px",
-            borderColor: aiPersona.color,
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <span style={{ fontSize: "24px" }}>{aiPersona.emoji}</span>
-            <h4
-              style={{
-                fontFamily: "var(--font-body)",
-                color: aiPersona.color,
-                margin: 0,
-              }}
-            >
-              {aiPersona.name}
-            </h4>
-          </div>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
-              lineHeight: "1.4",
-              margin: 0,
-            }}
-          >
-            {aiMessage}
-          </p>
-        </div>
-      )}
+            {txError && (
+              <div className="sandbox-error" role="alert">
+                {txError}
+              </div>
+            )}
 
-      {/* Session Summary */}
-      {showSummary && rounds.length > 0 && (
-        <div
-          className="glass-panel"
-          style={{
-            padding: "20px",
-            marginTop: "20px",
-            borderColor: "rgba(102, 126, 234, 0.3)",
-          }}
-        >
-          <h4
-            style={{
-              fontFamily: "var(--font-body)",
-              color: "var(--accent-violet)",
-              margin: "0 0 15px 0",
-            }}
-          >
-            📊 Session Summary
-          </h4>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "15px",
-              marginBottom: "15px",
-            }}
-          >
-            <div style={{ textAlign: "center" }}>
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  margin: "0 0 5px 0",
-                  fontSize: "var(--text-sm)",
-                }}
+            {/* The latest round prints its receipt. Practice mode only ever
+                claims points — never a transaction (honesty rules, §7). */}
+            {result && latestRound && (
+              <RoundReceipt
+                roundNumber={latestRound.round}
+                mode="practice"
+                you={latestRound.playerMove}
+                partner={latestRound.aiMove}
+                pointsYou={latestRound.playerPayout}
+                pointsPartner={latestRound.aiPayout}
+                trustTwists={trustAltitude}
+                primitiveId={primitiveForRound(latestRound.round, "practice")}
+                learnHref="/learn"
+                feeding
               >
-                Record
-              </p>
-              <p
-                style={{
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  fontWeight: "bold",
-                }}
-              >
-                {sessionAnalysis.wins}W {sessionAnalysis.losses}L{" "}
-                {sessionAnalysis.ties}T
+                {latestRound.noiseEvent.player ||
+                latestRound.noiseEvent.opponent ? (
+                  <p className="sandbox-noise-note">
+                    The wind caught{" "}
+                    {latestRound.noiseEvent.player &&
+                    latestRound.noiseEvent.opponent
+                      ? "you both"
+                      : latestRound.noiseEvent.player
+                        ? "you"
+                        : strategyInfo.name}{" "}
+                    — a move was flipped.
+                  </p>
+                ) : null}
+              </RoundReceipt>
+            )}
+          </section>
+
+          {/* AI tutor feedback — a note from the persona, on stock. */}
+          {result && aiMessage && showTutor && (
+            <div className="sandbox-tutor receipt receipt-edge">
+              <p className="sandbox-tutor__name">{aiPersona.name}</p>
+              <p className="sandbox-tutor__message">{aiMessage}</p>
+            </div>
+          )}
+
+          {/* Session summary */}
+          {showSummary && rounds.length > 0 && (
+            <div className="sandbox-summary receipt receipt-edge">
+              <p className="till-settings__title">Session summary</p>
+              <dl className="sandbox-summary__grid">
+                <div>
+                  <dt>Record</dt>
+                  <dd>
+                    {sessionAnalysis.wins}W {sessionAnalysis.losses}L{" "}
+                    {sessionAnalysis.ties}T
+                  </dd>
+                </div>
+                <div>
+                  <dt>Cooperation rate</dt>
+                  <dd>{sessionAnalysis.cooperationRate.toFixed(0)}%</dd>
+                </div>
+                <div>
+                  <dt>Peak trust altitude</dt>
+                  <dd>{sessionAnalysis.maxAltitude}</dd>
+                </div>
+                <div>
+                  <dt>Your total</dt>
+                  <dd>{cumulativePlayer} points</dd>
+                </div>
+                <div>
+                  <dt>{strategyInfo.name} total</dt>
+                  <dd>{cumulativeAI} points</dd>
+                </div>
+              </dl>
+              <p className="sandbox-summary__note">
+                Each round builds or breaks trust. Try different opponents to
+                see how strategies change the game.
               </p>
             </div>
-            <div style={{ textAlign: "center" }}>
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  margin: "0 0 5px 0",
-                  fontSize: "var(--text-sm)",
-                }}
-              >
-                Cooperation Rate
-              </p>
-              <p
-                style={{
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  fontWeight: "bold",
-                }}
-              >
-                {sessionAnalysis.cooperationRate.toFixed(0)}%
-              </p>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  margin: "0 0 5px 0",
-                  fontSize: "var(--text-sm)",
-                }}
-              >
-                Peak Trust Altitude
-              </p>
-              <p
-                style={{
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  fontWeight: "bold",
-                }}
-              >
-                🏔️ {sessionAnalysis.maxAltitude}
-              </p>
-            </div>
-            <div style={{ textAlign: "center" }}>
-              <p
-                style={{
-                  color: "var(--text-secondary)",
-                  margin: "0 0 5px 0",
-                  fontSize: "var(--text-sm)",
-                }}
-              >
-                Total points
-              </p>
-              <p
-                style={{
-                  color: "var(--text-primary)",
-                  margin: 0,
-                  fontWeight: "bold",
-                }}
-              >
-                {cumulativePlayer} points
-              </p>
-            </div>
-          </div>
-          <p
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "var(--text-sm)",
-              margin: 0,
-              fontStyle: "italic",
-              textAlign: "center",
-            }}
-          >
-            Each round builds or breaks trust. Try different opponents to see
-            how strategies evolve over repeated play.
-          </p>
-        </div>
-      )}
+          )}
+
+          {/* Move history — a strip of round receipts joined by the thread,
+              with a compact table for long sessions. */}
+          {rounds.length > 0 && (
+            <section className="sandbox-history" aria-label="Move history">
+              <div className="sandbox-history__head">
+                <p className="till-stat__label">
+                  Move history — {rounds.length} round
+                  {rounds.length > 1 ? "s" : ""}
+                </p>
+                <div
+                  className="sandbox-history__toggle"
+                  role="group"
+                  aria-label="History view"
+                >
+                  <button
+                    type="button"
+                    className={
+                      historyView === "receipts"
+                        ? "payoff-preset payoff-preset--active"
+                        : "payoff-preset"
+                    }
+                    onClick={() => setHistoryView("receipts")}
+                  >
+                    Receipts
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      historyView === "table"
+                        ? "payoff-preset payoff-preset--active"
+                        : "payoff-preset"
+                    }
+                    onClick={() => setHistoryView("table")}
+                  >
+                    Table
+                  </button>
+                </div>
+              </div>
+
+              {historyView === "receipts" ? (
+                <div className="sandbox-history__strip">
+                  {rounds.map((r, i) => {
+                    // The thread joining receipt i-1 to receipt i carries
+                    // that round's outcome state and the running twist count.
+                    let twists = 0;
+                    for (let j = i; j >= 0; j--) {
+                      if (
+                        rounds[j].playerMove === "C" &&
+                        rounds[j].aiMove === "C"
+                      )
+                        twists++;
+                      else break;
+                    }
+                    return (
+                      <React.Fragment key={r.round}>
+                        {i > 0 && (
+                          <Thread
+                            surface="receipt"
+                            state={getOutcome(r.playerMove, r.aiMove).thread}
+                            twists={twists}
+                            width={72}
+                            height={36}
+                            className="sandbox-history__thread"
+                          />
+                        )}
+                        <div className="sandbox-history__item">
+                          <RoundReceipt
+                            roundNumber={r.round}
+                            mode="practice"
+                            you={r.playerMove}
+                            partner={r.aiMove}
+                            pointsYou={r.playerPayout}
+                            pointsPartner={r.aiPayout}
+                            primitiveId={primitiveForRound(r.round, "practice")}
+                            learnHref="/learn"
+                          />
+                        </div>
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="till-results receipt receipt-edge">
+                  <table
+                    className="till-results__table"
+                    aria-label="Tutorial move history"
+                  >
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>You</th>
+                        <th>{strategyInfo.name}</th>
+                        <th>You</th>
+                        <th>Them</th>
+                        <th>Outcome</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rounds
+                        .slice()
+                        .reverse()
+                        .map((r) => (
+                          <tr key={r.round}>
+                            <td>{r.round}</td>
+                            <td>{MOVE_LABEL[r.playerMove]}</td>
+                            <td>{MOVE_LABEL[r.aiMove]}</td>
+                            <td>{r.playerPayout}</td>
+                            <td>{r.aiPayout}</td>
+                            <td>{getOutcome(r.playerMove, r.aiMove).word}</td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                  <dl className="sandbox-history__totals">
+                    <div>
+                      <dt>Your total</dt>
+                      <dd>{cumulativePlayer} points</dd>
+                    </div>
+                    <div>
+                      <dt>{strategyInfo.name} total</dt>
+                      <dd>{cumulativeAI} points</dd>
+                    </div>
+                  </dl>
+                </div>
+              )}
+            </section>
+          )}
+        </main>
+      </div>
     </div>
   );
 };

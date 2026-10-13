@@ -1,0 +1,202 @@
+/* ============================================================================
+ * Choice slide — content printed ON the lesson receipt (LessonLayout's
+ * `.lesson-copy` IS the receipt, design.md §2), plus the payoff matrix, which
+ * opens in the lesson dialog as its own wide receipt.
+ *
+ * Surface discipline: everything here reads closely, so it is all receipt
+ * tokens. The only counter-family piece is the dialog it sits in, which
+ * learning.css owns — not this file.
+ * ========================================================================== */
+
+/* --- the result block ------------------------------------------------------ */
+
+.choice-result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+}
+
+/* `.lesson-copy p` would otherwise force these into body-14; the outcome word
+   and the payout line have their own roles (display heading / print line). */
+.lesson-copy .choice-result__word {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.choice-result__word:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.lesson-copy .choice-result__payout {
+  margin: 0;
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-faded);
+}
+
+/* --- the reflection lines -------------------------------------------------- */
+
+.lesson-copy .choice-reflection {
+  margin: 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+  max-width: var(--measure-prose);
+}
+
+/* Grouping inside a receipt is dashed rules and spacing (design.md §5). The
+   auto `.lesson-copy` rule only chains from p/h3/list elements, so the link
+   from the result block gets its own rule. */
+.choice-result + .choice-reflection {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+/* --- the payoff matrix (a receipt inside the lesson dialog) ---------------- */
+
+.choice-payoff {
+  margin-inline: auto;
+}
+
+.choice-payoff__grid {
+  display: grid;
+  /* learning.css overrides this below 420px with its own minmax tracks */
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-3xs);
+}
+
+/* Columns are the partner's moves; amber always means your partner
+   (design.md §3). */
+.choice-payoff__col {
+  padding: var(--space-3xs);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-partner-print);
+  overflow-wrap: anywhere;
+}
+
+/* Rows are your moves; blue always means you. */
+.choice-payoff__row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3xs);
+  padding-right: var(--space-2xs);
+  transition: opacity var(--dur-short) var(--ease-out);
+}
+
+.choice-payoff__row--dim {
+  opacity: 0.4;
+}
+
+.choice-payoff__row-label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-you-print);
+}
+
+.choice-payoff__cell {
+  position: relative;
+  padding: var(--space-2xs) var(--space-3xs);
+  border: 1px dashed var(--color-receipt-rule);
+  text-align: center;
+  transition:
+    background-color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+/* The proximity wash: `--prox` (0–1) is set per frame by the rAF handler;
+   it only ever drives opacity of a flat receipt tint — no glow (design.md §8). */
+.choice-payoff__cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-receipt-2);
+  opacity: var(--prox, 0);
+  pointer-events: none;
+}
+
+.choice-payoff__cell > * {
+  position: relative;
+}
+
+/* The hovered row is marked by a heavier rule and the pressed stock, never
+   by colour alone (design.md §3). */
+.choice-payoff__cell--active {
+  border: 2px solid var(--color-receipt-ink);
+  background: var(--color-receipt-2);
+}
+
+.choice-payoff__cell:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* The lesson dialog carries a legacy focus rule for [tabindex] children
+   (learning.css, off-limits to this ticket); restate ours with higher
+   specificity so the correct ring wins wherever the bundle order lands. */
+.lesson-dialog .choice-payoff__cell[tabindex]:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.choice-payoff__payoff {
+  font-family: var(--font-print);
+  font-size: var(--text-md);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-ink);
+}
+
+.choice-payoff__sub {
+  margin-top: var(--space-3xs);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+  color: var(--color-receipt-faded);
+  overflow-wrap: anywhere;
+}
+
+.choice-payoff__hint {
+  min-height: var(--space-md);
+  margin-top: var(--space-sm);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  text-align: center;
+  color: var(--color-receipt-faded);
+  opacity: 0;
+  transition: opacity var(--dur-short) var(--ease-out);
+  overflow-wrap: anywhere;
+}
+
+.choice-payoff__hint--visible {
+  opacity: 1;
+}
+
+/* --- narrow ---------------------------------------------------------------- */
+
+@media (max-width: 420px) {
+  .choice-payoff__col,
+  .choice-payoff__row-label {
+    font-size: var(--text-xs);
+  }
+}
+
+/* --- reduced motion --------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .choice-payoff__row,
+  .choice-payoff__cell,
+  .choice-payoff__hint {
+    transition: none;
+  }
+}

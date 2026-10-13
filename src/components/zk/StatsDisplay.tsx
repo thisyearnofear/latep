@@ -1,13 +1,14 @@
 /**
- * StatsDisplay — glassmorphic panel showing persistent Latep stats.
+ * StatsDisplay — counter panel of persistent Latep stats.
  *
  * Renders above the game list in the lobby. Shows total games, W/L/T record,
- * net XLM, and cooperation rate. Falls back to an encouraging empty state
- * when no games have been played yet.
+ * net XLM, and cooperation rate. Falls back to a one-line nudge when no games
+ * have been played yet.
  */
 
 import React from "react";
 import { useGameStats, type GameStats } from "../../hooks/useGameStats";
+import "../../styles/zk.css";
 
 interface StatsDisplayProps {
   /** Optional override (e.g. for testing). Defaults to live localStorage. */
@@ -22,39 +23,21 @@ const formatXLM = (xlm: number): string => {
 const StatTile: React.FC<{
   label: string;
   value: string;
-  accent?: string;
-}> = ({ label, value, accent }) => (
-  <div
-    style={{
-      textAlign: "center",
-      padding: "12px 8px",
-      borderRadius: "var(--radius-sm)",
-      background: "rgba(255,255,255,0.04)",
-      border: "1px solid rgba(255,255,255,0.06)",
-    }}
-  >
+  tone?: "up" | "down";
+}> = ({ label, value, tone }) => (
+  <div className="zk-stat">
     <div
-      style={{
-        fontFamily: "var(--font-display)",
-        fontSize: "var(--text-xl)",
-        color: accent || "var(--text-primary)",
-        lineHeight: 1.1,
-      }}
+      className={
+        tone === "up"
+          ? "zk-stat__num zk-stat__num--up"
+          : tone === "down"
+            ? "zk-stat__num zk-stat__num--down"
+            : "zk-stat__num"
+      }
     >
       {value}
     </div>
-    <div
-      style={{
-        fontFamily: "var(--font-body)",
-        fontSize: "var(--text-xs)",
-        color: "var(--text-muted)",
-        marginTop: "4px",
-        textTransform: "uppercase",
-        letterSpacing: "0.04em",
-      }}
-    >
-      {label}
-    </div>
+    <div className="zk-stat__label">{label}</div>
   </div>
 );
 
@@ -65,96 +48,29 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats }) => {
 
   if (s.totalGames === 0) {
     return (
-      <div
-        className="glass-panel"
-        style={{
-          padding: "28px 24px",
-          marginBottom: "24px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            fontSize: "40px",
-            marginBottom: "10px",
-            filter: "drop-shadow(0 0 16px rgba(102,126,234,0.25))",
-          }}
-        >
-          🪂
-        </div>
-        <h3
-          style={{
-            margin: "0 0 6px",
-            color: "var(--text-primary)",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          Your stats will appear here
-        </h3>
-        <p
-          style={{
-            margin: 0,
-            color: "var(--text-secondary)",
-            fontFamily: "var(--font-body)",
-          }}
-        >
+      <div className="zk-panel zk-panel--centred">
+        <p className="zk-section-title">Your stats will appear here</p>
+        <p className="zk-status-line">
           Play your first Trustfall to start tracking your wins, losses, and
-          cooperation rate.
+          lean-in rate.
         </p>
       </div>
     );
   }
 
-  const xlmAccent =
-    s.totalXlmWon > 0
-      ? "#4ade80"
-      : s.totalXlmWon < 0
-        ? "#f87171"
-        : "var(--text-primary)";
+  const xlmTone =
+    s.totalXlmWon > 0 ? "up" : s.totalXlmWon < 0 ? "down" : undefined;
 
   return (
-    <div
-      className="glass-panel"
-      style={{
-        padding: "20px 24px",
-        marginBottom: "24px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: "14px",
-        }}
-      >
-        <h3
-          style={{
-            margin: 0,
-            color: "var(--text-primary)",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          📊 Your Record
-        </h3>
-        <p
-          style={{
-            margin: 0,
-            color: "var(--text-muted)",
-            fontFamily: "var(--font-body)",
-          }}
-        >
+    <div className="zk-panel">
+      <div className="zk-head">
+        <h3 className="zk-title">Your record</h3>
+        <p className="zk-row__sub">
           {s.totalGames} game{s.totalGames === 1 ? "" : "s"} played
         </p>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(5, 1fr)",
-          gap: "10px",
-        }}
-      >
+      <div className="zk-stats">
         <StatTile label="Total" value={String(s.totalGames)} />
         <StatTile
           label="W / L / T"
@@ -163,21 +79,20 @@ export const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats }) => {
         <StatTile
           label="Net XLM"
           value={formatXLM(s.totalXlmWon)}
-          accent={xlmAccent}
+          tone={xlmTone}
         />
         <StatTile
-          label="Coop Rate"
+          label="Lean-in rate"
           value={`${s.cooperationRate}%`}
-          accent="#4ade80"
+          tone="up"
         />
         <StatTile
-          label="Win Rate"
+          label="Win rate"
           value={
             s.totalGames > 0
               ? `${Math.round((s.wins / s.totalGames) * 100)}%`
               : "—"
           }
-          accent="#667eea"
         />
       </div>
     </div>

@@ -12,43 +12,60 @@
  *     recognizable silhouettes at a glance.
  */
 import React from "react";
+import {
+  POSES,
+  type CharacterColor,
+  type CharacterState,
+  type CharacterSurface,
+} from "./trustFallRig";
 
-export type CharacterState =
-  | "standing"
-  | "falling"
-  | "caught"
-  | "impact"
-  | "thinking"
-  | "celebrating"
-  | "waiting";
-
-export type CharacterColor =
-  | "you"
-  | "opponent"
-  | "neutral"
-  | "cooperator"
-  | "defector";
+// Types only. Re-exporting *values* (POSES, getHandPosition, RIG) from here
+// trips the react-refresh lint rule, so new code imports those from
+// ./trustFallRig directly. These types stay re-exported because a dozen
+// existing screens already import them from this path and moving them is not
+// worth the churn mid-redesign.
+export type {
+  CharacterColor,
+  CharacterState,
+  CharacterSurface,
+} from "./trustFallRig";
 
 interface TrustFallCharacterProps {
   state?: CharacterState;
   color?: CharacterColor;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
   /** Show a speech bubble with text */
   speech?: string;
   /** Label under the character */
   label?: string;
-  /** Mirror the figure horizontally (for right-side actors) */
+  /**
+   * Mirror the figure horizontally. `facing: "left"` is the design-system
+   * spelling; `flip` is kept working because existing callers use it.
+   */
+  facing?: "left" | "right";
+  /** @deprecated Use `facing="left"`. */
   flip?: boolean;
+  /**
+   * The figure is drawn in receipt ink on a receipt, and in the counter's
+   * thread colour on the counter. Only the ink changes.
+   */
+  surface?: CharacterSurface;
   /** Additional className for custom animations */
   className?: string;
 }
 
 const COLOR_MAP: Record<CharacterColor, string> = {
-  you: "#667eea",
-  opponent: "#f0a020",
-  neutral: "#9E9E9E",
-  cooperator: "#4ade80",
-  defector: "#f87171",
+  you: "var(--color-you)",
+  opponent: "var(--color-partner)",
+  neutral: "var(--color-counter-muted)",
+  cooperator: "var(--color-you)",
+  defector: "var(--color-partner)",
+};
+
+/** Ink for the figure itself, picked by surface (design.md §3). */
+const SURFACE_INK: Record<CharacterSurface, string> = {
+  counter: "var(--color-counter-text)",
+  receipt: "var(--color-receipt-ink)",
 };
 
 const SIZE_MAP: Record<string, number> = {
@@ -56,6 +73,12 @@ const SIZE_MAP: Record<string, number> = {
   md: 48,
   lg: 64,
   xl: 96,
+  /**
+   * The scene size. Big enough that two figures' reaching arms can actually
+   * meet on a Held round, which a 96px figure cannot do at any sane gap
+   * (design.md §7: "Palms meet, both supported").
+   */
+  "2xl": 132,
 };
 
 const STATE_ANIMATION: Record<CharacterState, string> = {
@@ -66,117 +89,27 @@ const STATE_ANIMATION: Record<CharacterState, string> = {
   thinking: "tf-sway",
   celebrating: "tf-bounce",
   waiting: "tf-sway",
+  // The lean poses are held, not looped: the moment of choosing is one beat,
+  // and an idle sway would fight the thread. (design.md §8 — one orchestrated
+  // moment per view.)
+  leaning: "",
+  held: "",
+  "holding-back": "",
+  toppled: "tf-impact",
 };
 
-/** Joint angles in degrees. Arms/legs hang along +y at 0deg. */
-interface Pose {
-  body: number; // torso rotation around the hips
-  head: number; // head tilt around the neck
-  lS: number; // left shoulder
-  lE: number; // left elbow
-  rS: number;
-  rE: number;
-  lH: number; // left hip
-  lK: number; // left knee
-  rH: number;
-  rK: number;
-}
+const TRANSITION = `transform 0.5s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1))`;
 
-const POSES: Record<CharacterState, Pose> = {
-  standing: {
-    body: 0,
-    head: 0,
-    lS: -20,
-    lE: -8,
-    rS: 20,
-    rE: 8,
-    lH: -10,
-    lK: 6,
-    rH: 10,
-    rK: -6,
-  },
-  waiting: {
-    body: 0,
-    head: 0,
-    lS: -40,
-    lE: -14,
-    rS: 40,
-    rE: 14,
-    lH: -10,
-    lK: 6,
-    rH: 10,
-    rK: -6,
-  },
-  thinking: {
-    body: 0,
-    head: 8,
-    lS: -20,
-    lE: -10,
-    rS: 42,
-    rE: -88,
-    lH: -10,
-    lK: 6,
-    rH: 10,
-    rK: -6,
-  },
-  falling: {
-    body: 82,
-    head: -18,
-    lS: -150,
-    lE: -25,
-    rS: 150,
-    rE: 25,
-    lH: -28,
-    lK: 40,
-    rH: 12,
-    rK: 30,
-  },
-  caught: {
-    body: -6,
-    head: -4,
-    lS: -70,
-    lE: -25,
-    rS: 70,
-    rE: 25,
-    lH: -8,
-    lK: 4,
-    rH: 8,
-    rK: -4,
-  },
-  celebrating: {
-    body: 0,
-    head: -4,
-    lS: -150,
-    lE: -8,
-    rS: 150,
-    rE: 8,
-    lH: -16,
-    lK: 8,
-    rH: 16,
-    rK: -8,
-  },
-  impact: {
-    body: 88,
-    head: -24,
-    lS: -50,
-    lE: 22,
-    rS: -70,
-    rE: 18,
-    lH: -26,
-    lK: 18,
-    rH: -12,
-    rK: 12,
-  },
-};
-
-const TRANSITION =
-  "transform 0.5s var(--rig-ease, cubic-bezier(.34,1.56,.64,1))";
-
+/**
+ * Reduced motion: poses switch with no transition at all (design.md §8).
+ * Read from CSS in the component so the rule stays in one place and can be
+ * tested by toggling devtools, not by editing props.
+ */
 const joint = (rotation: number): React.CSSProperties => ({
   transform: `rotate(${rotation}deg)`,
   transformOrigin: "0px 0px",
   transformBox: "view-box",
-  transition: TRANSITION,
+  transition: "var(--rig-transition, " + TRANSITION + ")",
 });
 
 export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
@@ -185,19 +118,29 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
   size = "md",
   speech,
   label,
-  flip = false,
+  facing,
+  flip,
+  surface = "counter",
   className = "",
 }) => {
   const dim = SIZE_MAP[size];
   const stroke = color === "neutral" ? 2.5 : 3;
-  const c = COLOR_MAP[color];
+  // `color` picks the thread this figure holds; `surface` picks the ink the
+  // figure itself is drawn in. On a receipt the ink is receipt ink, never a
+  // counter colour (design.md §3, one surface at a time).
+  const thread = COLOR_MAP[color];
+  const c = surface === "receipt" ? SURFACE_INK.receipt : thread;
+  const mirrored = (facing ? facing === "left" : flip) === true;
   const animClass = STATE_ANIMATION[state];
   const p = POSES[state];
 
   const eyes: "happy" | "wide" | "dazed" | "thinking" | "neutral" =
-    state === "caught" || state === "celebrating"
+    state === "caught" ||
+    state === "celebrating" ||
+    state === "held" ||
+    state === "leaning"
       ? "happy"
-      : state === "impact"
+      : state === "impact" || state === "toppled"
         ? "dazed"
         : state === "falling"
           ? "wide"
@@ -205,9 +148,12 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
             ? "thinking"
             : "neutral";
   const mouth: "smile" | "o" | "flat" | "neutral" =
-    state === "caught" || state === "celebrating"
+    state === "caught" ||
+    state === "celebrating" ||
+    state === "held" ||
+    state === "leaning"
       ? "smile"
-      : state === "impact" || state === "falling"
+      : state === "impact" || state === "toppled" || state === "falling"
         ? "o"
         : state === "thinking" || state === "waiting"
           ? "flat"
@@ -261,19 +207,20 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
               bottom: "100%",
               left: "50%",
               transform: "translateX(-50%)",
-              background: "rgba(20, 26, 46, 0.95)",
-              border: `1px solid ${c}40`,
+              // A bubble is read closely, so it sits on receipt stock whatever
+              // the figure is printed on (design.md §2: one surface at a time).
+              background: "var(--color-receipt)",
+              border: `1px solid var(--color-receipt-rule)`,
+              color: "var(--color-receipt-ink)",
               padding: "6px 12px",
-              borderRadius: "12px",
-              fontSize: "12px",
+              borderRadius: "var(--radius-sm)",
+              fontSize: "var(--text-xs)",
               fontFamily: "var(--font-body)",
-              color: "var(--text-primary)",
               maxWidth: "180px",
               textAlign: "center",
               marginBottom: "6px",
-              whiteSpace: "nowrap",
-              boxShadow: `0 4px 16px ${c}30`,
-              animation: "fadeIn 0.3s ease-out",
+              boxShadow: "var(--shadow-receipt)",
+              animation: "fadeIn var(--dur-long) var(--ease-out)",
               zIndex: 10,
             }}
           >
@@ -288,46 +235,52 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
                 height: 0,
                 borderLeft: "5px solid transparent",
                 borderRight: "5px solid transparent",
-                borderTop: `5px solid rgba(20, 26, 46, 0.95)`,
+                borderTop: "5px solid var(--color-receipt)",
               }}
             />
           </div>
         )}
 
-        {/* Thinking bubble */}
+        {/* Thinking bubble — ellipsis, not an emoji */}
         {state === "thinking" && !speech && (
           <div
+            aria-hidden
             style={{
               position: "absolute",
               top: "-8px",
               right: "-12px",
               fontSize: "16px",
+              fontFamily: "var(--font-print, monospace)",
+              color: "var(--color-counter-muted)",
               animation: "tf-sway 2s ease-in-out infinite",
             }}
           >
-            💭
+            …
           </div>
         )}
 
-        {/* Waiting indicator */}
+        {/* Waiting indicator — printed question mark */}
         {state === "waiting" && (
           <div
+            aria-hidden
             style={{
               position: "absolute",
               top: "-10px",
               right: "-8px",
               fontSize: "14px",
+              fontFamily: "var(--font-print, monospace)",
+              color: "var(--color-counter-muted)",
               animation: "tf-waiting-pulse 1.5s ease-in-out infinite",
             }}
           >
-            ❓
+            ?
           </div>
         )}
 
         {/* Jointed stick figure */}
         <div
           style={
-            flip
+            mirrored
               ? { transform: "scaleX(-1)", display: "inline-block" }
               : undefined
           }
@@ -339,7 +292,7 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
             className={`${animClass} ${className}`}
             style={{
               overflow: "visible",
-              filter: `drop-shadow(0 0 8px ${c}40)`,
+              // No glow (design.md §3). The figure is printed, not lit.
             }}
           >
             {/* Whole figure rotates around the hips */}
@@ -348,7 +301,7 @@ export const TrustFallCharacter: React.FC<TrustFallCharacterProps> = ({
                 transform: `rotate(${p.body}deg)`,
                 transformOrigin: "20px 32px",
                 transformBox: "view-box",
-                transition: TRANSITION,
+                transition: "var(--rig-transition, " + TRANSITION + ")",
               }}
             >
               {/* Torso */}

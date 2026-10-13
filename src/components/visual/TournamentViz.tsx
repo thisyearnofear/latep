@@ -1,19 +1,24 @@
 /**
  * TournamentViz — Animated population visualization for tournament mode.
  *
- * Renders a horizontal bar for each strategy in the population. Bar widths are
- * proportional to each strategy's count and animate via GSAP whenever the
- * population changes. The current generation is displayed at the top.
+ * Renders a horizontal printed bar for each strategy in the population.
+ * Bar widths are proportional to each strategy's count and animate via GSAP
+ * whenever the population changes. The current generation is displayed at
+ * the top. Strategies are told apart by name plus thread pattern — never
+ * nine colours (design.md §6).
  */
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 
+import "../../styles/tournament.css";
+
 interface PopulationEntry {
   strategyId: string;
   name: string;
-  emoji: string;
-  color: string;
+  pattern: string;
+  /** Index into the chart tints — becomes the `chart-tint-N` class. */
+  tint: number;
   count: number;
 }
 
@@ -86,113 +91,46 @@ const TournamentViz: React.FC<TournamentVizProps> = ({
     else countsRef.current.delete(id);
   };
 
-  const headerStyle: React.CSSProperties = {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    marginBottom: compact ? 8 : 16,
-  };
-
-  const generationStyle: React.CSSProperties = {
-    fontFamily: "var(--font-display)",
-    fontSize: compact ? "1rem" : "1.25rem",
-    color: "var(--text-primary)",
-    margin: 0,
-  };
-
-  const totalStyle: React.CSSProperties = {
-    fontFamily: "var(--font-body)",
-    fontSize: "0.8rem",
-    color: "var(--text-muted)",
-  };
-
-  const rowStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: compact ? 8 : 12,
-    marginBottom: compact ? 6 : 10,
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    width: compact ? "min(140px, 36vw)" : 120,
-    flexShrink: 0,
-    fontFamily: "var(--font-body)",
-    fontSize: compact ? "0.875rem" : "0.85rem",
-    color: "var(--text-secondary)",
-  };
-
-  const trackStyle: React.CSSProperties = {
-    flex: 1,
-    height: compact ? 12 : 22,
-    background: "var(--bg-glass-light)",
-    borderRadius: 11,
-    overflow: "hidden",
-    position: "relative",
-  };
-
-  const barStyle = (color: string): React.CSSProperties => ({
-    height: "100%",
-    width: 0,
-    background: `linear-gradient(90deg, ${color}cc, ${color})`,
-    borderRadius: 11,
-    boxShadow: `0 0 12px ${color}55`,
-  });
-
-  const countStyle: React.CSSProperties = {
-    width: compact ? 28 : 40,
-    textAlign: "right",
-    fontFamily: "var(--font-mono, monospace)",
-    fontSize: "0.85rem",
-    color: "var(--text-primary)",
-    flexShrink: 0,
-  };
-
-  const emptyStyle: React.CSSProperties = {
-    padding: "32px 16px",
-    textAlign: "center",
-    fontFamily: "var(--font-body)",
-    fontSize: "0.9rem",
-    color: "var(--text-muted)",
-    fontStyle: "italic",
-  };
-
   return (
     <div className={compact ? "tournament-viz-compact" : undefined}>
-      <div style={headerStyle}>
-        <h4 style={generationStyle}>Generation {generation}</h4>
-        <span style={totalStyle}>{totalCount} agents</span>
-      </div>
+      <div className="till-roll receipt receipt-edge">
+        <div className="tviz-head">
+          <h4 className="tviz-gen">Generation {generation}</h4>
+          <span className="tviz-total">{totalCount} agents</span>
+        </div>
 
-      {isEmpty ? (
-        <div style={emptyStyle}>
-          No agents remaining. The population has gone extinct.
-        </div>
-      ) : (
-        <div>
-          {population.map((entry) => (
-            <div key={entry.strategyId} style={rowStyle}>
-              <div style={labelStyle}>
-                <span style={{ fontSize: compact ? "1rem" : "1.1rem" }}>
-                  {entry.emoji}
+        {isEmpty ? (
+          <div className="tviz-empty">
+            No agents remaining. The population has gone extinct.
+          </div>
+        ) : (
+          <div>
+            {population.map((entry) => (
+              <div key={entry.strategyId} className="tviz-row">
+                <div className="tviz-label">
+                  <span
+                    className={`thread-key thread-key--${entry.pattern} chart-tint-${entry.tint}`}
+                    aria-hidden="true"
+                  />
+                  <span>{entry.name}</span>
+                </div>
+                <div className="tviz-track">
+                  <div
+                    ref={setBarRef(entry.strategyId)}
+                    className={`tviz-bar till-roll__fill--${entry.pattern} chart-tint-${entry.tint}`}
+                  />
+                </div>
+                <span
+                  ref={setCountRef(entry.strategyId)}
+                  className="tviz-count"
+                >
+                  {entry.count}
                 </span>
-                <span>{entry.name}</span>
               </div>
-              <div style={trackStyle}>
-                <div
-                  ref={setBarRef(entry.strategyId)}
-                  style={barStyle(entry.color)}
-                />
-              </div>
-              <span ref={setCountRef(entry.strategyId)} style={countStyle}>
-                {entry.count}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

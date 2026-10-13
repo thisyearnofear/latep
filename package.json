@@ -12,6 +12,10 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier . --write",
+    "design:check": "node scripts/design-check.cjs",
+    "design:check:write": "node scripts/design-check.cjs --write",
+    "check:hidden-moves": "node scripts/check-hidden-moves.cjs",
+    "shots": "node scripts/shots.cjs",
     "prepare": "husky",
     "demo:capture": "playwright test --project=demo-capture"
   },
@@ -32,6 +36,7 @@
     "gsap": "^3.15.0",
     "howler": "^2.2.4",
     "lossless-json": "^4.2.0",
+    "lucide-react": "^1.55.0",
     "poseidon-lite": "^0.3.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

@@ -7,39 +7,18 @@
 
 import React from "react";
 import { TournamentMode } from "../components/slides/TournamentMode";
+import "../styles/tournament.css";
 
 const TournamentPage: React.FC = () => {
   return (
-    <div
-      style={{
-        maxWidth: "900px",
-        margin: "0 auto",
-        padding: "40px 20px 80px",
-      }}
-    >
-      <div style={{ marginBottom: "32px", textAlign: "center" }}>
-        <h2
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "var(--text-3xl)",
-            marginBottom: "8px",
-          }}
-        >
-          🏆 The Tournament
-        </h2>
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-lg)",
-            color: "var(--text-secondary)",
-            maxWidth: "560px",
-            margin: "0 auto",
-          }}
-        >
+    <div className="till-page">
+      <header className="till-page__head">
+        <h1 className="till-page__title">The Tournament</h1>
+        <p className="till-page__lede">
           Watch trust evolve. All 9 strategies compete in a round-robin
           tournament — the weak are eliminated, the strong reproduce.
         </p>
-      </div>
+      </header>
       <TournamentMode />
     </div>
   );

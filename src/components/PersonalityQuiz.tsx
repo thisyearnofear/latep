@@ -1,9 +1,9 @@
 /**
  * PersonalityQuiz — an interactive onboarding quiz that builds a "trust profile".
  *
- * Inspired by Duolingo's mascot-guided onboarding and the dating app's
- * personality profile builder. The stick figure mascot guides users
- * through 5 questions, then reveals their trust personality.
+ * The stick-figure rig guides users through 5 questions, then reveals their
+ * trust personality. Everything you read closely sits on a receipt (design.md
+ * §2); the scrim is the counter. Vocabulary comes from design.md §7.
  *
  * Flow:
  *   1. Mascot welcomes user
@@ -18,9 +18,20 @@
  */
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  Brain,
+  Shield,
+  Shuffle,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
 import { TrustFallCharacter, type CharacterState } from "./TrustFallCharacter";
+import { Receipt } from "./receipt";
 import { useFirstRun } from "../hooks/useFirstRun";
 import AudioManager from "./AudioManager";
+import "../styles/ui.css";
+import "../styles/quiz.css";
 
 const PROFILE_KEY = "tf_trust_profile";
 
@@ -36,7 +47,6 @@ interface QuizQuestion {
   mascotState: CharacterState;
   options: {
     label: string;
-    emoji: string;
     value: "C" | "D" | "neutral";
     profileWeight: Partial<Record<TrustProfile, number>>;
   }[];
@@ -50,19 +60,16 @@ const QUESTIONS: QuizQuestion[] = [
     options: [
       {
         label: "Of course — I'd catch them",
-        emoji: "🤝",
         value: "C",
         profileWeight: { cooperator: 2, strategist: 1 },
       },
       {
         label: "Maybe — depends on their vibe",
-        emoji: "🤔",
         value: "neutral",
         profileWeight: { strategist: 2, survivor: 1 },
       },
       {
         label: "I'd step aside — prove yourself first",
-        emoji: "⚔️",
         value: "D",
         profileWeight: { survivor: 2, wildcard: 1 },
       },
@@ -76,19 +83,16 @@ const QUESTIONS: QuizQuestion[] = [
     options: [
       {
         label: "Forgive — maybe they had a reason",
-        emoji: "🤝",
         value: "C",
         profileWeight: { cooperator: 2, wildcard: 1 },
       },
       {
         label: "Tit for tat — step aside next time",
-        emoji: "⚖️",
         value: "neutral",
         profileWeight: { strategist: 3 },
       },
       {
         label: "Never trust them again",
-        emoji: "🚫",
         value: "D",
         profileWeight: { survivor: 2, strategist: 1 },
       },
@@ -102,19 +106,16 @@ const QUESTIONS: QuizQuestion[] = [
     options: [
       {
         label: "Excited — trust is worth proving",
-        emoji: "🤩",
         value: "C",
         profileWeight: { cooperator: 2, wildcard: 1 },
       },
       {
         label: "Cautious — I'll think carefully",
-        emoji: "🧐",
         value: "neutral",
         profileWeight: { strategist: 2, survivor: 1 },
       },
       {
-        label: "Nervous — I might defect",
-        emoji: "😰",
+        label: "Nervous — I might hold back",
         value: "D",
         profileWeight: { survivor: 2 },
       },
@@ -126,20 +127,17 @@ const QUESTIONS: QuizQuestion[] = [
     mascotState: "thinking",
     options: [
       {
-        label: "Always cooperate — build trust",
-        emoji: "🤝",
+        label: "Always lean in — build trust",
         value: "C",
         profileWeight: { cooperator: 3 },
       },
       {
         label: "Start nice, mirror their moves",
-        emoji: "🪞",
         value: "neutral",
         profileWeight: { strategist: 3 },
       },
       {
         label: "Mix it up — keep them guessing",
-        emoji: "🎲",
         value: "D",
         profileWeight: { wildcard: 3 },
       },
@@ -153,19 +151,16 @@ const QUESTIONS: QuizQuestion[] = [
     options: [
       {
         label: "Be more forgiving — it might be noise",
-        emoji: "🌊",
         value: "C",
         profileWeight: { cooperator: 2, strategist: 1 },
       },
       {
         label: "Account for it — but stay sharp",
-        emoji: "📊",
         value: "neutral",
         profileWeight: { strategist: 2, survivor: 1 },
       },
       {
-        label: "Assume the worst — defect anyway",
-        emoji: "🛡️",
+        label: "Assume the worst — hold back anyway",
         value: "D",
         profileWeight: { survivor: 2, wildcard: 1 },
       },
@@ -177,42 +172,37 @@ const PROFILE_INFO: Record<
   TrustProfile,
   {
     name: string;
-    emoji: string;
+    Icon: LucideIcon;
     description: string;
-    color: string;
     state: CharacterState;
   }
 > = {
   cooperator: {
     name: "The Cooperator",
-    emoji: "🤝",
+    Icon: Users,
     description:
-      "You lead with trust. You believe cooperation is the best strategy, even when it's risky. The world needs more people like you — but watch out for those who'd take advantage.",
-    color: "var(--accent-cooperate)",
+      "You lead with trust. You believe leaning in is the best strategy, even when it's risky. The world needs more people like you — but watch out for those who'd take advantage.",
     state: "caught",
   },
   strategist: {
     name: "The Strategist",
-    emoji: "🧠",
+    Icon: Brain,
     description:
       "You think before you act. You mirror, you adapt, you play the long game. Tit for tat is your natural rhythm — fair but not naive.",
-    color: "var(--accent-violet)",
     state: "thinking",
   },
   survivor: {
     name: "The Survivor",
-    emoji: "🛡️",
+    Icon: Shield,
     description:
       "You protect yourself first. Trust is earned, not given. In a world of betrayal, you'd rather be safe than sorry — and that's a valid choice.",
-    color: "var(--accent-defect)",
     state: "standing",
   },
   wildcard: {
     name: "The Wildcard",
-    emoji: "🎲",
+    Icon: Shuffle,
     description:
-      "Unpredictable, adaptive, and a little chaotic. You keep everyone guessing — sometimes you cooperate, sometimes you defect. No one knows what you'll do next.",
-    color: "var(--accent-warm)",
+      "Unpredictable, adaptive, and a little chaotic. You keep everyone guessing — sometimes you lean in, sometimes you hold back. No one knows what you'll do next.",
     state: "celebrating",
   },
 };
@@ -327,141 +317,63 @@ export const PersonalityQuiz: React.FC<{
   };
 
   const currentQuestion = QUESTIONS[step];
-  const progress = ((step + 1) / QUESTIONS.length) * 100;
+  const progress = (step + 1) / QUESTIONS.length;
 
   // Result screen
   if (showResult && profile) {
     const info = PROFILE_INFO[profile];
     return (
-      <div
-        onClick={dismiss}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(0,0,0,0.8)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 950,
-          padding: "20px",
-        }}
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            background: "var(--bg-glass)",
-            backdropFilter: "blur(24px) saturate(180%)",
-            WebkitBackdropFilter: "blur(24px) saturate(180%)",
-            border: `1px solid ${info.color}40`,
-            borderRadius: "var(--radius-xl)",
-            padding: "40px",
-            maxWidth: "480px",
-            width: "100%",
-            textAlign: "center",
-            boxShadow: `var(--shadow-lg), 0 0 40px ${info.color}30`,
-          }}
-        >
-          {/* Mascot reveal */}
-          <div
-            style={{
-              marginBottom: "20px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <TrustFallCharacter
-              state={info.state}
-              color={
-                profile === "cooperator"
-                  ? "cooperator"
-                  : profile === "survivor"
-                    ? "defector"
-                    : profile === "wildcard"
-                      ? "opponent"
-                      : "you"
-              }
-              size="xl"
-              speech={info.emoji}
-            />
-          </div>
+      <div className="quiz-scrim" onClick={dismiss}>
+        <div className="quiz-ticket" onClick={(e) => e.stopPropagation()}>
+          <Receipt title="Trust profile">
+            {/* Rig reveal — on receipt stock, so the figure prints in ink. */}
+            <div className="quiz-figure">
+              <TrustFallCharacter
+                state={info.state}
+                color={
+                  profile === "cooperator"
+                    ? "cooperator"
+                    : profile === "survivor"
+                      ? "defector"
+                      : profile === "wildcard"
+                        ? "opponent"
+                        : "you"
+                }
+                size="xl"
+                surface="receipt"
+              />
+            </div>
 
-          <h2
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-3xl)",
-              color: info.color,
-              margin: "0 0 16px",
-            }}
-          >
-            {info.name}
-          </h2>
+            <h2 className="quiz-result__name">
+              <info.Icon size={20} aria-hidden className="quiz-result__icon" />
+              {info.name}
+            </h2>
 
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-base)",
-              color: "var(--text-secondary)",
-              lineHeight: 1.6,
-              margin: "0 0 28px",
-            }}
-          >
-            {info.description}
-          </p>
+            <p className="quiz-result__description">{info.description}</p>
 
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-muted)",
-              margin: "0 0 24px",
-            }}
-          >
-            Now let's see how your strategy plays out against 9 AI opponents...
-          </p>
+            <p className="quiz-result__helper">
+              Now let&rsquo;s see how your strategy plays out against 9 AI
+              opponents…
+            </p>
 
-          <div
-            style={{ display: "flex", gap: "12px", justifyContent: "center" }}
-          >
-            <button
-              type="button"
-              onClick={dismiss}
-              style={{
-                background: "transparent",
-                color: "var(--text-secondary)",
-                border: "1px solid var(--border-glass)",
-                borderRadius: "var(--radius-sm)",
-                padding: "10px 20px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                cursor: "pointer",
-              }}
-            >
-              Skip for now
-            </button>
-            <button
-              type="button"
-              onClick={handleFinish}
-              style={{
-                background: info.color,
-                color: "white",
-                border: "none",
-                borderRadius: "var(--radius-sm)",
-                padding: "10px 24px",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-sm)",
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: `0 4px 16px ${info.color}40`,
-              }}
-            >
-              Start Learning →
-            </button>
-          </div>
+            <div className="quiz-actions">
+              <button
+                type="button"
+                onClick={dismiss}
+                className="quiz-skip"
+              >
+                Skip for now
+              </button>
+              <button
+                type="button"
+                onClick={handleFinish}
+                className="ui-button ui-button--on-receipt"
+              >
+                Start learning
+                <ArrowRight size={18} aria-hidden />
+              </button>
+            </div>
+          </Receipt>
         </div>
       </div>
     );
@@ -469,147 +381,49 @@ export const PersonalityQuiz: React.FC<{
 
   // Quiz question screen
   return (
-    <div
-      onClick={dismiss}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0,0,0,0.8)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 950,
-        padding: "20px",
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: "var(--bg-glass)",
-          backdropFilter: "blur(24px) saturate(180%)",
-          WebkitBackdropFilter: "blur(24px) saturate(180%)",
-          border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-xl)",
-          padding: "40px",
-          maxWidth: "520px",
-          width: "100%",
-          boxShadow: "var(--shadow-lg), var(--shadow-glow-violet)",
-        }}
-      >
-        {/* Progress bar */}
-        <div
-          style={{
-            height: "4px",
-            background: "var(--bg-glass-light)",
-            borderRadius: "2px",
-            marginBottom: "28px",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              width: `${progress}%`,
-              height: "100%",
-              background:
-                "linear-gradient(90deg, var(--accent-violet), var(--accent-warm))",
-              borderRadius: "2px",
-              transition: "width 0.4s var(--ease-out)",
-            }}
-          />
-        </div>
+    <div className="quiz-scrim" onClick={dismiss}>
+      <div className="quiz-ticket" onClick={(e) => e.stopPropagation()}>
+        <Receipt title="Trust quiz">
+          {/* Progress — the fill scales by the dynamic CSS variable only. */}
+          <div className="quiz-progress">
+            <div
+              className="quiz-progress__fill"
+              style={{ "--quiz-progress": progress } as React.CSSProperties}
+            />
+          </div>
 
-        {/* Mascot + question */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <div
-            style={{
-              marginBottom: "16px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
+          {/* Mascot + question */}
+          <div className="quiz-figure">
             <TrustFallCharacter
               state={currentQuestion.mascotState}
               color="you"
               size="lg"
               speech={`Q${step + 1} of ${QUESTIONS.length}`}
+              surface="receipt"
             />
           </div>
-          <h3
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-xl)",
-              color: "var(--text-primary)",
-              margin: "0",
-              lineHeight: 1.4,
-            }}
-          >
-            {currentQuestion.prompt}
-          </h3>
-        </div>
 
-        {/* Answer options */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {currentQuestion.options.map((option) => (
-            <button
-              key={option.label}
-              type="button"
-              onClick={() => handleAnswer(option.value)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "14px",
-                padding: "16px 20px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--bg-glass-light)",
-                border: "1px solid var(--border-glass)",
-                color: "var(--text-primary)",
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--text-base)",
-                cursor: "pointer",
-                textAlign: "left",
-                transition: "all 0.2s var(--ease-out)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(102, 126, 234, 0.1)";
-                e.currentTarget.style.borderColor = "var(--accent-violet)";
-                e.currentTarget.style.transform = "translateX(4px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "var(--bg-glass-light)";
-                e.currentTarget.style.borderColor = "var(--border-glass)";
-                e.currentTarget.style.transform = "translateX(0)";
-              }}
-            >
-              <span style={{ fontSize: "24px", flexShrink: 0 }}>
-                {option.emoji}
-              </span>
-              <span>{option.label}</span>
-            </button>
-          ))}
-        </div>
+          <h3 className="quiz-prompt">{currentQuestion.prompt}</h3>
 
-        {/* Skip */}
-        <button
-          type="button"
-          onClick={dismiss}
-          style={{
-            display: "block",
-            margin: "20px auto 0",
-            background: "none",
-            border: "none",
-            color: "var(--text-muted)",
-            cursor: "pointer",
-            fontSize: "var(--text-xs)",
-            fontFamily: "var(--font-body)",
-          }}
-        >
-          Skip quiz
-        </button>
+          {/* Answer options */}
+          <div className="quiz-options">
+            {currentQuestion.options.map((option) => (
+              <button
+                key={option.label}
+                type="button"
+                onClick={() => handleAnswer(option.value)}
+                className="quiz-option"
+              >
+                <span>{option.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Skip */}
+          <button type="button" onClick={dismiss} className="quiz-dismiss">
+            Skip quiz
+          </button>
+        </Receipt>
       </div>
     </div>
   );

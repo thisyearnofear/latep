@@ -2,9 +2,9 @@
   min-height: 44px;
   padding: 10px 18px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-glass-hover);
-  background: var(--bg-glass-light);
-  color: var(--text-primary);
+  border: 1px solid var(--color-counter-muted);
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 600;
@@ -21,7 +21,7 @@
 }
 
 .learning-button:focus-visible {
-  outline: 2px solid var(--accent-warm);
+  outline: 2px solid var(--color-partner);
   outline-offset: 3px;
 }
 
@@ -31,9 +31,47 @@
 }
 
 .learning-button-primary {
-  background: color-mix(in srgb, var(--accent-violet) 82%, white);
-  border-color: transparent;
-  color: var(--bg-deep);
+  background: var(--color-receipt);
+  border: 2px solid var(--color-receipt-ink);
+  color: var(--color-receipt-ink);
+}
+
+.learning-button-primary:not(:disabled):hover {
+  background: var(--color-receipt-2);
+}
+
+/* --- inside the receipt -------------------------------------------------
+   A button on the counter is a receipt-stock tile; on a receipt it is the
+   inverse — an ink fill with stock text (design.md §9). */
+.lesson-copy .learning-button {
+  align-self: flex-start;
+  background: var(--color-receipt-ink);
+  border-color: var(--color-receipt-ink);
+  color: var(--color-receipt);
+}
+
+.lesson-copy .learning-button:not(:disabled):hover {
+  opacity: 0.88;
+}
+
+.lesson-copy .learning-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* A details disclosure on receipt stock: a dashed rule and receipt ink, not
+   the counter's muted grey. */
+.lesson-copy .lesson-details > summary {
+  color: var(--color-receipt-ink);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+}
+
+.lesson-copy .lesson-details > summary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .learning-round {
@@ -51,13 +89,13 @@
 }
 
 .tutorial-round-panel .trust-btn[aria-pressed="true"] {
-  box-shadow: inset 0 0 0 2px var(--accent-warm);
+  box-shadow: inset 0 0 0 2px var(--color-partner);
 }
 
 .tutorial-selection {
   margin: -4px 0 16px;
   font-size: var(--text-sm);
-  color: var(--text-primary);
+  color: var(--color-counter-text);
   text-align: center;
 }
 
@@ -77,7 +115,7 @@
   display: none;
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
   align-items: center;
   gap: 8px;
 }
@@ -86,9 +124,9 @@
   font-family: var(--font-body);
   padding: 8px;
   max-width: 100%;
-  background: var(--bg-glass-light);
-  color: var(--text-primary);
-  border: 1px solid var(--border-glass);
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+  border: 1px solid var(--color-counter-rule);
   border-radius: var(--radius-sm);
 }
 
@@ -120,7 +158,7 @@
 }
 
 .learning-details [tabindex="0"]:focus-visible {
-  outline: 2px solid var(--accent-warm);
+  outline: 2px solid var(--color-partner);
   outline-offset: 3px;
 }
 
@@ -169,9 +207,13 @@
 
 .tutorial-round-panel {
   padding: clamp(16px, 3vw, 28px);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-xl);
-  background: linear-gradient(180deg, var(--bg-mid) 0%, var(--bg-deep) 38%);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    180deg,
+    var(--color-counter-2) 0%,
+    var(--color-counter) 38%
+  );
   margin-bottom: 24px;
 }
 
@@ -180,14 +222,14 @@
   justify-content: space-between;
   gap: 12px;
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
   margin-bottom: 12px;
 }
 
 .tutorial-settings,
 .learning-details {
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
   margin: 24px 0;
   padding: 16px;
   overflow-x: auto;
@@ -196,13 +238,13 @@
 .tutorial-settings summary,
 .learning-details summary {
   cursor: pointer;
-  color: var(--text-primary);
+  color: var(--color-counter-text);
   font-weight: 600;
 }
 
 .tutorial-settings summary:focus-visible,
 .learning-details summary:focus-visible {
-  outline: 2px solid var(--accent-warm);
+  outline: 2px solid var(--color-partner);
   outline-offset: 3px;
 }
 
@@ -256,9 +298,9 @@
 
 .narrative-panel {
   padding: 16px;
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  background: rgba(10, 14, 26, 0.85);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-scrim);
   overflow-x: auto;
 }
 
@@ -270,7 +312,7 @@
   margin: 8px 0 0;
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
   text-align: center;
 }
 
@@ -289,7 +331,7 @@
 /* --- Compact lesson player ------------------------------------------------ */
 
 .lesson-player {
-  background: var(--bg-deep);
+  background: var(--color-counter);
   width: 100%;
   min-height: 0;
   --lesson-scene-height: 180px;
@@ -322,7 +364,7 @@
 .lesson-position {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
   white-space: nowrap;
 }
 
@@ -340,9 +382,9 @@
   max-width: 300px;
   min-width: 0;
   width: 100%;
-  background: var(--bg-glass-light);
-  color: var(--text-primary);
-  border: 1px solid var(--border-glass);
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+  border: 1px solid var(--color-counter-rule);
   border-radius: var(--radius-sm);
 }
 
@@ -377,7 +419,7 @@
   font-family: var(--font-display);
   font-size: clamp(28px, 3vw, 40px);
   line-height: 1.1;
-  color: var(--text-primary);
+  color: var(--color-counter-text);
 }
 
 .lesson-heading p {
@@ -386,7 +428,7 @@
   line-height: 1.45;
   margin: 8px 0 0;
   max-width: 66ch;
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
 }
 
 .lesson-body {
@@ -397,12 +439,16 @@
   min-height: 0;
 }
 
+/* The lesson column is the receipt (design.md §2). Everything below is
+   printed ON it, so it all takes receipt tokens — never a counter token, and
+   never a nested receipt. */
 .lesson-copy {
   display: flex;
   flex-direction: column;
   gap: 12px;
   min-width: 0;
   min-height: 0;
+  max-width: none;
 }
 
 .lesson-copy p {
@@ -410,14 +456,57 @@
   font-size: 14px;
   line-height: 1.45;
   margin: 0;
-  color: var(--text-secondary);
+  color: var(--color-receipt-ink);
+  max-width: var(--measure-prose);
 }
 
 .lesson-copy h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-size: var(--text-xl);
-  color: var(--text-primary);
+  font-size: var(--text-lg);
+  color: var(--color-receipt-ink);
+}
+
+/* Grouping inside a receipt is dashed rules and space, never a nested box
+   (design.md §5). */
+.lesson-copy > :is(p, h3, ul, ol, .lesson-details, .epilogue-primitives) + * {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: 12px;
+  margin-top: 0;
+}
+
+.lesson-copy :is(ul, ol) {
+  margin: 0;
+  padding-left: 1.2em;
+  max-width: var(--measure-prose);
+}
+
+.lesson-copy :is(ul, ol) li {
+  margin-bottom: 6px;
+}
+
+.lesson-copy strong {
+  color: var(--color-receipt-ink);
+}
+
+.lesson-copy em {
+  color: var(--color-receipt-ink);
+}
+
+.lesson-copy a {
+  color: var(--color-receipt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.lesson-copy a:hover {
+  text-decoration-thickness: 2px;
+}
+
+.lesson-copy :focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }
 
 .lesson-visual {
@@ -481,8 +570,8 @@
   max-width: none;
   padding: 12px max(16px, calc((100vw - 1120px) / 2));
   box-sizing: border-box;
-  background: var(--bg-deep);
-  border-top: 1px solid var(--border-glass);
+  background: var(--color-counter);
+  border-top: 1px solid var(--color-counter-rule);
 }
 
 .lesson-action-host {
@@ -506,10 +595,10 @@
 .lesson-dialog {
   width: min(680px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  background: var(--bg-deep);
-  color: var(--text-primary);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-counter);
+  color: var(--color-counter-text);
   padding: 0;
 }
 
@@ -523,7 +612,7 @@
 }
 
 .lesson-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--color-scrim);
 }
 
 .lesson-dialog-header {
@@ -532,14 +621,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid var(--border-glass);
+  border-bottom: 1px solid var(--color-counter-rule);
 }
 
 .lesson-dialog-header h2 {
   margin: 0;
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  color: var(--text-primary);
+  color: var(--color-counter-text);
 }
 
 .lesson-dialog-body {
@@ -549,7 +638,7 @@
 }
 
 .lesson-dialog :is(button, [tabindex]):focus-visible {
-  outline: 2px solid var(--accent-warm);
+  outline: 2px solid var(--color-partner);
   outline-offset: 3px;
 }
 
@@ -604,38 +693,37 @@
 
 /* --- Epilogue: mechanic → primitive map ------------------------------------ */
 
-.epilogue-map {
+/* The epilogue recap: four primitives inside the lesson receipt, grouped with
+   dashed rules rather than nested receipts. */
+.epilogue-primitives {
+  list-style: none;
   margin: 0;
-  display: grid;
-  grid-template-columns: minmax(130px, auto) minmax(0, 1fr);
-  gap: 8px 10px;
-  font-family: var(--font-body);
-  font-size: 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.epilogue-primitives > li {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: 10px;
+}
+
+.epilogue-primitives > li:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.epilogue-what {
+  margin: 6px 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.35;
+  color: var(--color-receipt-faded);
+}
+
+.epilogue-reputation {
+  margin: 0;
+  font-size: var(--text-xs);
   line-height: 1.4;
-  text-align: left;
-}
-
-.epilogue-map dt {
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.epilogue-map dd {
-  margin: 0;
-  color: var(--text-secondary);
-}
-
-@media (max-width: 520px) {
-  .epilogue-map {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
-
-  .epilogue-map dd {
-    margin-bottom: 8px;
-  }
-
-  .epilogue-map dd:last-child {
-    margin-bottom: 0;
-  }
+  color: var(--color-receipt-faded);
 }

@@ -1,5 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from "react";
-import { Button, Text } from "@stellar/design-system";
+import { AlertTriangle } from "lucide-react";
+import { Receipt } from "./receipt";
+import "../styles/ui.css";
 
 interface Props {
   children: ReactNode;
@@ -36,53 +38,32 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            minHeight: "60vh",
-            padding: "40px",
-            textAlign: "center",
-          }}
-        >
-          <div style={{ fontSize: "48px", marginBottom: "20px" }}>
-            {"\u26a0\ufe0f"}
-          </div>
-          <Text
-            as="h2"
-            size="lg"
-            style={{ marginBottom: "10px", color: "var(--text-primary)" }}
-          >
-            Something went wrong
-          </Text>
-          <Text
-            as="p"
-            size="sm"
-            style={{
-              marginBottom: "20px",
-              color: "var(--text-secondary)",
-              maxWidth: "400px",
-            }}
-          >
-            {this.state.error?.message || "An unexpected error occurred."}
-          </Text>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => window.location.reload()}
-          >
-            Reload Page
-          </Button>
-          <Button
-            variant="tertiary"
-            size="md"
-            onClick={this.handleReset}
-            style={{ marginTop: "10px" }}
-          >
-            Try Again
-          </Button>
+        <div className="ui-error">
+          <Receipt title="Error">
+            <div className="ui-error__body">
+              <AlertTriangle size={32} className="ui-error__icon" aria-hidden />
+              <h2 className="ui-error__title">Something went wrong</h2>
+              <p className="ui-error__message">
+                {this.state.error?.message || "An unexpected error occurred."}
+              </p>
+              <div className="ui-error__actions">
+                <button
+                  type="button"
+                  className="ui-button ui-button--on-receipt"
+                  onClick={() => window.location.reload()}
+                >
+                  Reload page
+                </button>
+                <button
+                  type="button"
+                  className="ui-button ui-button--on-receipt"
+                  onClick={this.handleReset}
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
+          </Receipt>
         </div>
       );
     }

@@ -15,6 +15,8 @@ import { TrustStage } from "../visual/TrustStage";
 import { LessonLayout } from "../learning/LessonLayout";
 import { LessonActions } from "../learning/LessonActions";
 import { LessonDetails } from "../learning/LessonDetails";
+import { ReceiptLine } from "../receipt";
+import "../../styles/slide-noise.css";
 import {
   createStrategy,
   playRepeatedGame,
@@ -92,17 +94,10 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
   return (
     <LessonLayout
       title="The Noise"
-      description="Even a cooperative choice can be changed by noise."
+      description="Even a choice to lean in can be received as holding back."
       visual={
         <>
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-muted)",
-              marginBottom: "8px",
-            }}
-          >
+          <p className="noise-caption">
             {result
               ? "Final round of the 50-round simulation"
               : "Wind risk is a setting, not a guaranteed mistake."}
@@ -127,51 +122,20 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
         </>
       }
     >
-      {/* Noise slider */}
-      <div
-        style={{
-          padding: "16px",
-          background: "rgba(10, 14, 26, 0.85)",
-          border: "1px solid var(--border-glass)",
-          borderRadius: "var(--radius-lg)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "8px",
-          }}
-        >
-          <label
-            htmlFor="lesson-noise"
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-muted)",
-              margin: 0,
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-            }}
-          >
-            Noise Level
+      {/* Noise slider — printed on the lesson receipt, so it is a labelled
+          control and a dashed rule, never a panel inside the receipt. */}
+      <div className="noise-control">
+        <div className="noise-control-head">
+          <label htmlFor="lesson-noise" className="noise-label">
+            Noise level
           </label>
-          <p
-            style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "var(--text-xl)",
-              color: "var(--accent-warm)",
-              margin: 0,
-            }}
-          >
-            {Math.round(noise * 100)}%
-          </p>
+          <p className="noise-value">{Math.round(noise * 100)}%</p>
         </div>
 
         <input
           id="lesson-noise"
           type="range"
+          className="noise-slider"
           min="0"
           max="0.5"
           step="0.05"
@@ -186,143 +150,29 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
             setRunning(false);
             setResult(null);
           }}
-          style={{
-            width: "100%",
-            height: "8px",
-            borderRadius: "4px",
-            background: `linear-gradient(90deg, var(--accent-cooperate) 0%, var(--accent-warm) ${noise * 200}%, rgba(255,255,255,0.12) ${noise * 200}%)`,
-            appearance: "none",
-            outline: "none",
-            cursor: "pointer",
-          }}
         />
 
-        <p
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--text-xs)",
-            color: "var(--text-muted)",
-            margin: "8px 0 0",
-          }}
-        >
-          Chance that each move is flipped.
-        </p>
+        <p className="noise-hint">Chance that each move is flipped.</p>
       </div>
 
       {/* Results */}
       {result && (
-        <div
-          className="lesson-result"
-          style={{
-            padding: "16px",
-            background: "rgba(10, 14, 26, 0.85)",
-            border: `1px solid ${
-              coopPercent > 60
-                ? "rgba(74,222,128,0.3)"
-                : coopPercent > 30
-                  ? "rgba(240,160,32,0.3)"
-                  : "rgba(248,113,113,0.3)"
-            }`,
-            borderRadius: "var(--radius-lg)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "24px",
-            }}
-          >
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-muted)",
-                  margin: 0,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                Cooperation rate
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-2xl)",
-                  color:
-                    coopPercent > 60
-                      ? "var(--accent-cooperate)"
-                      : coopPercent > 30
-                        ? "var(--accent-warm)"
-                        : "var(--accent-defect)",
-                  margin: 0,
-                }}
-              >
-                {coopPercent}%
-              </p>
-            </div>
-            <div>
-              <p
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--text-xs)",
-                  color: "var(--text-muted)",
-                  margin: 0,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                }}
-              >
-                Average total points
-              </p>
-              <p
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-2xl)",
-                  color: "var(--text-primary)",
-                  margin: 0,
-                }}
-              >
-                {scoreLabel}
-              </p>
-            </div>
-          </div>
+        <div className="noise-result">
+          <ReceiptLine label="Leaned in" value={`${coopPercent}%`} />
+          <ReceiptLine label="Average total points" value={scoreLabel} />
 
-          {/* Cooperation bar */}
-          <div
-            style={{
-              marginTop: "12px",
-              height: "6px",
-              borderRadius: "3px",
-              background: "rgba(255,255,255,0.08)",
-              overflow: "hidden",
-            }}
-          >
+          {/* The bar's one dynamic value, passed as a CSS variable. */}
+          <div className="noise-bar">
             <div
-              style={{
-                height: "100%",
-                width: `${coopPercent}%`,
-                background:
-                  coopPercent > 60
-                    ? "var(--accent-cooperate)"
-                    : coopPercent > 30
-                      ? "var(--accent-warm)"
-                      : "var(--accent-defect)",
-                transition: "width 0.6s var(--ease-out)",
-                borderRadius: "3px",
-              }}
+              className="noise-bar-fill"
+              style={
+                { "--bar-scale": coopPercent / 100 } as React.CSSProperties
+              }
             />
           </div>
 
-          <p
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "var(--text-secondary)",
-              margin: "12px 0 0",
-            }}
-          >
-            {`At ${Math.round(result.noise * 100)}% noise risk, this run produced ${coopPercent}% cooperation. Run it again to explore variation.`}
+          <p className="noise-summary">
+            {`At ${Math.round(result.noise * 100)}% noise risk, this run leaned in on ${coopPercent}% of the 100 moves. Run it again to explore variation.`}
           </p>
         </div>
       )}
@@ -343,7 +193,7 @@ export const NoiseSlide: React.FC<SlideProps> = ({ onNext }) => {
           onClick={runSimulation}
           disabled={running}
         >
-          {running ? "Running 50 rounds..." : "Simulate 50 rounds"}
+          {running ? "Running 50 rounds…" : "Simulate 50 rounds"}
         </button>
         {result && (
           <button

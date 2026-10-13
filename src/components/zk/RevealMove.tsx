@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { useWallet } from "../../hooks/useWallet";
 import { useZKDilemma, type GameMove } from "../../hooks/useZKDilemma";
 import { VerifiedOnChainCard } from "./VerifiedOnChainCard";
+import { MOVE_LABEL, MOVE_HELPER } from "../../content/vocabulary";
+import "../../styles/zk.css";
 
 interface RevealMoveProps {
   gameId: number;
@@ -113,17 +115,9 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
 
   if (!isPlayer) {
     return (
-      <div
-        className="glass-panel"
-        style={{
-          borderRadius: "12px",
-          padding: "24px",
-          fontFamily: "var(--font-body)",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-          👀 Spectating — wait for players to reveal their moves
+      <div className="zk-panel zk-panel--centred">
+        <p className="zk-status-line">
+          Spectating — wait for the players to show their hands.
         </p>
       </div>
     );
@@ -131,29 +125,22 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
 
   if (justRevealed) {
     return (
-      <VerifiedOnChainCard
-        hash={revealTxHash}
-        label="🎉 Sealed move opened"
-        sublabel="The contract checked your reveal against your commitment — math, not trust."
-      />
+      <div className="receipt receipt-edge zk-solo-receipt">
+        <VerifiedOnChainCard
+          hash={revealTxHash}
+          label="Sealed move opened"
+          sublabel="The contract checked your reveal against your commitment — math, not trust."
+        />
+      </div>
     );
   }
 
   if (bothRevealed) {
     return (
-      <div
-        className="tf-fade-in-up"
-        style={{
-          background: "rgba(16, 185, 129, 0.08)",
-          borderRadius: "12px",
-          padding: "24px",
-          border: "1px solid rgba(16, 185, 129, 0.35)",
-          fontFamily: "var(--font-body)",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ color: "#10b981", margin: 0, fontWeight: "bold" }}>
-          ✅ Both players have revealed! The game is ready to resolve.
+      <div className="zk-panel zk-panel--centred tf-fade-in-up">
+        <p className="zk-status-line">
+          <strong>Both hands are showing.</strong> Resolve next to settle the
+          round.
         </p>
       </div>
     );
@@ -161,33 +148,18 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
 
   if (hasRevealed) {
     return (
-      <div
-        style={{
-          background: "rgba(59, 130, 246, 0.05)",
-          borderRadius: "12px",
-          padding: "24px",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-          fontFamily: "var(--font-body)",
-          textAlign: "center",
-        }}
-      >
-        <p style={{ color: "#3b82f6", margin: 0, fontWeight: "bold" }}>
-          ✅ Your turn is done — your move is revealed.
+      <div className="zk-panel zk-panel--centred">
+        <p className="zk-status-line">
+          <strong>Your turn is done</strong> — your move is revealed.
         </p>
-        <p
-          style={{
-            color: "var(--text-secondary)",
-            margin: "8px 0 0",
-            fontSize: "14px",
-          }}
-        >
+        <p className="zk-status-line">
           {opponentRevealed
             ? "Both hands are showing — press Resolve next."
-            : "⏳ Waiting for your opponent to show their hand…"}
+            : "Waiting for your opponent to show their hand…"}
         </p>
         {!opponentRevealed && timeRemaining > 0 && (
-          <p style={{ color: "var(--text-secondary)", marginTop: "8px" }}>
-            ⏱️ You can claim forfeit after the deadline (
+          <p className="zk-status-line">
+            You can claim forfeit after the deadline (
             {Math.floor(timeRemaining / 60)}m {timeRemaining % 60}s remaining)
           </p>
         )}
@@ -197,24 +169,9 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
 
   if (isExpired) {
     return (
-      <div
-        style={{
-          background: "rgba(244, 67, 54, 0.05)",
-          borderRadius: "12px",
-          padding: "24px",
-          border: "1px solid rgba(244, 67, 54, 0.2)",
-          fontFamily: "var(--font-body)",
-          textAlign: "center",
-        }}
-      >
-        <p
-          style={{
-            color: "#F44336",
-            margin: 0,
-            fontWeight: "bold",
-          }}
-        >
-          ⏰ Reveal deadline has passed!{" "}
+      <div className="zk-panel zk-panel--centred">
+        <p className="zk-status-line zk-status-line--warn">
+          <strong>The reveal deadline has passed.</strong>{" "}
           {opponentRevealed
             ? "Your opponent can claim forfeit."
             : "You can no longer reveal and forfeit your stake."}
@@ -224,220 +181,96 @@ export const RevealMove: React.FC<RevealMoveProps> = ({
   }
 
   return (
-    <div
-      className="glass-panel"
-      style={{
-        borderRadius: "12px",
-        padding: "24px",
-        fontFamily: "var(--font-body)",
-      }}
-    >
-      <h4
-        style={{
-          margin: "0 0 16px 0",
-          color: "var(--text-primary)",
-          textAlign: "center",
-        }}
-      >
-        🙋 Show Your Hand
-      </h4>
-
-      <p
-        style={{
-          margin: "-8px 0 16px 0",
-          color: "var(--text-secondary)",
-          textAlign: "center",
-          fontSize: "var(--text-sm)",
-        }}
-      >
+    <div className="receipt receipt-edge zk-commit">
+      <h4 className="zk-commit__title">Show your hand</h4>
+      <p className="zk-commit__lede">
         You both reveal your own move. Your secret is already filled in — just
         press the button.
       </p>
 
       {/* Timer */}
       {timeRemaining > 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            marginBottom: "16px",
-            color: timeRemaining < 60 ? "#F44336" : "var(--text-secondary)",
-            fontSize: "14px",
-          }}
+        <p
+          className={
+            timeRemaining < 60 ? "zk-timer zk-timer--late" : "zk-timer"
+          }
         >
-          ⏱️ Time to reveal: {Math.floor(timeRemaining / 60)}m{" "}
-          {timeRemaining % 60}s before you forfeit
-        </div>
+          Time to reveal: {Math.floor(timeRemaining / 60)}m {timeRemaining % 60}
+          s before you forfeit
+        </p>
       )}
 
       {/* Move selection — confirm the move you committed earlier */}
-      <p
-        style={{
-          margin: "0 0 8px 0",
-          color: "var(--text-secondary)",
-          textAlign: "center",
-          fontFamily: "var(--font-body)",
-        }}
-      >
+      <p className="zk-commit__label">
         {selectedMove
           ? "Confirm the move you committed — your nonce proves it matches"
           : "Select the move you committed earlier"}
       </p>
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          marginBottom: "16px",
-          justifyContent: "center",
-        }}
-      >
+      <div className="zk-choices">
         <button
           type="button"
           onClick={() => setSelectedMove("C")}
           disabled={isLoading}
-          style={{
-            flex: 1,
-            padding: "16px",
-            borderRadius: "10px",
-            border:
-              selectedMove === "C"
-                ? "3px solid #4CAF50"
-                : "2px solid var(--border-glass)",
-            background:
-              selectedMove === "C"
-                ? "rgba(76, 175, 80, 0.1)"
-                : "var(--bg-glass-light)",
-            cursor: isLoading ? "not-allowed" : "pointer",
-            transition: "all 0.2s",
-            fontFamily: "var(--font-body)",
-            opacity: isLoading ? 0.6 : 1,
-          }}
+          aria-pressed={selectedMove === "C"}
+          className={
+            selectedMove === "C" ? "zk-move zk-move--picked" : "zk-move"
+          }
         >
-          <div style={{ fontSize: "28px", marginBottom: "4px" }}>🤝</div>
-          <div
-            style={{
-              fontWeight: "bold",
-              color: selectedMove === "C" ? "#4CAF50" : "var(--text-primary)",
-              fontSize: "14px",
-            }}
-          >
-            Cooperate
-          </div>
+          <span className="zk-move__name">{MOVE_LABEL.C}</span>
+          <span className="zk-move__note">{MOVE_HELPER.C}</span>
         </button>
         <button
           type="button"
           onClick={() => setSelectedMove("D")}
           disabled={isLoading}
-          style={{
-            flex: 1,
-            padding: "16px",
-            borderRadius: "10px",
-            border:
-              selectedMove === "D"
-                ? "3px solid #F44336"
-                : "2px solid var(--border-glass)",
-            background:
-              selectedMove === "D"
-                ? "rgba(244, 67, 54, 0.1)"
-                : "var(--bg-glass-light)",
-            cursor: isLoading ? "not-allowed" : "pointer",
-            transition: "all 0.2s",
-            fontFamily: "var(--font-body)",
-            opacity: isLoading ? 0.6 : 1,
-          }}
+          aria-pressed={selectedMove === "D"}
+          className={
+            selectedMove === "D" ? "zk-move zk-move--picked" : "zk-move"
+          }
         >
-          <div style={{ fontSize: "28px", marginBottom: "4px" }}>⚔️</div>
-          <div
-            style={{
-              fontWeight: "bold",
-              color: selectedMove === "D" ? "#F44336" : "var(--text-primary)",
-              fontSize: "14px",
-            }}
-          >
-            Defect
-          </div>
+          <span className="zk-move__name">{MOVE_LABEL.D}</span>
+          <span className="zk-move__note">{MOVE_HELPER.D}</span>
         </button>
       </div>
 
       {/* Nonce input */}
-      <div style={{ marginBottom: "16px" }}>
-        <p
-          style={{
-            margin: "0 0 6px 0",
-            color: "var(--text-primary)",
-            fontWeight: "bold",
-          }}
-        >
-          Your Commitment Nonce
-        </p>
-        <p
-          style={{
-            margin: "0 0 8px 0",
-            color: "var(--text-muted)",
-          }}
-        >
-          Enter the nonce you used when committing (you saved it locally)
+      <div className="zk-field">
+        <label htmlFor={`reveal-nonce-${gameId}`} className="zk-field__label">
+          Your commitment nonce
+        </label>
+        <p className="zk-field__hint">
+          The nonce you used when committing — you saved it locally.
         </p>
         <input
+          id={`reveal-nonce-${gameId}`}
           type="text"
           value={revealNonce}
           onChange={(e) => setRevealNonce(e.target.value)}
-          placeholder="Enter your nonce..."
+          placeholder="Enter your nonce…"
           disabled={isLoading}
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            borderRadius: "8px",
-            border: "1px solid var(--border-glass)",
-            fontFamily: "monospace",
-            fontSize: "14px",
-            boxSizing: "border-box",
-          }}
+          className="zk-input"
         />
       </div>
 
       {txError && (
-        <p
-          style={{
-            color: "#F44336",
-            marginBottom: "12px",
-            textAlign: "center",
-          }}
-        >
-          ⚠️ {txError}
+        <p className="zk-error" role="alert">
+          {txError}
         </p>
       )}
 
       {error && (
-        <p
-          style={{
-            color: "#F44336",
-            marginBottom: "12px",
-            textAlign: "center",
-          }}
-        >
-          ⚠️ {error}
+        <p className="zk-error" role="alert">
+          {error}
         </p>
       )}
 
       <button
         type="button"
-        className="tf-cta-pulse"
         onClick={() => void handleReveal()}
         disabled={!selectedMove || !revealNonce || isLoading}
-        style={{
-          background: "var(--accent-violet)",
-          color: "white",
-          border: "none",
-          borderRadius: "var(--radius-sm)",
-          padding: "12px 16px",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--text-base)",
-          fontWeight: 700,
-          cursor: "pointer",
-          width: "100%",
-        }}
+        className="till-button till-button--primary zk-submit"
       >
-        {isLoading ? "📡 Revealing..." : "🔓 Show My Hand"}
+        {isLoading ? "Revealing…" : "Show my hand"}
       </button>
     </div>
   );

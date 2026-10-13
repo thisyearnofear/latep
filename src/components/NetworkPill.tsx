@@ -1,7 +1,8 @@
 import React from "react";
-import { Icon } from "@stellar/design-system";
+import { AlertTriangle } from "lucide-react";
 import { useWallet } from "../hooks/useWallet";
 import { stellarNetwork } from "../contracts/util";
+import "../styles/ui.css";
 
 // Format network name with first letter capitalized
 const formatNetworkName = (name: string) =>
@@ -12,9 +13,6 @@ const formatNetworkName = (name: string) =>
 
 const appNetwork = formatNetworkName(stellarNetwork);
 
-const bgColor = "#F0F2F5";
-const textColor = "#4A5362";
-
 const NetworkPill: React.FC = () => {
   const { network, address } = useWallet();
 
@@ -23,32 +21,20 @@ const NetworkPill: React.FC = () => {
   const isNetworkMismatch = walletNetwork !== appNetwork;
 
   let title = "";
-  let color = "#2ED06E";
   if (!address) {
     title = "Connect your wallet using this network.";
-    color = "#C1C7D0";
   } else if (isNetworkMismatch) {
     title = `Wallet is on ${walletNetwork}, connect to ${appNetwork} instead.`;
-    color = "#FF3B30";
   }
 
+  // The mismatch carries an icon and a tooltip, not just a colour: an outcome
+  // never reads from colour alone (design.md §3).
   return (
     <div
-      style={{
-        backgroundColor: bgColor,
-        color: textColor,
-        padding: "4px 10px",
-        borderRadius: "16px",
-        fontSize: "12px",
-        fontWeight: "bold",
-        display: "flex",
-        alignItems: "center",
-        gap: "4px",
-        cursor: isNetworkMismatch ? "help" : "default",
-      }}
+      className={`ui-network-pill${isNetworkMismatch ? " ui-network-pill--mismatch" : ""}`}
       title={title}
     >
-      <Icon.Circle color={color} />
+      {isNetworkMismatch && <AlertTriangle size={14} aria-hidden />}
       {appNetwork}
     </div>
   );

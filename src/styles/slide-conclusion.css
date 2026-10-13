@@ -1,0 +1,189 @@
+/* ============================================================================
+ * Conclusion slide — the epilogue of the Learn journey.
+ *
+ * The page is the counter; everything read closely sits on a receipt
+ * (design.md §2): the rules, the applications list, the closing line, the
+ * completion stub. Only the lead question and the credits stay on the
+ * counter, and both are short.
+ * ========================================================================== */
+
+.conclusion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-md);
+  max-width: var(--measure-prose);
+  margin: 0 auto;
+  padding-block: var(--space-sm);
+  text-align: left;
+}
+
+.conclusion > * {
+  max-width: 100%;
+}
+
+/* --- counter content ------------------------------------------------------- */
+
+.conclusion-lead {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  line-height: 1.2;
+  color: var(--color-counter-text-2);
+  overflow-wrap: anywhere;
+}
+
+.conclusion-credits {
+  margin: var(--space-lg) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-counter-muted);
+}
+
+/* --- the receipts -----------------------------------------------------------
+   Each sits in the column at the kit's default receipt width. */
+
+.conclusion-rules,
+.conclusion-apps,
+.conclusion-quote,
+.conclusion-done {
+  min-width: 0;
+}
+
+.conclusion-rule-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* Grouping on a receipt is dashed rules and spacing, never nested boxes
+   (design.md §5). */
+.conclusion-rule {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: var(--space-xs);
+}
+
+.conclusion-rule:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.conclusion-rule__title {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2xs);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-receipt-ink);
+}
+
+.conclusion-rule__num {
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-faded);
+}
+
+.conclusion-rule__text {
+  margin: var(--space-3xs) 0 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+  max-width: var(--measure-prose);
+}
+
+/* --- the applications receipt ----------------------------------------------- */
+
+.conclusion-app-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.conclusion-app {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: var(--space-xs);
+}
+
+.conclusion-app:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.conclusion-app__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-receipt-ink);
+}
+
+.conclusion-app__title svg {
+  flex: none;
+}
+
+.conclusion-app__text {
+  margin: var(--space-3xs) 0 0;
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+  overflow-wrap: anywhere;
+}
+
+/* --- the closing line ------------------------------------------------------- */
+
+.conclusion-quote__text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--color-receipt-ink);
+  overflow-wrap: anywhere;
+}
+
+.conclusion-quote__text em {
+  font-style: normal;
+}
+
+.conclusion-quote__text strong {
+  font-weight: 800;
+}
+
+/* --- the completion stub ----------------------------------------------------- */
+
+.conclusion-done__text {
+  margin: 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+}
+
+.conclusion-done__wallet {
+  display: inline-block;
+  max-width: 100%;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+/* --- narrow ------------------------------------------------------------------- */
+
+@media (max-width: 420px) {
+  .conclusion-lead {
+    font-size: var(--text-lg);
+  }
+}

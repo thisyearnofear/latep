@@ -1,85 +1,13 @@
 /* ============================================================================
  * Latep — Design System
  *
- * Typography: Instrument Serif (display) + Inter (body)
- * Background: WebGL topographic shader (see TopographicBackground.tsx)
- * Cards: Glassmorphism with light-sweep hover
- * Interactions: Card lift, button press, tilt
- * ============================================================================ */
-
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Inconsolata:wght@500&family=Instrument+Serif:ital@0;1&display=swap");
-
-/* ============================================================================
- * Design Tokens
- * ============================================================================ */
-
-:root {
-  /* Typography */
-  --font-display: "Instrument Serif", Georgia, serif;
-  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "Inconsolata", "SF Mono", monospace;
-
-  /* Type scale */
-  --text-xs: 0.75rem;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
-  --text-3xl: 2.5rem;
-  --text-4xl: 3.5rem;
-  --text-5xl: 5rem;
-
-  /* Colors — trust terrain palette */
-  --bg-deep: #0a0e1a;
-  --bg-mid: #141a2e;
-  --bg-surface: rgba(255, 255, 255, 0.06);
-  --bg-surface-hover: rgba(255, 255, 255, 0.1);
-  --bg-glass: rgba(20, 26, 46, 0.55);
-  --bg-glass-light: rgba(255, 255, 255, 0.08);
-
-  --border-glass: rgba(255, 255, 255, 0.12);
-  --border-glass-hover: rgba(255, 255, 255, 0.2);
-
-  --text-primary: rgba(255, 255, 255, 0.95);
-  --text-secondary: rgba(255, 255, 255, 0.65);
-  --text-muted: rgba(255, 255, 255, 0.4);
-
-  --accent-violet: #667eea;
-  --accent-purple: #764ba2;
-  --accent-warm: #f0a020;
-  --accent-cool: #4a90d9;
-  --accent-cooperate: #4ade80;
-  --accent-defect: #f87171;
-
-  /* Shadows — multi-layer for depth */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.35), 0 8px 24px rgba(0, 0, 0, 0.2);
-  --shadow-glow-violet: 0 0 40px rgba(102, 126, 234, 0.15);
-  --shadow-glow-warm: 0 0 40px rgba(240, 160, 32, 0.2);
-
-  /* Spacing */
-  --space-xs: 4px;
-  --space-sm: 8px;
-  --space-md: 16px;
-  --space-lg: 24px;
-  --space-xl: 40px;
-  --space-2xl: 64px;
-
-  /* Radii */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
-
-  /* Transitions */
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --duration-fast: 0.2s;
-  --duration-normal: 0.4s;
-  --duration-slow: 0.6s;
-}
+ * Tokens live in styles/tokens.css. This file is what remains of the legacy
+ * stylesheet: class rules that older surfaces still pick up. Every reference
+ * to the old token names was resolved in Phase 4 (ticket A7) — the alias
+ * block is gone, and new work should never need this file.
+ *
+ * See ../design.md and docs/REDESIGN_PLAN.md ticket A1.
+ * ========================================================================== */
 
 /* ============================================================================
  * Base
@@ -89,71 +17,20 @@ html,
 body {
   width: 100%;
   height: 100%;
+  /* No horizontal scroll at any width (design.md §10). */
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
-  overflow-x: hidden;
-  background: var(--bg-deep);
+  background: var(--color-counter);
   font-family: var(--font-body);
-  color: var(--text-primary);
-  font-size: var(--text-base);
-  line-height: 1.6;
+  color: var(--color-counter-text);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-}
-
-/* Fallback background if WebGL fails */
-.slide-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0a0e1a 0%, #141a2e 50%, #1a1f3a 100%);
-  font-family: var(--font-body);
-  position: relative;
-  overflow: hidden;
-}
-
-/* ============================================================================
- * Glassmorphism Cards
- * ============================================================================ */
-
-.slide-card {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: var(--space-xl) var(--space-lg);
-  background: var(--bg-glass);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-xl);
-  margin-top: var(--space-lg);
-  box-shadow: var(--shadow-lg), var(--shadow-glow-violet);
-  position: relative;
-  z-index: 2;
-  overflow: hidden;
-}
-
-/* Light sweep on hover — inspired by holocard.frag diagonal sheen */
-.slide-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(
-    105deg,
-    transparent 40%,
-    rgba(255, 255, 255, 0.06) 50%,
-    transparent 60%
-  );
-  transition: left 0.8s var(--ease-out);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.slide-card:hover::before {
-  left: 120%;
 }
 
 /* ============================================================================
@@ -167,12 +44,12 @@ h4 {
   font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: -0.02em;
-  color: var(--text-primary);
+  color: var(--color-counter-text);
   margin: 0;
 }
 
 h1 {
-  font-size: var(--text-4xl);
+  font-size: var(--text-3xl);
   line-height: 1.05;
 }
 
@@ -193,265 +70,13 @@ h4 {
 
 p {
   font-family: var(--font-body);
-  color: var(--text-secondary);
+  color: var(--color-counter-text-2);
   line-height: 1.7;
-}
-
-/* Italic display variant for emphasis */
-.font-display-italic {
-  font-family: var(--font-display);
-  font-style: italic;
-}
-
-/* ============================================================================
- * Glass surfaces — reusable component classes
- * ============================================================================ */
-
-.glass-panel {
-  background: var(--bg-glass-light);
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-md);
-  transition: all var(--duration-normal) var(--ease-out);
-}
-
-.glass-panel:hover {
-  background: var(--bg-surface-hover);
-  border-color: var(--border-glass-hover);
-}
-
-/* Interactive elements inside glass panels get a subtle solid backing
-   so they don't blend into the blurred background. Only applies to
-   native form controls and buttons, not custom-styled components. */
-.glass-panel input[type="text"],
-.glass-panel input[type="number"],
-.glass-panel input[type="range"],
-.glass-panel select,
-.glass-panel textarea {
-  background: rgba(10, 14, 26, 0.6);
-  border: 1px solid var(--border-glass);
-}
-
-/* ============================================================================
- * Micro-interactions
- * ============================================================================ */
-
-/* Card lift on hover */
-.lift-on-hover {
-  transition:
-    transform var(--duration-normal) var(--ease-out),
-    box-shadow var(--duration-normal) var(--ease-out);
-  will-change: transform;
-}
-
-.lift-on-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-/* Button press feedback */
-.press-feedback {
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-
-.press-feedback:active {
-  transform: scale(0.97);
-}
-
-/* ============================================================================
- * Characters (cooperate/defect avatars)
- * ============================================================================ */
-
-.character {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  display: inline-block;
-  margin: var(--space-sm);
-  transition: transform var(--duration-normal) var(--ease-spring);
-  cursor: pointer;
-  position: relative;
-}
-
-.character:hover {
-  transform: scale(1.12) translateY(-2px);
-}
-
-.cooperator {
-  background: var(--accent-cooperate);
-  box-shadow: 0 0 24px rgba(74, 222, 128, 0.3);
-}
-
-.defector {
-  background: var(--accent-defect);
-  box-shadow: 0 0 24px rgba(248, 113, 113, 0.3);
-}
-
-.character::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60%;
-  height: 60%;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-/* ============================================================================
- * Payoff matrix
- * ============================================================================ */
-
-.payoff-matrix {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr 1fr;
-  gap: var(--space-sm);
-  max-width: 400px;
-  margin: var(--space-lg) auto;
-  font-family: var(--font-body);
-}
-
-.payoff-cell {
-  padding: var(--space-md);
-  text-align: center;
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  transition: transform var(--duration-fast) var(--ease-out);
-}
-
-.payoff-cell:hover {
-  transform: scale(1.05);
-}
-
-.payoff-header {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary);
-}
-
-.payoff-cooperate {
-  background: rgba(74, 222, 128, 0.12);
-  color: var(--accent-cooperate);
-}
-
-.payoff-defect {
-  background: rgba(248, 113, 113, 0.12);
-  color: var(--accent-defect);
-}
-
-.payoff-mixed {
-  background: rgba(240, 160, 32, 0.12);
-  color: var(--accent-warm);
-}
-
-/* ============================================================================
- * Floating decorative elements
- * ============================================================================ */
-
-.floating-elements {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.floating-coin {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  background: rgba(240, 160, 32, 0.3);
-  border-radius: 50%;
-  animation: float 6s ease-in-out infinite;
-  backdrop-filter: blur(4px);
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-20px) rotate(180deg);
-  }
-}
-
-/* ============================================================================
- * Slide transitions (GSAP-enhanced, CSS fallback)
- * ============================================================================ */
-
-.slide-enter {
-  animation: slideIn 0.6s var(--ease-out);
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* ============================================================================
- * Trust altitude bar
- * ============================================================================ */
-
-.tf-height-bar {
-  background: linear-gradient(
-    180deg,
-    var(--accent-violet) 0%,
-    var(--accent-purple) 100%
-  );
-  border-radius: var(--radius-sm);
-  transition: height 0.6s var(--ease-out);
-  box-shadow: 0 0 16px rgba(102, 126, 234, 0.4);
-}
-
-.tf-height-track {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-  position: relative;
-  border: 1px solid var(--border-glass);
-}
-
-.tf-ground-line {
-  border-top: 2px dashed rgba(255, 255, 255, 0.1);
-  width: 100%;
 }
 
 /* ============================================================================
  * Thematic animations — trust fall concept
  * ============================================================================ */
-
-@keyframes tf-fall {
-  0% {
-    transform: translateY(0) rotate(0deg);
-    opacity: 1;
-  }
-  15% {
-    transform: translateY(8px) rotate(-3deg);
-  }
-  40% {
-    transform: translateY(40px) rotate(-8deg);
-  }
-  70% {
-    transform: translateY(80px) rotate(-12deg);
-    opacity: 0.85;
-  }
-  100% {
-    transform: translateY(100px) rotate(-15deg);
-    opacity: 0.6;
-  }
-}
 
 @keyframes tf-sway {
   0%,
@@ -493,51 +118,9 @@ p {
   }
 }
 
-@keyframes tf-glow-warm {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(240, 160, 32, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(240, 160, 32, 0.5);
-  }
-}
-
-@keyframes tf-glow-cold {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(74, 144, 217, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(74, 144, 217, 0.35);
-  }
-}
-
-@keyframes tf-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-6px);
-  }
-  40% {
-    transform: translateX(6px);
-  }
-  60% {
-    transform: translateX(-4px);
-  }
-  80% {
-    transform: translateX(4px);
-  }
-}
-
 /* Applied animation classes */
 .tf-falling {
   animation: tf-float 1.8s ease-in-out infinite;
-}
-.tf-suspended {
-  animation: tf-sway 3s ease-in-out infinite;
 }
 .tf-impact {
   animation: tf-impact 0.6s ease-out;
@@ -545,17 +128,8 @@ p {
 .tf-catch {
   animation: tf-catch 0.8s ease-out;
 }
-.tf-shake {
-  animation: tf-shake 0.5s ease-out;
-}
-.tf-glow-warm {
-  animation: tf-glow-warm 2s ease-in-out infinite;
-}
-.tf-glow-cold {
-  animation: tf-glow-cold 2s ease-in-out infinite;
-}
 
-/* Waiting indicator — pulsing dot and text */
+/* Waiting indicator — pulsing text */
 @keyframes tf-waiting-pulse {
   0%,
   100% {
@@ -566,105 +140,8 @@ p {
   }
 }
 
-@keyframes tf-waiting-dot {
-  0%,
-  100% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-}
-
 .tf-waiting-pulse {
   animation: tf-waiting-pulse 1.6s ease-in-out infinite;
-}
-
-.tf-waiting-dot {
-  animation: tf-waiting-dot 1.4s ease-in-out infinite;
-}
-
-/* Next-action call-to-action breathing glow */
-@keyframes tf-cta-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.45);
-  }
-  50% {
-    box-shadow: 0 0 18px 5px rgba(102, 126, 234, 0.55);
-  }
-}
-
-.tf-cta-pulse {
-  animation: tf-cta-pulse 1.6s ease-in-out infinite;
-}
-
-/* Opponent-joined celebratory flash */
-@keyframes tf-joined-glow {
-  0% {
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
-  }
-  20% {
-    box-shadow: 0 0 48px 8px rgba(74, 222, 128, 0.55);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
-  }
-}
-
-.tf-joined-glow {
-  animation: tf-joined-glow 1.8s ease-out forwards;
-}
-
-@keyframes tf-joined-text {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  15%,
-  75% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-}
-
-.tf-joined-text {
-  animation: tf-joined-text 3s ease-in-out forwards;
-}
-
-/* Journey progress pulse for current step */
-@keyframes journey-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(240, 160, 32, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(240, 160, 32, 0);
-  }
-}
-
-/* TrustFall figure sway (used in EdgeSlide and TrustFallFigure) */
-@keyframes trustfall-sway {
-  0%,
-  100% {
-    transform: rotate(-2deg);
-  }
-  50% {
-    transform: rotate(2deg);
-  }
-}
-
-/* Loading spinner rotation (used in LoadingSpinner component) */
-@keyframes tf-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Surface transition — fade + rise when a view mounts */
@@ -681,60 +158,6 @@ p {
 
 .tf-fade-in-up {
   animation: tf-fade-in-up 0.45s var(--ease-out, ease-out) both;
-}
-
-/* Verified-on-chain celebration glow pulse */
-@keyframes tf-verified {
-  0% {
-    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
-    transform: scale(0.97);
-    opacity: 0;
-  }
-  15% {
-    opacity: 1;
-    transform: scale(1.01);
-  }
-  35% {
-    box-shadow: 0 0 48px 10px rgba(74, 222, 128, 0.5);
-    transform: scale(1);
-  }
-  100% {
-    box-shadow: 0 0 16px 2px rgba(74, 222, 128, 0.22);
-  }
-}
-
-.tf-verified {
-  animation: tf-verified 1.1s var(--ease-out, ease-out) both;
-}
-
-/* Modal / overlay entrances */
-@keyframes tf-bg-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.tf-bg-in {
-  animation: tf-bg-in 0.25s ease-out both;
-}
-
-@keyframes tf-pop-in {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.tf-pop-in {
-  animation: tf-pop-in 0.4s
-    var(--ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)) both;
 }
 
 /* Airborne hover — the figure drifts while the proof wait plays out */
@@ -801,8 +224,19 @@ p {
   animation: tf-dust 0.8s ease-out forwards;
 }
 
-/* Respect reduced-motion across the tf-* animation vocabulary */
+/* Respect reduced-motion: every animation and transition everywhere resolves
+   instantly (receipt lines print instead of feeding; figures land instead of
+   animating). */
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
   [class^="tf-"],
   [class*=" tf-"] {
     animation: none !important;
@@ -833,123 +267,93 @@ p {
  * ============================================================================ */
 
 @media (max-width: 640px) {
-  .zk-game-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .zk-page-container {
-    max-width: 100% !important;
-    padding: var(--space-md) !important;
-  }
-
-  .zk-card-container {
-    max-width: 100% !important;
-  }
-
-  .zk-move-buttons {
-    flex-direction: column !important;
-  }
-
-  .zk-game-header {
-    font-size: var(--text-lg) !important;
-  }
-
   h1 {
     font-size: var(--text-3xl);
   }
   h2 {
     font-size: var(--text-2xl);
   }
-
-  .slide-card {
-    padding: var(--space-lg) var(--space-md);
-    margin-top: var(--space-md);
-  }
 }
 
-/* ============================================================================
- * Utility
- * ============================================================================ */
-
-.text-gradient {
-  background: linear-gradient(
-    135deg,
-    var(--accent-violet) 0%,
-    var(--accent-warm) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Wallet cluster in the shell header */
+.connect-account {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+}
+.wallet-status {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+.wallet-status--loading {
+  opacity: 0.6;
+}
+.wallet-address {
+  line-break: anywhere;
 }
 
-.text-cooperate {
-  color: var(--accent-cooperate);
+/* Dev-only contract debugger (/debug) — flat counter pills */
+.debug-pills {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  flex-wrap: wrap;
 }
-
-.text-defect {
-  color: var(--accent-defect);
+.debug-pill-link {
+  text-decoration: none;
 }
-
-.text-warm {
-  color: var(--accent-warm);
+.debug-pill {
+  background: transparent;
+  color: var(--color-counter-text-2);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  padding: 4px 12px;
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  cursor: pointer;
 }
-
-.text-secondary {
-  color: var(--text-secondary);
+.debug-pill--active {
+  background: var(--color-you);
+  color: var(--color-counter-text);
 }
-
-.text-muted {
-  color: var(--text-muted);
-}
-
-.shell-nav-link:hover {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: var(--text-primary) !important;
-}
-
-.shell-nav-link.active:hover {
-  background: rgba(102, 126, 234, 0.2) !important;
-}
-
-.shell-nav-link:focus-visible {
-  outline: 2px solid var(--accent-warm);
+.debug-pill:focus-visible {
+  outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
-
-@media (max-width: 700px) {
-  .shell-header {
-    position: sticky !important;
-    height: auto !important;
-    flex-wrap: wrap;
-    padding: 12px !important;
-    row-gap: 8px;
-  }
-
-  .shell-nav {
-    order: 3;
-    flex-basis: 100%;
-    width: auto;
-    min-width: 0;
-    justify-content: center;
-  }
-
-  .shell-nav-link {
-    padding: 8px 10px !important;
-  }
-
-  .shell-content {
-    padding-top: 0 !important;
-  }
+.debug-toggle {
+  margin-top: 1rem;
+}
+.debug-stack {
+  display: flex;
+  flex-flow: column;
+  gap: 1rem;
+}
+.debug-detail {
+  flex-basis: 30%;
+  min-width: 100%;
+  align-self: flex-start;
+}
+.debug-methods {
+  flex: 1;
+}
+.debug-error {
+  color: var(--color-stamp);
 }
 
-@media (max-width: 400px) {
-  .shell-nav-link {
-    padding: 8px 6px !important;
-    gap: 4px !important;
-    font-size: var(--text-xs) !important;
-  }
+/* Route-level Suspense fallback — printed text, no decoration */
+.app-suspense {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  color: var(--color-counter-muted);
+}
 
-  div#root {
-    --sds-window-width-min: 0;
-  }
+div#root {
+  --sds-window-width-min: 0;
 }
