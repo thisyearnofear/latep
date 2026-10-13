@@ -1,0 +1,318 @@
+/* ============================================================================
+ * Tutorial sandbox — the workbench (ticket A5)
+ *
+ * Settings on a straight receipt in the left column, the scene in the main
+ * column, and the move history as a strip of round receipts joined by the
+ * thread — with a compact table toggle for long sessions.
+ *
+ * Field and button chrome reuses the till-roll classes (.till-field,
+ * .payoff-preset, .till-button, .till-results): the same convention, so the
+ * same look. This sheet only owns the workbench layout itself.
+ * ========================================================================== */
+
+.sandbox {
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-md) var(--space-sm) var(--space-xl);
+  box-sizing: border-box;
+}
+
+/* The page header is counter surface — plain type, no chrome. */
+.sandbox-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.sandbox-title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  color: var(--color-counter-text);
+  margin: 0 0 var(--space-2xs) 0;
+}
+
+.sandbox-lede {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  color: var(--color-counter-muted);
+  max-width: 480px;
+  margin: 0;
+}
+
+/* Two columns on the desk; the settings receipt stacks first on narrow. */
+.sandbox-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.sandbox-side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+/* The settings receipt reads top to bottom — it is a form, so it is stock. */
+.sandbox-settings {
+  max-width: none;
+  text-align: left;
+  padding: var(--space-sm) var(--space-sm) var(--space-md);
+}
+
+.sandbox-label {
+  display: block;
+  margin-bottom: var(--space-3xs);
+}
+
+/* Select and stake inputs print on the receipt's lighter stock, matching
+   .payoff-input's convention. */
+.sandbox-select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  border: 1px solid var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-receipt-2);
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+}
+
+.sandbox-select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.sandbox-stake {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.sandbox-toggle {
+  width: 100%;
+}
+
+.sandbox-editor {
+  margin-top: var(--space-2xs);
+}
+
+.sandbox-inspector {
+  min-width: 0;
+}
+
+/* --- main column ---------------------------------------------------------- */
+
+.sandbox-main {
+  min-width: 0;
+}
+
+.sandbox-round {
+  margin-bottom: var(--space-md);
+}
+
+.sandbox-round__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2xs);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-counter-muted);
+  margin-bottom: var(--space-2xs);
+}
+
+.sandbox-choices {
+  margin: var(--space-sm) auto var(--space-2xs);
+}
+
+.sandbox-actions {
+  display: flex;
+  gap: var(--space-2xs);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-sm);
+}
+
+/* An error is stamp red — the one place that colour is allowed. */
+.sandbox-error {
+  border: 1px dashed var(--color-stamp);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2xs) var(--space-sm);
+  margin: 0 auto var(--space-sm);
+  max-width: 460px;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-stamp);
+  text-align: center;
+}
+
+/* A noise note sits under the receipt, faded — the receipt already printed
+   the settled moves; this only says the wind was involved. */
+.sandbox-noise-note {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--color-receipt-faded);
+  margin: var(--space-2xs) 0 0 0;
+  text-align: center;
+}
+
+/* --- tutor + summary: their own receipts ---------------------------------- */
+
+.sandbox-tutor,
+.sandbox-summary {
+  max-width: none;
+  text-align: left;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-sm) var(--space-md);
+}
+
+.sandbox-tutor__name {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-receipt-faded);
+  margin: 0 0 var(--space-2xs) 0;
+  border-bottom: 1px dashed var(--color-receipt-rule);
+  padding-bottom: var(--space-3xs);
+}
+
+.sandbox-tutor__message {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--color-receipt-ink);
+  margin: 0;
+}
+
+.sandbox-summary__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xs) var(--space-sm);
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.sandbox-summary__grid dt {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+}
+
+.sandbox-summary__grid dd {
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-ink);
+  margin: 0;
+}
+
+.sandbox-summary__note {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-style: italic;
+  color: var(--color-receipt-faded);
+  margin: 0;
+  text-align: center;
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: var(--space-2xs);
+}
+
+/* --- the history strip -----------------------------------------------------
+ *
+ * Round receipts end to end, the thread drawn between each consecutive pair.
+ * The strip scrolls sideways rather than wrapping — the till roll order is
+ * left to right, oldest first. */
+.sandbox-history {
+  margin-bottom: var(--space-md);
+}
+
+.sandbox-history__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2xs);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-2xs);
+}
+
+.sandbox-history__head .till-stat__label {
+  margin: 0;
+}
+
+.sandbox-history__toggle {
+  display: flex;
+  gap: var(--space-3xs);
+}
+
+.sandbox-history__strip {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: var(--space-2xs);
+}
+
+/* Each receipt holds a fixed ticket width so the strip reads as tickets. */
+.sandbox-history__item {
+  flex: 0 0 auto;
+  width: 280px;
+}
+
+.sandbox-history__item .receipt {
+  max-width: none;
+  margin: 0;
+}
+
+.sandbox-history__thread {
+  flex: 0 0 auto;
+  width: 72px;
+}
+
+/* Totals under the compact table — the same dl rhythm as the summary. */
+.sandbox-history__totals {
+  display: flex;
+  justify-content: space-around;
+  gap: var(--space-sm);
+  margin: var(--space-2xs) 0 0 0;
+  border-top: 1px solid var(--color-receipt-rule);
+  padding-top: var(--space-2xs);
+}
+
+.sandbox-history__totals dt {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  text-align: center;
+}
+
+.sandbox-history__totals dd {
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-ink);
+  margin: 0;
+  text-align: center;
+}
+
+/* --- narrow screens -------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .sandbox-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 400px) {
+  .sandbox {
+    padding: var(--space-sm) var(--space-2xs) var(--space-lg);
+  }
+}
