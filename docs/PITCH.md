@@ -1,6 +1,6 @@
 # Pitch Package — Find Your Way (General Track)
 
-Deadline: Oct 13, 0:59. Everything below is supported by evidence already in this repo.
+Deadline: Oct 14, 0:59. Everything below is supported by evidence already in this repo.
 
 ## One-liner
 
