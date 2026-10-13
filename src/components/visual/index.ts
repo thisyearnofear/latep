@@ -7,5 +7,3 @@
 export { default as StrategyCard } from "./StrategyCard";
 
 export { default as TournamentViz } from "./TournamentViz";
-
-export { default as JourneyProgress } from "./JourneyProgress";

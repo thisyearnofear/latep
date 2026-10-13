@@ -21,7 +21,6 @@ import {
   EpilogueSlide,
 } from "../components/slides";
 import { useFirstRun } from "../hooks/useFirstRun";
-import "../styles/slides.css";
 
 const LearnJourney: React.FC = () => {
   const { unlock } = useFirstRun();
