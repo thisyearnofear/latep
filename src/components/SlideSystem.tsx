@@ -3,7 +3,6 @@ import gsap from "gsap";
 import { useAudioSettings } from "../hooks/useAudioSettings";
 import { LessonActionProvider } from "./learning/LessonActions";
 import { LessonDetails } from "./learning/LessonDetails";
-import "../styles/slides.css";
 import "../styles/learning.css";
 
 // SINGLE SOURCE OF TRUTH for slide configuration
