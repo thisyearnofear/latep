@@ -164,3 +164,714 @@
   font-size: var(--text-xs);
   color: var(--color-receipt-faded);
 }
+
+/* --- the counter chrome around the roll ---------------------------------- */
+
+/* Generation / population / stage. Counter surface: plain counters, no
+   cards. The stage word never relies on colour alone — "eliminating" gets a
+   stamp-red word AND the word itself says the same thing. */
+.till-stats {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+
+.till-stat {
+  text-align: center;
+}
+
+.till-stat__label {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-counter-muted);
+  margin: 0;
+}
+
+.till-stat__value {
+  font-family: var(--font-print);
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-counter-text);
+  margin: 0;
+}
+
+.till-stat__value--stamp {
+  color: var(--color-stamp);
+}
+
+/* --- controls -------------------------------------------------------------
+
+   Same convention as the lesson buttons (design.md §9): on the counter the
+   primary action is a receipt-stock tile, secondary actions are counter
+   panels. */
+.till-controls {
+  display: flex;
+  gap: var(--space-2xs);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+}
+
+.till-button {
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-counter-rule);
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.till-button:not(:disabled):hover {
+  background: var(--color-counter);
+}
+
+.till-button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.till-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.till-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.till-button--primary {
+  background: var(--color-receipt);
+  border: 2px solid var(--color-receipt-ink);
+  color: var(--color-receipt-ink);
+}
+
+.till-button--primary:not(:disabled):hover {
+  background: var(--color-receipt-2);
+}
+
+/* Auto-play is a toggle: when it is on, the button inverts so the state is
+   visible without a colour-only cue (the label says "Stop" too). */
+.till-button--active {
+  background: var(--color-counter-text);
+  border-color: var(--color-counter-text);
+  color: var(--color-counter);
+}
+
+/* --- the settings receipt -------------------------------------------------
+
+   A form is read closely, so it prints on stock (recipe §3). */
+.till-settings {
+  max-width: none;
+  text-align: left;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.till-settings__title {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-receipt-faded);
+  margin: 0 0 var(--space-sm) 0;
+  border-bottom: 1px dashed var(--color-receipt-rule);
+  padding-bottom: var(--space-3xs);
+}
+
+.till-field {
+  margin-bottom: var(--space-sm);
+}
+
+.till-field:last-child {
+  margin-bottom: 0;
+}
+
+.till-field__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-3xs);
+}
+
+.till-field__label {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-receipt-ink);
+}
+
+.till-field__value {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-faded);
+}
+
+/* Noise past ~10% is flagged warm — and the slider value already reads the
+   percentage, so the colour is a hint, not the signal. */
+.till-field__value--loud {
+  color: var(--color-partner-print);
+}
+
+.till-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-you-print);
+}
+
+.till-field__hint {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  margin: var(--space-3xs) 0 0 0;
+}
+
+/* --- the results table ----------------------------------------------------
+
+   Prints on the roll: print font, tabular numbers, dashed rules. The leader
+   is marked by weight and a left rule, never colour alone. */
+.till-results {
+  max-width: none;
+  text-align: left;
+  margin-bottom: var(--space-md);
+}
+
+.till-results__title {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-receipt-faded);
+  margin: 0 0 var(--space-2xs) 0;
+  text-align: center;
+}
+
+.till-results__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-ink);
+}
+
+.till-results__table th {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  text-align: left;
+  padding: var(--space-3xs) var(--space-3xs);
+  border-bottom: 1px solid var(--color-receipt-rule);
+}
+
+.till-results__table td {
+  padding: var(--space-3xs) var(--space-3xs);
+  border-bottom: 1px dashed var(--color-receipt-rule);
+  color: var(--color-receipt-ink);
+}
+
+.till-results__table tr:last-child td {
+  border-bottom: none;
+}
+
+.till-results__table td:last-child,
+.till-results__table th:last-child {
+  color: var(--color-receipt-faded);
+  text-align: right;
+}
+
+.till-results__row--leader td {
+  font-weight: 700;
+  border-left: 3px solid var(--color-receipt-ink);
+}
+
+/* --- population history ---------------------------------------------------
+
+   One column per generation, stacked bars in chart tints. Values stay
+   inline: height and colour are per-strategy data. */
+.till-history__chart {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 60px;
+  overflow-x: auto;
+  padding-bottom: var(--space-3xs);
+}
+
+.till-history__col {
+  min-width: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.till-history__col > div {
+  min-height: 2px;
+  opacity: 0.75;
+}
+
+.till-history__axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: var(--space-3xs);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+}
+
+/* --- the winner banner ----------------------------------------------------
+
+   A finished tournament prints its own receipt: the winner is announced in
+   ink, and the only decoration is the torn edge. */
+.till-winner {
+  max-width: none;
+  text-align: center;
+  margin-bottom: var(--space-md);
+  padding: var(--space-md);
+}
+
+.till-winner__line {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--color-receipt-ink);
+  margin: 0;
+}
+
+.till-winner .till-button {
+  margin-top: var(--space-sm);
+  background: var(--color-receipt-ink);
+  border-color: var(--color-receipt-ink);
+  color: var(--color-receipt);
+}
+
+.till-intro {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--color-counter-text-2);
+  margin: 0 0 var(--space-md);
+}
+
+/* --- the payoff matrix editor ---------------------------------------------
+
+   Lives inside a settings receipt, so it cannot be its own panel — just
+   fields on the same stock. The inputs were the near-invisible bug: faint
+   white borders on a faint white panel. On stock they get a rule border and
+   ink text. */
+.payoff-editor__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3xs);
+  margin-bottom: var(--space-sm);
+}
+
+.payoff-preset {
+  min-height: 32px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-receipt-rule);
+  background: transparent;
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.payoff-preset:not(:disabled):hover {
+  border-color: var(--color-receipt-ink);
+}
+
+.payoff-preset:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Selected = inked in, not a colour alone. */
+.payoff-preset--active {
+  background: var(--color-receipt-ink);
+  border-color: var(--color-receipt-ink);
+  color: var(--color-receipt);
+}
+
+.payoff-grid {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  gap: var(--space-3xs);
+  max-width: 320px;
+  margin-bottom: var(--space-2xs);
+}
+
+.payoff-grid__head,
+.payoff-grid__side {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  text-align: center;
+  align-self: center;
+  padding: var(--space-3xs);
+}
+
+.payoff-grid__side {
+  text-align: right;
+}
+
+.payoff-cell {
+  padding: var(--space-3xs);
+  border: 1px dashed var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.payoff-cell__pair {
+  display: flex;
+  gap: var(--space-3xs);
+  justify-content: center;
+}
+
+.payoff-input {
+  width: 44px;
+  padding: 2px 4px;
+  text-align: center;
+  border: 1px solid var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-receipt-2);
+  color: var(--color-receipt-ink);
+  font-family: var(--font-print);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+}
+
+.payoff-input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
+
+.payoff-cell__label {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  margin-top: 2px;
+}
+
+.payoff-editor__type {
+  text-align: center;
+}
+
+.payoff-editor__type-name {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  color: var(--color-receipt-ink);
+  margin: 0;
+}
+
+.payoff-editor__type-detail {
+  font-family: var(--font-print);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  margin: var(--space-3xs) 0 0 0;
+}
+
+/* --- the strategy inspector ------------------------------------------------
+
+   Read closely, so it is a receipt of its own. */
+.till-inspector {
+  max-width: none;
+  margin-top: var(--space-2xs);
+  text-align: left;
+}
+
+.till-inspector__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-sm);
+}
+
+.till-inspector__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.till-inspector__section {
+  margin-bottom: var(--space-sm);
+}
+
+.till-inspector__label {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-receipt-faded);
+  margin: 0 0 var(--space-3xs) 0;
+}
+
+.till-inspector__body {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--color-receipt-ink);
+  margin: 0;
+}
+
+.till-inspector__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.till-inspector__example {
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: var(--space-2xs);
+}
+
+.till-inspector__example .till-inspector__body {
+  font-style: italic;
+  color: var(--color-receipt-faded);
+}
+
+/* --- the lesson's completion line ------------------------------------------
+
+   TournamentSlide renders inside .lesson-copy, which is already the receipt
+   (LessonLayout). A receipt never sits inside a receipt, so the result is a
+   dashed-rule group on the same stock (the EpilogueSlide pattern). */
+.lesson-copy .till-result {
+  border-top: 1px dashed var(--color-receipt-rule);
+  border-radius: 0;
+  padding: var(--space-2xs) 0 0;
+  margin-bottom: var(--space-sm);
+}
+
+.till-result__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-3xs) 0;
+}
+
+.till-result__note {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-receipt-faded);
+  margin: 0;
+}
+
+/* --- chart tints as classes ------------------------------------------------
+
+   A strategy's tint is data, but it only ever takes four values — so it is a
+   class, not an inline colour. The same class tints a thread key, a bar fill
+   (via currentColor), or a name. */
+.chart-tint-1 {
+  color: var(--chart-tint-1);
+}
+.chart-tint-2 {
+  color: var(--chart-tint-2);
+}
+.chart-tint-3 {
+  color: var(--chart-tint-3);
+}
+.chart-tint-4 {
+  color: var(--chart-tint-4);
+}
+
+/* The stacked segments in the history chart and any other tinted fill draw
+   in currentColor so the class above supplies the ink. */
+.tint-fill {
+  background: currentColor;
+}
+
+/* --- the lesson's population viz (TournamentViz) ----------------------------
+
+   Charts print on stock (design.md §6), so the viz is a section of the roll
+   even though it sits in the counter-side visual column. Bar widths are
+   animated by GSAP inline — the classes carry everything static. */
+.tviz-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px dashed var(--color-receipt-rule);
+  padding-bottom: var(--space-3xs);
+  margin-bottom: var(--space-2xs);
+}
+
+.tviz-gen {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-receipt-faded);
+  margin: 0;
+}
+
+.tviz-total {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-receipt-faded);
+}
+
+.tviz-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding-block: var(--space-3xs);
+}
+
+.tviz-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  width: min(140px, 36vw);
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-receipt-ink);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.tviz-label .thread-key {
+  width: 20px;
+}
+
+.tviz-track {
+  flex: 1;
+  height: 12px;
+  background: var(--color-receipt-rule);
+  overflow: hidden;
+}
+
+.tournament-viz-compact .tviz-track {
+  height: 10px;
+}
+
+.tviz-bar {
+  height: 100%;
+  width: 0;
+}
+
+.tviz-count {
+  width: 32px;
+  text-align: right;
+  font-family: var(--font-print);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+  flex-shrink: 0;
+}
+
+.tviz-empty {
+  padding: var(--space-md) var(--space-sm);
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-receipt-faded);
+  font-style: italic;
+}
+
+/* --- the strategy card -----------------------------------------------------
+
+   A counter card: quiet, flat, one tinted left rule that matches the charts.
+   The `chart-tint-N` class on the card feeds `currentColor` to the rule and
+   the pattern swatch. Selected is a stronger rule, never a glow. */
+.strategy-card {
+  position: relative;
+  background: var(--color-counter-2);
+  border: 1px solid var(--color-counter-rule);
+  border-left: 4px solid currentColor;
+  border-radius: var(--radius-sm);
+  padding: 24px 26px;
+  overflow: hidden;
+  transition:
+    transform var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+.strategy-card--compact {
+  padding: 16px 18px;
+}
+
+.strategy-card--interactive {
+  cursor: pointer;
+}
+
+.strategy-card--interactive:hover {
+  transform: translateY(-2px);
+}
+
+.strategy-card--interactive:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.strategy-card--selected {
+  border-color: currentColor;
+}
+
+.strategy-card__swatch {
+  display: block;
+  width: 56px;
+  height: 8px;
+  margin-bottom: 12px;
+}
+
+.strategy-card--compact .strategy-card__swatch {
+  width: 40px;
+  margin-bottom: 8px;
+}
+
+.strategy-card__name {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--color-counter-text);
+  margin: 0 0 6px;
+}
+
+.strategy-card--compact .strategy-card__name {
+  font-size: var(--text-lg);
+}
+
+.strategy-card__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-counter-text-2);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* --- the page frame -------------------------------------------------------- */
+
+.till-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md) var(--space-3xl);
+}
+
+.till-page__head {
+  margin-bottom: var(--space-lg);
+}
+
+.till-page__title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  color: var(--color-counter-text);
+  margin: 0 0 var(--space-2xs);
+}
+
+.till-page__lede {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  color: var(--color-counter-text-2);
+  max-width: 560px;
+  margin: 0;
+}

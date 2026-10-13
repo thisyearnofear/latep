@@ -1,0 +1,254 @@
+/* ============================================================================
+ * Shared UI — the pieces that sit on every route: toasts, dialogs, badges,
+ * the network badge, the mascot bubble, the share tile.
+ *
+ * These are all things you read closely, so they are receipts (design.md §2).
+ * Anything that needs the torn edge or printed lines uses the kit in
+ * components/receipt rather than restating it here.
+ * ========================================================================== */
+
+/* ----------------------------------------------------------------------------
+ * Buttons (design.md §9)
+ *
+ * On the counter a button is a receipt-stock tile with ink text. On a receipt
+ * it is the inverse — ink fill, stock text — so add .ui-button--on-receipt.
+ * -------------------------------------------------------------------------- */
+
+.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3xs);
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-sm);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-counter-text);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out);
+}
+
+.ui-button:not(:disabled):hover {
+  background: var(--color-counter-2);
+}
+
+.ui-button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+.ui-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.ui-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ui-button--primary {
+  border: 2px solid var(--color-receipt-ink);
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+}
+
+.ui-button--primary:not(:disabled):hover {
+  background: var(--color-receipt-2);
+}
+
+.ui-button--on-receipt {
+  border: 2px solid var(--color-receipt-ink);
+  background: var(--color-receipt-ink);
+  color: var(--color-receipt);
+}
+
+.ui-button--on-receipt:not(:disabled):hover {
+  background: var(--color-receipt-faded);
+  border-color: var(--color-receipt-faded);
+}
+
+/* ----------------------------------------------------------------------------
+ * Achievement — an earned mark, printed like any other label
+ * -------------------------------------------------------------------------- */
+
+.ui-achievement {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2xs);
+  text-align: center;
+}
+
+.ui-achievement__icon {
+  color: var(--color-receipt-ink);
+}
+
+.ui-achievement__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-receipt-ink);
+}
+
+.ui-achievement__description {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+.ui-achievement--compact {
+  flex-direction: row;
+  justify-content: center;
+  gap: var(--space-3xs);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+}
+
+/* ----------------------------------------------------------------------------
+ * Toast — slides in from the right, transform and opacity only
+ * -------------------------------------------------------------------------- */
+
+.ui-toast {
+  position: fixed;
+  right: var(--space-md);
+  bottom: 80px;
+  z-index: 10000;
+  cursor: pointer;
+  transition:
+    transform var(--dur-short) var(--ease-out),
+    opacity var(--dur-short) var(--ease-out);
+}
+
+.ui-toast--hidden {
+  transform: translateX(120%);
+  opacity: 0;
+}
+
+/* Held to the viewport so the toast can't push a horizontal scrollbar at
+   320px (design.md §10). */
+.ui-toast .receipt {
+  min-width: min(260px, calc(100vw - 48px));
+  max-width: min(340px, calc(100vw - 48px));
+}
+
+.ui-toast__label {
+  margin: 0 0 var(--space-3xs);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+}
+
+/* ----------------------------------------------------------------------------
+ * Network badge — the one pill the system allows (design.md §5)
+ * -------------------------------------------------------------------------- */
+
+.ui-network-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  padding: var(--space-3xs) 10px;
+  border: 1px solid var(--color-counter-rule);
+  border-radius: 16px;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-counter-text-2);
+}
+
+.ui-network-pill--mismatch {
+  border-color: var(--color-stamp);
+  color: var(--color-stamp);
+}
+
+/* ----------------------------------------------------------------------------
+ * Mascot bubble — a small receipt floating on the counter
+ * -------------------------------------------------------------------------- */
+
+.ui-mascot {
+  position: fixed;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: 90;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+
+.ui-mascot__bubble {
+  position: relative;
+  max-width: 280px;
+  margin: 0 var(--space-xs) 20px 0;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px dashed var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  box-shadow: var(--shadow-receipt);
+}
+
+/* the tail, cut from the same stock as the bubble */
+.ui-mascot__bubble::after {
+  content: "";
+  position: absolute;
+  right: -7px;
+  bottom: var(--space-sm);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 7px solid var(--color-receipt);
+}
+
+/* ----------------------------------------------------------------------------
+ * Shareable result — a receipt you can hand to someone
+ * -------------------------------------------------------------------------- */
+
+.ui-share__text {
+  margin: 0 0 var(--space-sm);
+  padding: var(--space-2xs);
+  border: 1px dashed var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  background: var(--color-receipt-2);
+  color: var(--color-receipt-ink);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  line-height: var(--leading-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.ui-share__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-toast {
+    transition: opacity 150ms linear;
+  }
+
+  .ui-toast--hidden {
+    transform: none;
+  }
+
+  .ui-button:not(:disabled):active {
+    transform: none;
+  }
+}
