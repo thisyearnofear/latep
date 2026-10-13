@@ -86,7 +86,9 @@ Four product shifts carry most of the impact. The restyle supports them:
 6. **Every PR includes before/after screenshots** at 390 and 1440 px for each
    route it touches (`npm run shots`, section 4).
 7. **No new dependencies** except `lucide-react` (ticket B1). Ask before
-   adding anything else. Fonts load from Google Fonts, not npm.
+   adding anything else. Fonts are self-hosted woff2 (Fontsource, latin
+   subset) in `public/fonts/`, loaded via `src/styles/fonts.css` — not Google
+   Fonts, not npm imports (the packages were only the download vehicle).
 8. **Strings live in one place.** Primitive names and everyday lines come from
    `src/content/primitives.ts`. Move, outcome, and stamp labels come from
    `src/content/vocabulary.ts`. Don't retype them.
@@ -553,14 +555,17 @@ listed bugs. Split large files into several PRs.
 - **B8 · Motion QA** (S): reduced-motion pass on every animated screen; no
   `transition: all`, no springs; `--ease-feed` used only for the receipt feed;
   one orchestrated moment per view.
-- **B9 · Deletions** (S): **needs explicit sign-off from the project owner
-  first.** Candidates, all unused after Phase 2–3 (verify each with a search
-  before proposing): `ui/CustomCursor.tsx`, `ui/ShimmerButton.tsx`,
-  `ui/ElectricButton.tsx`, `ui/StaggerButton.tsx`, `hooks/useMagnetic.ts`,
-  `visual/TopographicBackground.tsx`, `visual/TrustFallFigure.tsx` (already
-  unused), `DemoRound.tsx` (already unused), `Character.tsx` (if
-  `AITutorPanel` moves to the rig). Keep `styles/balloon.css`: `LearnJourney`
-  still imports it; it's restyled in A4.
+- **B9 · Deletions** (S): ✅ **done 2026-10-13** (`e02b9a3`, project-owner
+  sign-off in chat). Deleted, all verified unimported first:
+  `ui/CustomCursor.tsx`, `ui/ShimmerButton.tsx`, `ui/ElectricButton.tsx`,
+  `ui/StaggerButton.tsx`, `ui/SuccessCelebration.tsx` (+ `SuccessCelebration`
+  export dropped from `ui/index.ts`), `hooks/useMagnetic.ts`,
+  `visual/TopographicBackground.tsx`, `visual/TrustFallFigure.tsx` (+ exports
+  dropped from `visual/index.ts`), `DemoRound.tsx`. Kept: `Character.tsx`
+  (`AITutorPanel` still imports it — out of scope), `gsap` (live reveal
+  choreography), `howler` (opt-in audio). `three` has zero imports left and
+  can go from `package.json` in a lockfile-safe follow-up. Restore with
+  `git revert e02b9a3`.
 - **Merge `redesign` → `main`** after the lead's final review and the 5-person
   comprehension test from section 1.
 
@@ -642,7 +647,7 @@ Locked by the project owner (2026-10-12):
   submission. All redesign work lands on `redesign`; `redesign` merges to `main`
   after Phase 4 review. A winner-announcement hotfix on `main` is not a
   conflict risk: rebase the ticket branches forward when it lands.
-- **Decision 4 — the deletion list** (B9) still needs sign-off when Phase 3 is
-  done. Candidates are listed in B9; none may be removed before that.
+- **Decision 4 — the deletion list** (B9): ✅ signed off and executed
+  2026-10-13 (`e02b9a3`). See B9 above for the kept/deleted ledger.
 - **Decision 5 — strategy display names in `src/util/strategies.ts`** may be
   edited for emoji removal only (B6).
