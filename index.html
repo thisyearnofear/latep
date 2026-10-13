@@ -96,16 +96,23 @@
       }
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!--
-      Bricolage Grotesque (display) · Atkinson Hyperlegible Next (body) ·
-      Martian Mono (print). Loaded once, here; the CSS @import is gone.
-      See design.md §4.
+    <!-- Self-hosted fonts (Fontsource woff2, latin subset) — no render-blocking
+      Google Fonts request. Preload display + body; print loads lazily.
+      See src/styles/fonts.css, design.md §4.
     -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Atkinson+Hyperlegible+Next:wght@400;700&family=Martian+Mono:wdth,wght@75..112.5,100..800&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      href="/fonts/bricolage-grotesque-latin-700-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/atkinson-hyperlegible-next-latin-400-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
     />
   </head>
   <body>

@@ -31,20 +31,43 @@ class AudioManager {
     return AudioManager.instance;
   }
 
-  // PERFORMANT: Preload and cache sounds
+  // PERFORMANT: Preload and cache sounds. Opus .webm first (roughly half
+  // the bytes), mp3 fallback for older decoders. Nothing loads until the
+  // user opts into sound — see toggleSFX / playBackgroundMusic.
   preloadSounds() {
     if (!this.sfxEnabled || Object.keys(this.sounds).length) return;
     this.sounds = {
-      click: new Howl({ src: ["/assets/sounds/button1.mp3"], volume: 0.2 }),
-      coin: new Howl({ src: ["/assets/sounds/coin_insert.mp3"], volume: 0.2 }),
-      cooperate: new Howl({
-        src: ["/assets/sounds/coin_get.mp3"],
+      click: new Howl({
+        src: ["/assets/sounds/button1.webm", "/assets/sounds/button1.mp3"],
         volume: 0.2,
       }),
-      defect: new Howl({ src: ["/assets/sounds/thump.mp3"], volume: 0.2 }),
-      win: new Howl({ src: ["/assets/sounds/coin_get.mp3"], volume: 0.2 }),
-      lose: new Howl({ src: ["/assets/sounds/thump.mp3"], volume: 0.2 }),
-      error: new Howl({ src: ["/assets/sounds/bonk.mp3"], volume: 0.2 }),
+      coin: new Howl({
+        src: [
+          "/assets/sounds/coin_insert.webm",
+          "/assets/sounds/coin_insert.mp3",
+        ],
+        volume: 0.2,
+      }),
+      cooperate: new Howl({
+        src: ["/assets/sounds/coin_get.webm", "/assets/sounds/coin_get.mp3"],
+        volume: 0.2,
+      }),
+      defect: new Howl({
+        src: ["/assets/sounds/thump.webm", "/assets/sounds/thump.mp3"],
+        volume: 0.2,
+      }),
+      win: new Howl({
+        src: ["/assets/sounds/coin_get.webm", "/assets/sounds/coin_get.mp3"],
+        volume: 0.2,
+      }),
+      lose: new Howl({
+        src: ["/assets/sounds/thump.webm", "/assets/sounds/thump.mp3"],
+        volume: 0.2,
+      }),
+      error: new Howl({
+        src: ["/assets/sounds/bonk.webm", "/assets/sounds/bonk.mp3"],
+        volume: 0.2,
+      }),
     };
   }
 

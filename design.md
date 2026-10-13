@@ -109,7 +109,10 @@ Rules:
 
 ## 4. Typography
 
-Load fonts once, in `index.html` (with preconnect). Delete the CSS `@import`.
+Load fonts once, self-hosted: woff2 files (Fontsource, latin subset) live in
+`public/fonts/` and load via `src/styles/fonts.css` (`font-display: swap`),
+with display + body preloaded in `index.html`. No Google Fonts request, no
+CSS `@import`, no npm font imports.
 
 | Role    | Face                                                  | Weights  | Token            |
 | ------- | ----------------------------------------------------- | -------- | ---------------- |

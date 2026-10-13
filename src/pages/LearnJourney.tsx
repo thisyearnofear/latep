@@ -22,7 +22,6 @@ import {
 } from "../components/slides";
 import { useFirstRun } from "../hooks/useFirstRun";
 import "../styles/slides.css";
-import "../styles/balloon.css";
 
 const LearnJourney: React.FC = () => {
   const { unlock } = useFirstRun();
@@ -36,7 +35,7 @@ const LearnJourney: React.FC = () => {
       id: "intro",
       title: "The Evolution of Trust",
       component: IntroSlide,
-      music: "/assets/sounds/bg_music.mp3",
+      music: "/assets/sounds/bg_music.webm",
     },
     {
       id: "edge",
