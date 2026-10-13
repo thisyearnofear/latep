@@ -3,7 +3,7 @@
 > **Locked 2026-10-12: the visual redesign** (Receipts + Threads). See
 > [`design.md`](../design.md) for the design system and
 > [`REDESIGN_PLAN.md`](REDESIGN_PLAN.md) for phases and tickets. `main` is
-> frozen until the Oct 13 submission; all redesign work lands on `redesign`.
+> frozen until the Oct 14 submission; all redesign work lands on `redesign`.
 >
 > **Next after the redesign:** Pattern 3 — Private Reputation, the
 > HackMeridian 2026 build. See [`HACKMERIDIAN.md`](HACKMERIDIAN.md).
