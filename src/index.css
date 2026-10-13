@@ -224,8 +224,19 @@ p {
   animation: tf-dust 0.8s ease-out forwards;
 }
 
-/* Respect reduced-motion across the tf-* animation vocabulary */
+/* Respect reduced-motion: every animation and transition everywhere resolves
+   instantly (receipt lines print instead of feeding; figures land instead of
+   animating). */
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
   [class^="tf-"],
   [class*=" tf-"] {
     animation: none !important;

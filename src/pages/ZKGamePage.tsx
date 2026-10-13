@@ -87,8 +87,11 @@ export const ZKGamePage: React.FC = () => {
       revealScrolledFor.current !== view.gameId
     ) {
       revealScrolledFor.current = view.gameId;
+      const reduceMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       revealCardRef.current?.scrollIntoView({
-        behavior: "smooth",
+        behavior: reduceMotion ? "auto" : "smooth",
         block: "center",
       });
     }
