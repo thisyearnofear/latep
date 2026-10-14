@@ -80,3 +80,7 @@ e2e/demo-footage/
 
 # Redesign review screenshots — regenerate with `npm run shots`
 e2e/shots/
+
+# Reveal-room performance traces (scripts/measure-reveal-room.cjs) — regenerate,
+# never commit them (AGENTS.md)
+e2e/perf/

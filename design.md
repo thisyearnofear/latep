@@ -437,8 +437,27 @@ Three rules keep the two stages from drifting apart, all added with the room:
 - **25 draw calls, 1,886 triangles, 4 programs, no textures**, for the whole
   scene at 620 x 320.
 - **60 fps** (16.7 ms median frame) through the reveal measured on the dev Mac.
-  A mid-range Android measurement is still outstanding, and until it is taken
-  the mobile budget is unproven.
+- **Phone-class budget (measured 2026-10-14, `npm run measure:reveal-room`).**
+  There is no Android device on this machine, so this is a calibrated throttle
+  and not a phone: Chrome's own CPU throttling at 4x (the mechanism behind
+  DevTools' "4x slowdown"), a 412 x 915 viewport at DPR 2.625, and slow-4G
+  network emulation, measured through the production build. The choreography
+  held **59.88 fps median, p95 17.7 ms, 4 missed vsyncs in 316 frames, and zero
+  main-thread tasks over 50 ms** while it ran. The one heavy task is start-up:
+  building the scene and compiling its four programs takes 116 ms at 4x, before
+  the first frame, which puts the room on screen **86 ms after the tap** (53 ms
+  on this Mac). The render surface is small by any phone's standard —
+  **660 x 340, about 0.2 megapixels**, 25 draw calls, 1,886 triangles, 4
+  programs, no textures, with the pixel ratio capped at 2.
+- **What that still does not prove.** CPU throttling does not slow the GPU, so
+  the phone's own driver and its thermal envelope are unmeasured, and a device
+  trace remains the confirmation. The harness also runs the scene under
+  SwiftShader to bound the GPU — and that run is reported as a diagnostic, not
+  as a bar, because a CPU rasteriser is not a phone GPU: it misses frames by
+  5-40x depending on the run, and cutting its pixel count by four did not change
+  that, so its cost is its own fixed overhead rather than the fill a phone would
+  do. It is not evidence in either direction, which is why the criterion above
+  closes on the throttled measurement and names the GPU as the residual.
 - Below the target the room falls back rather than degrading.
 
 **Mobile.** Portrait framing: the camera pulls back rather than cropping. The
