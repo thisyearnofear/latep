@@ -162,6 +162,13 @@ window.__perfRenderer = () => {
 `;
 
 const round2 = (n) => Math.round(n * 100) / 100;
+
+/** Largest of a set, or null when there is nothing to take a largest of. */
+const largest = (values) => (values.length ? Math.max(...values) : null);
+
+/** A figure for the report: never -Infinity when a round measured nothing. */
+const shown = (value) =>
+  Number.isFinite(value) ? `${value}ms` : "not measured";
 const pct = (values, p) => {
   if (!values.length) return 0;
   const sorted = [...values].sort((a, b) => a - b);
@@ -305,30 +312,38 @@ async function measureProfile(browser, profile) {
     frames: all.reduce((n, r) => n + r.frames, 0),
     // Pace is reported over the worst round as well as the median round: a
     // reveal that stutters once in three is not a smooth reveal.
-    medianMs: round2(
-      pct(
-        all.map((r) => r.medianMs),
-        50,
-      ),
-    ),
-    p95Ms: Math.max(...all.map((r) => r.p95Ms)),
-    worstMs: Math.max(...all.map((r) => r.worstMs)),
-    fps: round2(
-      pct(
-        all.map((r) => r.fps),
-        50,
-      ),
-    ),
+    // Each figure is null when nothing was measured, rather than -Infinity or
+    // a zero that would read as a clean run.
+    medianMs: all.length
+      ? round2(
+          pct(
+            all.map((r) => r.medianMs),
+            50,
+          ),
+        )
+      : null,
+    p95Ms: largest(all.map((r) => r.p95Ms)),
+    worstMs: largest(all.map((r) => r.worstMs)),
+    fps: all.length
+      ? round2(
+          pct(
+            all.map((r) => r.fps),
+            50,
+          ),
+        )
+      : null,
     dropped: all.reduce((n, r) => n + r.dropped, 0),
-    roomMountMs: round2(
-      pct(
-        all.filter((r) => r.roomMountMs !== null).map((r) => r.roomMountMs),
-        50,
-      ),
-    ),
-    setupLongestTaskMs: Math.max(...all.map((r) => r.setupLongestTaskMs)),
-    choreographyLongestTaskMs: Math.max(
-      ...all.map((r) => r.choreographyLongestTaskMs),
+    roomMountMs: all.some((r) => r.roomMountMs !== null)
+      ? round2(
+          pct(
+            all.filter((r) => r.roomMountMs !== null).map((r) => r.roomMountMs),
+            50,
+          ),
+        )
+      : null,
+    setupLongestTaskMs: largest(all.map((r) => r.setupLongestTaskMs)),
+    choreographyLongestTaskMs: largest(
+      all.map((r) => r.choreographyLongestTaskMs),
     ),
     longTasks: all.reduce((n, r) => n + r.longTasks, 0),
   };
@@ -343,29 +358,32 @@ async function measureProfile(browser, profile) {
   // findings are reported and decide nothing. The room-mount check above still
   // applies: a diagnostic of the wrong renderer is worthless too.
   if (!profile.gate) return { profile, renderer, rounds, merged, failures };
+  // A null figure means nothing was measured, which the finding above already
+  // covers; comparing it against a bar would add a second, nonsense finding.
+  const over = (value, bar) => Number.isFinite(value) && value > bar;
   if (!merged.frames)
     failures.push("no frames were sampled after the room's first frame");
-  if (merged.medianMs > BAR.medianFrameMs) {
+  if (over(merged.medianMs, BAR.medianFrameMs)) {
     failures.push(
       `median frame ${merged.medianMs}ms is over the ${BAR.medianFrameMs}ms floor`,
     );
   }
-  if (merged.p95Ms > BAR.p95FrameMs) {
+  if (over(merged.p95Ms, BAR.p95FrameMs)) {
     failures.push(
       `p95 frame ${merged.p95Ms}ms is over the ${BAR.p95FrameMs}ms bar`,
     );
   }
-  if (merged.worstMs > BAR.worstFrameMs) {
+  if (over(merged.worstMs, BAR.worstFrameMs)) {
     failures.push(
       `worst frame ${merged.worstMs}ms is over the ${BAR.worstFrameMs}ms bar`,
     );
   }
-  if (merged.choreographyLongestTaskMs > BAR.worstLongTaskMs) {
+  if (over(merged.choreographyLongestTaskMs, BAR.worstLongTaskMs)) {
     failures.push(
       `longest main-thread task during the choreography ${merged.choreographyLongestTaskMs}ms is over the ${BAR.worstLongTaskMs}ms bar`,
     );
   }
-  if (merged.roomMountMs > BAR.setupMs) {
+  if (over(merged.roomMountMs, BAR.setupMs)) {
     failures.push(
       `the room's first frame took ${merged.roomMountMs}ms to arrive, over the ${BAR.setupMs}ms bar`,
     );
@@ -413,10 +431,10 @@ async function measureProfile(browser, profile) {
         }`,
       );
       console.log(
-        `  choreography: ${m.frames} frames over ${m.rounds} reveal(s) | median ${m.medianMs}ms (${m.fps} fps) | p95 ${m.p95Ms}ms | worst ${m.worstMs}ms | missed vsyncs ${m.dropped}`,
+        `  choreography: ${m.frames} frames over ${m.rounds} reveal(s) | median ${shown(m.medianMs)}${Number.isFinite(m.fps) ? ` (${m.fps} fps)` : ""} | p95 ${shown(m.p95Ms)} | worst ${shown(m.worstMs)} | missed vsyncs ${m.dropped}`,
       );
       console.log(
-        `  start-up: room's first frame ${m.roomMountMs}ms after the tap | longest task before it ${m.setupLongestTaskMs}ms, during the choreography ${m.choreographyLongestTaskMs}ms`,
+        `  start-up: room's first frame ${shown(m.roomMountMs)} after the tap | longest task before it ${shown(m.setupLongestTaskMs)}, during the choreography ${shown(m.choreographyLongestTaskMs)}`,
       );
       for (const failure of result.failures) {
         console.log(`  ${profile.gate ? "✗" : "·"} ${failure}`);

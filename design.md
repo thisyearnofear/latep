@@ -444,14 +444,13 @@ Three rules keep the two stages from drifting apart, all added with the room:
   network emulation, measured through the production build. The choreography
   held **59.88 fps median, p95 17.7 ms, 4 missed vsyncs in 316 frames, and zero
   main-thread tasks over 50 ms** while it ran. The one heavy task is start-up:
-  building the scene and compiling its four programs takes 116 ms at 4x, before
-  the first frame, which puts the room on screen **86 ms after the tap** (53 ms
-  on this Mac). The render surface is small by any phone's standard —
+  building the scene and compiling its four programs takes 110-116 ms at 4x,
+  before the first frame, which puts the room on screen **84-91 ms after the tap**
+  (51-57 ms on this Mac). The render surface is small by any phone's standard —
   **660 x 340, about 0.2 megapixels**, 25 draw calls, 1,886 triangles, 4
-  programs, no textures, with the pixel ratio capped at 2. These are one run of
-  three; across them the spread is a few milliseconds (p95 17.7-18.6 ms, first
-  frame 86-91 ms), so read them as the pace the reveal holds rather than as a
-  single sample.
+  programs, no textures, with the pixel ratio capped at 2. The figures above are
+  one run of four; across them the spread is a few milliseconds (p95 17.6-18.6
+  ms), so read them as the pace the reveal holds rather than as a single sample.
 - **What that still does not prove.** CPU throttling does not slow the GPU, so
   the phone's own driver and its thermal envelope are unmeasured, and a device
   trace remains the confirmation. The harness also runs the scene under

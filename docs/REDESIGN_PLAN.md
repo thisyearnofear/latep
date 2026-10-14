@@ -603,11 +603,11 @@ routing and fallback.
      DevTools mechanism for approximating a mid-range device, not a phone. The
      choreography held **59.88 fps median, p95 17.7 ms, 4 missed vsyncs in 316
      frames, and no main-thread task over 50 ms while it ran**; the heaviest
-     task is start-up (scene build and four program compiles, 116 ms at 4x,
-     before anything is on screen), which puts the room's first frame **86 ms
-     after the tap** against 53 ms on this Mac. The frame it draws is small:
+     task is start-up (scene build and four program compiles, 110-116 ms at 4x,
+     before anything is on screen), which puts the room's first frame **84-91 ms
+     after the tap** against 51-57 ms on this Mac. The frame it draws is small:
      a 660 x 340 surface (~0.2 Mpx) with the pixel ratio capped at 2, 25 draw
-     calls, 1,886 triangles, no textures; those are one run of three, and the
+     calls, 1,886 triangles, no textures; those are one run of four, and the
      spread across them is a few milliseconds on every figure. **Still
      unmeasured:** the phone's own
      GPU, driver and thermal envelope — CPU throttling does not slow the GPU,
