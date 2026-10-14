@@ -179,8 +179,7 @@ export const FirstRunWizard: React.FC<{
                       onClick={() => handleStart(step)}
                       className="wizard-step__cta"
                     >
-                      {step.cta}{" "}
-                      <ArrowRight size={16} aria-hidden="true" />
+                      {step.cta} <ArrowRight size={16} aria-hidden="true" />
                     </button>
                   )}
                 </li>
