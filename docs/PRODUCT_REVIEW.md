@@ -4,6 +4,12 @@ Comprehensive review of product design, UI/UX, system architecture, reliability/
 
 ## Product direction — September 2026
 
+> **Superseded in part, 2026-10-14.** The owner chose a 3D reveal room with a
+> 2D fallback. The "no second animation engine" and "reserve Three.js" lines
+> below are amended by `design.md` §12 and `REDESIGN_PLAN.md` Decision 6. The
+> rest of this section still holds. The text below is kept as the historical
+> record.
+
 The next demo iteration is an interactive world about trust, not a dashboard with more effects.
 
 ### Agreed primitives

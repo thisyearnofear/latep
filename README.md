@@ -24,6 +24,8 @@ Entered as the education + games story: playable wallet-free tutorial/tournament
 
 ## Docs
 
+- `design.md` — the design system and the reveal-room direction (the source of truth for look and motion)
+- `docs/REDESIGN_PLAN.md` — redesign phases, tickets and review rules
 - `docs/HACKMERIDIAN.md` — the three-pattern story, Pattern 3 (private reputation) spec, HackMeridian plan
 - `docs/PITCH.md` — pitch script, submission copy, two-wallet demo runbook
 - `docs/PRODUCT_REVIEW.md` — honest product review, gaps, what was fixed

@@ -13,6 +13,11 @@ import { defineConfig, devices } from "@playwright/test";
  *
  * Output:
  *   e2e/demo-footage/<segment>/video.webm
+ *
+ * The `s1-reveal-room` project is the same kind of thing for one artifact: the
+ * recording Decision 6 asks the owner to review before the reveal room spreads
+ * to other screens (docs/REDESIGN_PLAN.md). It is a separate project so it can
+ * be re-recorded on its own, without walking the whole demo.
  */
 export default defineConfig({
   testDir: "./e2e",
@@ -39,7 +44,15 @@ export default defineConfig({
   projects: [
     {
       name: "demo-capture",
+      testIgnore: "**/capture-s1-reveal-room.spec.ts",
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "s1-reveal-room",
+      testMatch: "**/capture-s1-reveal-room.spec.ts",
+      // The installed Chrome channel, like scripts/shots.cjs and
+      // scripts/check-hidden-moves.cjs: no browser download needed to record.
+      use: { ...devices["Desktop Chrome"], channel: "chrome" },
     },
   ],
 });

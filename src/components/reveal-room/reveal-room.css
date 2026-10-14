@@ -1,0 +1,97 @@
+/* ============================================================================
+ * The reveal room — design.md §12.
+ *
+ * Only the frame, the lettering, and the fallback surface live here: the table,
+ * the figures and the thread are drawn in WebGL. Every value is a token, and
+ * the scene box matches the 2D stage's footprint exactly, so swapping between
+ * the two never moves the page (see .trust-scene in trust-experiment.css).
+ * ========================================================================== */
+
+.reveal-room {
+  display: block;
+}
+
+.reveal-room-scene {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  margin-inline: auto;
+  aspect-ratio: 620 / 320;
+  max-height: 340px;
+  overflow: hidden;
+  /* The desk, painted before WebGL's first frame so the box never flashes. */
+  background: var(--color-counter);
+}
+
+.reveal-room-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* The renderer is created with `updateStyle: false`, so the canvas keeps its
+   own pixel size and takes its layout size from here. */
+.reveal-room-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* --- the two players, labelled on the sheet -------------------------------- */
+
+.reveal-room-label {
+  position: absolute;
+  bottom: var(--space-3xs);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.reveal-room-label-you {
+  left: var(--space-xs);
+  color: var(--color-you-print);
+}
+
+.reveal-room-label-partner {
+  right: var(--space-xs);
+  /* The partner's name is the player's own string, so it can be longer than
+     the box on a narrow screen. Truncate rather than wrap into the figures. */
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-partner-print);
+}
+
+/* --- the outcome, pressed onto the paper ----------------------------------- */
+
+/* No transform here: GSAP owns this element's transform for the stamp, so the
+   centring has to come from the box, not from translateX(-50%). */
+.reveal-room-plate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8%;
+  width: max-content;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  transform-origin: 50% 50%;
+}
+
+.reveal-room-word {
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-print-label);
+  color: var(--color-receipt-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The room is normally gated off here; this covers `?room=on`. */
+  .reveal-room-plate {
+    opacity: 1;
+    transform: none;
+  }
+}

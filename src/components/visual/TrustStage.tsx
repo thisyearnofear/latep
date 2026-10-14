@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
-import { TrustFallCharacter, type CharacterState } from "../TrustFallCharacter";
+import { TrustFallCharacter } from "../TrustFallCharacter";
+import { posesFor } from "./outcomePoses";
 import { Receipt, ReceiptStub, Stamp } from "../receipt";
 import { Thread } from "../receipt/Thread";
 import type { GameMove } from "../../util/strategies";
 import {
+  drawnTwists,
   getOutcome,
   MOVE_LABEL,
   MAX_DRAWN_TWISTS,
@@ -44,56 +46,9 @@ export interface TrustStageProps {
   onRevealComplete?: () => void;
 }
 
-/* ============================================================================
- * The four outcomes — design.md §7.
- *
- * This table replaces the old `outcomeActorState`. A reviewer should be able
- * to check every move pair against design.md §7 and find it here, in the same
- * order, with the same words:
- *
- *   you / partner   word          pose you / pose partner   thread
- *   ---------------------------------------------------------------------
- *   C  / C         Held          held       / held          twisted
- *   C  / D         Dropped       toppled    / holding-back  snapped
- *   D  / C         You took it   holding-back / toppled     snapped
- *   D  / D         Standoff      holding-back / holding-back slack
- *
- * The thread state comes from `getOutcome` (content/vocabulary.ts), which is
- * the single source of truth; only the poses live here, because they are a
- * property of the drawing rather than of the words.
- *
- * Before the reveal there is no outcome at all: both figures hold their seal,
- * the thread is loose, and no move value is anywhere in the DOM.
- * ========================================================================== */
-
-const OUTCOME_POSES: Record<
-  string,
-  { you: CharacterState; partner: CharacterState }
-> = {
-  // C / C — Held: both lean in, palms meet, both are held up.
-  CC: { you: "held", partner: "held" },
-  // C / D — Dropped: you leaned in, they held back; you go over.
-  CD: { you: "toppled", partner: "holding-back" },
-  // D / C — You took it: the reverse. The leaner goes over, not you.
-  DC: { you: "holding-back", partner: "toppled" },
-  // D / D — Standoff: both upright and apart, nothing gained.
-  DD: { you: "holding-back", partner: "holding-back" },
-};
-
-/** Before anyone has chosen, both figures stand ready. */
-const READY_POSE: CharacterState = "standing";
-
-function posesFor(
-  phase: TrustStageState["phase"],
-  you?: GameMove,
-  partner?: GameMove,
-) {
-  if (phase !== "revealing" && phase !== "outcome") {
-    return { you: READY_POSE, partner: READY_POSE };
-  }
-  if (!you || !partner) return { you: READY_POSE, partner: READY_POSE };
-  return OUTCOME_POSES[`${you}${partner}`];
-}
+/* The pose table lives in ./outcomePoses.ts so the reveal room can pose the
+ * same rig in three dimensions without keeping a second copy (see the notes
+ * there for the design.md §7 table). */
 
 /** The stub each figure holds before the reveal. Never carries a move value. */
 function SealedStub({
@@ -131,6 +86,16 @@ export function TrustStage({
   const revealFired = useRef<string | number | null>(null);
 
   const revealed = state.phase === "revealing" || state.phase === "outcome";
+
+  /**
+   * The phase as far as the choreography is concerned. `outcome` is the same
+   * beat as `revealing`: app state merely finishes recording the round a moment
+   * after the reveal (TrustExperiment flips the phase 1100ms in, against a
+   * 950ms sequence). Keying the animation effect on the raw phase replayed the
+   * whole tear/pose/thread/stamp sequence at that moment, under the reader.
+   */
+  const choreography = state.phase === "outcome" ? "revealing" : state.phase;
+
   const playerMove = revealed ? state.playerMove : undefined;
   const opponentMove = revealed ? state.opponentMove : undefined;
 
@@ -153,11 +118,15 @@ export function TrustStage({
   const threadState: ThreadState = revealed
     ? getOutcome(playerMove!, opponentMove!).thread
     : "loose";
-  const threadTwists = revealed
-    ? threadState === "twisted"
-      ? Math.max(1, visualAltitude)
-      : 0
-    : 0;
+  // The braid's height comes from the shared rule (content/vocabulary.ts), so
+  // the 2D stage and the reveal room cannot disagree about how far the thread
+  // has been twisted. During the reveal it draws the height this round is about
+  // to earn — and then does not move when app state records it a beat later.
+  const threadTwists = drawnTwists(
+    threadState,
+    altitude,
+    state.phase === "outcome",
+  );
 
   // --- Reveal choreography: stubs tear, poses and thread, then the stamp. ---
   useEffect(() => {
@@ -187,14 +156,14 @@ export function TrustStage({
           return;
         }
 
-        if (state.phase === "choose" || state.phase === "idle") {
+        if (choreography === "choose" || choreography === "idle") {
           reset();
           gsap.from(actors, {
             y: -6 * (compact ? 0.5 : 1),
             duration: 0.3,
             ease: "power2.out",
           });
-        } else if (state.phase === "sealed") {
+        } else if (choreography === "sealed") {
           reset();
           gsap.from(stubs, {
             scale: 0.94,
@@ -202,7 +171,7 @@ export function TrustStage({
             duration: 0.24,
             ease: "power2.out",
           });
-        } else if (state.phase === "revealing" || state.phase === "outcome") {
+        } else if (choreography === "revealing") {
           // The one orchestrated moment. Durations match design.md §8's
           // sequence: tear 200ms, poses + thread 600ms, stamp 150ms.
           const tl = gsap.timeline();
@@ -225,8 +194,12 @@ export function TrustStage({
               { y: 0, duration: 0.6, ease: "power2.out" },
               0.2,
             )
+            // The stamp the reveal prints. This selector used to read
+            // ".trust-scene-stamp", which matches nothing in the markup — the
+            // element is the `.trust-seal-revealed` stub above — so the one
+            // press in the sequence was never animated.
             .fromTo(
-              ".trust-scene-stamp",
+              ".trust-seal-revealed",
               { opacity: 0, scale: 1.25, rotation: -9 },
               {
                 opacity: 1,
@@ -248,7 +221,7 @@ export function TrustStage({
       media.removeEventListener("change", onChange);
       ctx.revert();
     };
-  }, [state.phase, playerMove, opponentMove, roundKey, compact]);
+  }, [choreography, playerMove, opponentMove, roundKey, compact]);
 
   /**
    * Tell the caller the reveal has landed. Fires once per round, and never
