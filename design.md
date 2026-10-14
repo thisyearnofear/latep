@@ -448,7 +448,10 @@ Three rules keep the two stages from drifting apart, all added with the room:
   the first frame, which puts the room on screen **86 ms after the tap** (53 ms
   on this Mac). The render surface is small by any phone's standard —
   **660 x 340, about 0.2 megapixels**, 25 draw calls, 1,886 triangles, 4
-  programs, no textures, with the pixel ratio capped at 2.
+  programs, no textures, with the pixel ratio capped at 2. These are one run of
+  three; across them the spread is a few milliseconds (p95 17.7-18.6 ms, first
+  frame 86-91 ms), so read them as the pace the reveal holds rather than as a
+  single sample.
 - **What that still does not prove.** CPU throttling does not slow the GPU, so
   the phone's own driver and its thermal envelope are unmeasured, and a device
   trace remains the confirmation. The harness also runs the scene under

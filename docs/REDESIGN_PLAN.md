@@ -607,7 +607,9 @@ routing and fallback.
      before anything is on screen), which puts the room's first frame **86 ms
      after the tap** against 53 ms on this Mac. The frame it draws is small:
      a 660 x 340 surface (~0.2 Mpx) with the pixel ratio capped at 2, 25 draw
-     calls, 1,886 triangles, no textures. **Still unmeasured:** the phone's own
+     calls, 1,886 triangles, no textures; those are one run of three, and the
+     spread across them is a few milliseconds on every figure. **Still
+     unmeasured:** the phone's own
      GPU, driver and thermal envelope — CPU throttling does not slow the GPU,
      so a device trace is the confirmation. The harness's SwiftShader profiles
      are printed as diagnostics and gate nothing, because a CPU rasteriser is
