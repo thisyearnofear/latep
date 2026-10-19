@@ -371,9 +371,57 @@
   color: var(--color-counter-text);
 }
 
+/* --- commit = ink (design.md §8) -------------------------------------------
+   Committing a move fills the tile with ink along a wipe. The second copy of
+   the label rides on top of the ink layer and is clipped to the same edge, so
+   the words invert exactly as the ink reaches them. Both layers are driven by
+   `aria-pressed`, which app state sets — never by the animation finishing. */
+
+.trust-btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.trust-btn-ink {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  /* Same box as the button's own label, so the two copies sit on top of each
+     other rather than a few pixels apart. */
+  padding: inherit;
+  text-align: center;
+  background: var(--color-receipt-ink);
+  color: var(--color-receipt);
+  /* Empty until pressed. */
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path var(--dur-long) var(--ease-out);
+}
+
+.trust-btn[aria-pressed="true"] .trust-btn-ink {
+  clip-path: inset(0 0 0 0);
+}
+
+.trust-btn-label {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The design's own reduction: a flat fill, no wipe. */
+  .trust-btn-ink {
+    transition: none;
+  }
+}
+
+/* The committed tile is the most legible thing in the tray: it is the one
+   decision on screen. Only the tile that was NOT chosen is dimmed. */
 .trust-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.trust-btn:disabled[aria-pressed="true"] {
+  opacity: 1;
+  cursor: default;
 }
 
 .trust-btn:not(:disabled):hover {

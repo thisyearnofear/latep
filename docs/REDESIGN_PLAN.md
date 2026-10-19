@@ -85,8 +85,10 @@ Four product shifts carry most of the impact. The restyle supports them:
    components are left alone until then.
 6. **Every PR includes before/after screenshots** at 390 and 1440 px for each
    route it touches (`npm run shots`, section 4).
-7. **No new dependencies** except `lucide-react` (ticket B1). Ask before
-   adding anything else. Fonts are self-hosted woff2 (Fontsource, latin
+7. **No new dependencies** except `lucide-react` (ticket B1) and `three` for
+   spike S1 (Decision 6) — it was already in the tree, and the room was built
+   on it directly, so **R3F and drei were not needed**. Ask before adding
+   anything else. Fonts are self-hosted woff2 (Fontsource, latin
    subset) in `public/fonts/`, loaded via `src/styles/fonts.css` — not Google
    Fonts, not npm imports (the packages were only the download vehicle).
 8. **Strings live in one place.** Primitive names and everyday lines come from
@@ -189,8 +191,32 @@ and screenshots `/`, `/learn`, `/learn/play`, `/tournament`, `/play`,
 them, per `AGENTS.md`). Uses Playwright with `channel: "chrome"` so no browser
 download is needed.
 
+**`npm run check:stage-parity`** (`scripts/check-stage-parity.cjs`) drives both
+reveal stages through the same deterministic round — Held, taken, standoff,
+dropped — and **fails if they disagree about the trust height, if that height
+moves when app state settles the round a beat after the reveal starts, if a
+braid is drawn for a thread that is not `twisted`, or if either reveal runs
+twice.** The count is measured off the drawing, never from the props: the SVG
+polyline the 2D stage prints, and the `TubeGeometry` three builds for the room.
+A check that compared `drawnTwists()` calls would pass while both stages drew
+the same wrong thing, which is the bug it exists to catch. Both its guards were
+proven by re-introducing each regression (keying the 2D choreography to the raw
+phase: 218 writes after the flip; keying the room's scene to the phase: the
+scene rebuilt at the flip) and watching it exit 1. Needs a running `npm run dev`.
+
+**`npm run measure:reveal-room`** (`scripts/measure-reveal-room.cjs`) is not a
+per-PR check — it measures the reveal's frame pacing, so it runs when something
+changes `reveal-room/`. It needs the production build (`npm run build && npm run
+preview`), applies a phone-class profile with CDP CPU and network throttling,
+and reports the choreography's median/p95/worst frame, missed vsyncs and the
+longest main-thread task in two windows: start-up before the room's first frame,
+and the choreography after it. It exits 1 on a missed bar under
+`MEASURE_STRICT=1`, and always exits 1 if the 2D fallback carried the reveal —
+numbers from the wrong renderer are worse than no numbers. Traces land in
+`e2e/perf/` (gitignored).
+
 **Every PR runs:** `npm run build`, `npm run lint`, `npm run design:check`,
-`npm run check:hidden-moves`, `npm run shots`.
+`npm run check:hidden-moves`, `npm run check:stage-parity`, `npm run shots`.
 
 **`npm run check:hidden-moves`** (`scripts/check-hidden-moves.cjs`) walks the
 DOM of every stage on every route that has one, and fails if a move value
@@ -545,6 +571,75 @@ listed bugs. Split large files into several PRs.
   `ErrorState.tsx`, `EmptyState.tsx`, `LoadingSpinner.tsx`: whoever finishes
   first takes them, announced in the team channel first.
 
+### Direction spike — the reveal room
+
+> **Status: approved to start (2026-10-14, Decision 6).** Runs after Phase 3
+> tickets that touch the same screens merge. It may start earlier on a branch
+> if the owner agrees. The room is specified in `design.md` §12.
+
+**S1 · Reveal room prototype** (L) — **built 2026-10-14.** Dev B, with Dev A on
+routing and fallback.
+
+- Files, as built: `src/components/reveal-room/` (`RevealRoom.tsx`,
+  `figure.ts`, `thread.ts`, `shaders.ts`, `tokens.ts`, `capability.ts`,
+  `load.ts`, `reveal-room.css`), plus `visual/RevealStage.tsx` (the router
+  between the two stages), `visual/outcomePoses.ts` (the pose table, lifted out
+  of `TrustStage.tsx` so both stages read one copy), the call site in
+  `TrustExperiment.tsx`, and the 2D tile's ink wipe in `trust-experiment.css`.
+  No `package.json` change: `three` was already a dependency.
+- Takes the same props as `TrustStage`. It does not compute outcomes or read
+  hidden moves, and `check:hidden-moves` still passes.
+- Pencil-to-ink commit on the 2D tiles (section 8) **and** on both cards at
+  reveal, so the two stages read as one language rather than two.
+- The 2D fallback shipped in the same change: capability probe, error
+  boundary, and lazy chunk.
+- Done-criteria scorecard:
+  1. **Met.** Lazy chunk 137 kB gzipped against a 150 kB ceiling; 0 bytes of
+     new assets; 25 draw calls and 1,886 triangles for the scene.
+  2. **Met on a calibrated proxy (2026-10-14), with the residual named.** No
+     Android device is available, so `npm run measure:reveal-room`
+     (`scripts/measure-reveal-room.cjs`) measures the production build under
+     Chrome's own 4x CPU throttling at 412 x 915 DPR 2.625 on slow 4G — the
+     DevTools mechanism for approximating a mid-range device, not a phone. The
+     choreography held **59.88 fps median, p95 17.7 ms, 4 missed vsyncs in 316
+     frames, and no main-thread task over 50 ms while it ran**; the heaviest
+     task is start-up (scene build and four program compiles, 110-116 ms at 4x,
+     before anything is on screen), which puts the room's first frame **84-91 ms
+     after the tap** against 51-57 ms on this Mac. The frame it draws is small:
+     a 660 x 340 surface (~0.2 Mpx) with the pixel ratio capped at 2, 25 draw
+     calls, 1,886 triangles, no textures; those are one run of four, and the
+     spread across them is a few milliseconds on every figure. **Still
+     unmeasured:** the phone's own
+     GPU, driver and thermal envelope — CPU throttling does not slow the GPU,
+     so a device trace is the confirmation. The harness's SwiftShader profiles
+     are printed as diagnostics and gate nothing, because a CPU rasteriser is
+     not evidence about a phone GPU either way.
+  3. **Met.** All four outcomes verified in the room (word, stamp and thread
+     state each), with WebGL unavailable and under reduced motion falling back
+     to the 2D stage that renders the same outcome.
+  4. **Met.** A keyboard-only round completes with the room on and off.
+  5. **Met.** The two stages agree on trust height in every outcome. Both draw
+     the twist count from `drawnTwists()` (`src/content/vocabulary.ts`), and
+     running the sequence Held, Held, taken, standoff, dropped on each stage
+     measured, off the drawing rather than the props, 1 then 2 turns and no
+     braid at all for the three non-`Held` outcomes — identical on both sides,
+     and constant across the moment app state settles the round.
+- Follow-up fixed in the same pass, both found while measuring: the 2D stage's
+  reveal choreography was keyed to the raw phase, so the phase flip ~150 ms
+  after the sequence ended replayed the whole sequence under the reader (216
+  style writes in one burst ending at 987 ms with the fix; 425 with a second
+  burst starting at 1355 ms without it); and the stamp beat targeted
+  `.trust-scene-stamp`, a class that is not in the markup, so that one press had
+  never animated.
+- The recording the gate asks for is `npm run demo:s1`
+  (`e2e/capture-s1-reveal-room.spec.ts`, output under `e2e/demo-footage/`,
+  gitignored): it plays all four outcomes in the room in one take and asserts,
+  as it records, that the room — not the fallback — carried each reveal.
+- Decision gate: **still open.** The owner reviews the S1 recording and
+  measurements before any other screen adopts the room. The room is now
+  opt-in (`?room=on`) pending that review; the default route uses the 2D stage.
+  If the gate fails, the 2D stage ships unchanged.
+
 ### Phase 4 — Clean up and prove it
 
 - **A7 · Remove legacy aliases** (S): delete the `LEGACY` block in
@@ -552,6 +647,16 @@ listed bugs. Split large files into several PRs.
 - **A8 · Mobile and a11y QA** (M): every route at 320/375/414/768/1440;
   keyboard-only run of the practice round, a lesson, and the tournament;
   contrast check on both surfaces with devtools; fix findings.
+  - **Width pass — verified 2026-10-19.** `SHOTS_STRICT=1 npm run shots`
+    captured 6 routes at 320/375/390/414/768/1440 (36 screenshots); the
+    reduced-motion pass captured the same 36 under `prefers-reduced-motion`.
+    Both runs reported **no horizontal overflow at any width**. With the dev
+    server running, `npm run check:hidden-moves` and
+    `npm run check:stage-parity` also pass. This closes the 320px caveat in
+    `PRODUCT_REVIEW.md`.
+  - **Still open:** keyboard-only walkthrough of the practice round, a lesson,
+    and the tournament; contrast check on both surfaces. The width floor is
+    verified; tap targets and text wrap are not.
 - **B8 · Motion QA** (S): reduced-motion pass on every animated screen; no
   `transition: all`, no springs; `--ease-feed` used only for the receipt feed;
   one orchestrated moment per view.
@@ -563,11 +668,13 @@ listed bugs. Split large files into several PRs.
   `visual/TopographicBackground.tsx`, `visual/TrustFallFigure.tsx` (+ exports
   dropped from `visual/index.ts`), `DemoRound.tsx`. Kept: `Character.tsx`
   (`AITutorPanel` still imports it — out of scope), `gsap` (live reveal
-  choreography), `howler` (opt-in audio). `three` has zero imports left and
-  can go from `package.json` in a lockfile-safe follow-up. Restore with
+  choreography), `howler` (opt-in audio). `three` is kept: the reveal room
+  (`design.md` §12) uses it. Do not remove it. Restore with
   `git revert e02b9a3`.
 - **Merge `redesign` → `main`** after the lead's final review and the 5-person
-  comprehension test from section 1.
+  comprehension test from section 1. The protocol and results table live in
+  [`COMPREHENSION_TEST.md`](COMPREHENSION_TEST.md); the table is not filled
+  yet.
 
 ---
 
@@ -651,3 +758,13 @@ Locked by the project owner (2026-10-12):
   2026-10-13 (`e02b9a3`). See B9 above for the kept/deleted ledger.
 - **Decision 5 — strategy display names in `src/util/strategies.ts`** may be
   edited for emoji removal only (B6).
+- **Decision 6 — the reveal room** (chosen by the project owner, 2026-10-14).
+  The 3D reveal room with the pencil-to-ink commit is the direction (`design.md`
+  §12). It amends the earlier rules against WebGL and runtime shaders, and the
+  "no second animation engine" rule in `PRODUCT_REVIEW.md`. Those are
+  amended by the same change, not overridden silently. Conditions: a 2D fallback
+  that ships with it, the budget in `design.md` §12, and the owner's sign-off on
+  spike S1 before wider use. **S1 is built (2026-10-14)** and its numbers are in
+  the scorecard above; the sign-off is the one condition still outstanding. World Labs' Marble is **not** on the shipping path.
+  Its beta terms restrict publishing outputs and allow training on inputs unless
+  opted out, and the beta is time-limited.

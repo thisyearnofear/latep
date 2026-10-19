@@ -46,7 +46,10 @@ const ROUTES = [
 const slug = (route) =>
   `${route.name}__${route.path.replace(/^\//, "").replace(/\//g, "-") || "root"}`;
 
-const short = (err) => String(err.message || err).split("\n")[0].slice(0, 60);
+const short = (err) =>
+  String(err.message || err)
+    .split("\n")[0]
+    .slice(0, 60);
 
 async function main() {
   let browser;
@@ -142,7 +145,9 @@ async function main() {
   );
 
   if (overflowing.length) {
-    console.log(`horizontal overflow (design.md §10 allows none):\n  ${overflowing.join("\n  ")}\n`);
+    console.log(
+      `horizontal overflow (design.md §10 allows none):\n  ${overflowing.join("\n  ")}\n`,
+    );
   } else {
     console.log("✓ no horizontal overflow at any width\n");
   }

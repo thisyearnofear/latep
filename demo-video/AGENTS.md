@@ -63,6 +63,23 @@ https://hyperframes.heygen.com/llms.txt
 - `meta.json` — project metadata (id, name)
 - `transcript.json` — whisper word-level transcript (if generated)
 
+## Media in git
+
+Track source, not output. Renders, screen captures, voice bounces, music,
+freeze frames and the social cut are generated and gitignored. A fresh clone
+has no media; rebuild it locally:
+
+1. Capture app footage from the repo root: `npm run demo:capture` (writes to
+   `e2e/demo-footage/`, gitignored).
+2. Generate voice/BGM from `audio_request.json` with the HyperFrames audio
+   workflow; keep the outputs under `assets/voice/` and `assets/bgm.mp3`.
+3. Transcode/copy the clips into `assets/` as `full-clip-*.webm` and the
+   freeze frames as `freeze-*.png`.
+4. `npm run render` here.
+
+`demo-video-social/` is a local variant with symlinked assets and its own
+cache; it is gitignored.
+
 ## Linting — ALWAYS RUN AFTER CHANGES
 
 After creating or editing any `.html` composition, **always** run the full check before considering the task complete:

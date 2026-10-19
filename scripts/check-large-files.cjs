@@ -8,6 +8,17 @@ const path = require("node:path");
 const LIMIT_MB = 2;
 const EXEMPT = [/^public\/assets\//];
 
+// Generated demo media is rejected by path, not only by size: the tracked
+// clips were under 2MB, so the size cap alone let them into history. Source
+// (HTML, compositions, config, docs) stays welcome; media is regenerated.
+const GENERATED_MEDIA = [
+  /^demo-video\/(?:renders|\.transcode-cache|capture\/assets|snapshots)\//,
+  /^demo-video\/assets\/.*\.(?:webm|mp4|wav|mp3|png)$/,
+  /^demo-video\/speech\.wav$/,
+  /^demo-video\/\.hyperframes\/(?:history-id|render-outputs\.json|video-state\.json|video-state-lock\/)/,
+  /^demo-video-social\//,
+];
+
 const staged = execSync("git diff --cached --name-only --diff-filter=ACM", {
   encoding: "utf8",
 })
@@ -15,8 +26,13 @@ const staged = execSync("git diff --cached --name-only --diff-filter=ACM", {
   .filter(Boolean);
 
 const offenders = [];
+const mediaOffenders = [];
 for (const file of staged) {
   if (EXEMPT.some((re) => re.test(file))) continue;
+  if (GENERATED_MEDIA.some((re) => re.test(file))) {
+    mediaOffenders.push(file);
+    continue;
+  }
   let size;
   try {
     size = fs.statSync(path.join(process.cwd(), file)).size;
@@ -26,6 +42,16 @@ for (const file of staged) {
   if (size > LIMIT_MB * 1024 * 1024) {
     offenders.push(`${(size / 1048576).toFixed(1)}MB  ${file}`);
   }
+}
+
+if (mediaOffenders.length) {
+  console.error(
+    `\n✗ Generated demo media cannot be committed:\n  ${mediaOffenders.join("\n  ")}\n` +
+      `Keep the demo-video source only. Renders, captures, voice bounces,\n` +
+      `music, freeze frames and the social cut are gitignored; see\n` +
+      `demo-video/AGENTS.md → "Media in git" for regeneration.\n`,
+  );
+  process.exit(1);
 }
 
 if (offenders.length) {

@@ -1,4 +1,4 @@
-import type { ThreadState } from "../../content/vocabulary";
+import { MAX_DRAWN_TWISTS, type ThreadState } from "../../content/vocabulary";
 
 /* ============================================================================
  * Thread — design.md §6.
@@ -36,8 +36,6 @@ export interface ThreadProps {
   className?: string;
 }
 
-const MAX_TWISTS = 5;
-
 /** Deterministic sine table so a twist never depends on Math.random(). */
 function twistOffset(t: number, turns: number, amp: number) {
   return Math.sin(t * Math.PI * 2 * turns) * amp;
@@ -63,7 +61,7 @@ export function Thread({
   // stays the same visual weight as it grows. Amplitude is capped so a short
   // thread doesn't turn into a scribble.
   const amp = Math.min(10, height / 4);
-  const turns = Math.max(0, Math.min(MAX_TWISTS, Math.round(twists)));
+  const turns = Math.max(0, Math.min(MAX_DRAWN_TWISTS, Math.round(twists)));
 
   const braidedPath = (phase: number) => {
     const points: string[] = [];

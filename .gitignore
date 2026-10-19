@@ -74,9 +74,33 @@ src/contracts/zk_dilemma/node_modules/
 # yarn.lock
 # pnpm-lock.yaml
 
-# Generated media — regenerable, keep out of history
+# Generated media — regenerable, keep out of history.
+# The demo-video project tracks source (HTML, compositions, config, docs) and
+# regenerates the rest; see demo-video/AGENTS.md → "Media in git".
 demo-video/renders/
+demo-video/.transcode-cache/
+demo-video/.hyperframes/history-id
+demo-video/.hyperframes/render-outputs.json
+demo-video/.hyperframes/video-state.json
+demo-video/.hyperframes/video-state-lock/
+demo-video/assets/*.webm
+demo-video/assets/*.mp4
+demo-video/assets/*.png
+demo-video/assets/*.mp3
+demo-video/assets/voice/
+demo-video/capture/assets/
+demo-video/snapshots/
+demo-video/speech.wav
+
+# The social cut is a local variant with symlinked assets and its own cache.
+# Ignore it until it is promoted to a standalone deliverable.
+demo-video-social/
+
 e2e/demo-footage/
 
 # Redesign review screenshots — regenerate with `npm run shots`
 e2e/shots/
+
+# Reveal-room performance traces (scripts/measure-reveal-room.cjs) — regenerate,
+# never commit them (AGENTS.md)
+e2e/perf/

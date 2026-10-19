@@ -11,7 +11,7 @@ A game-theory learning app (tutorial, tournament, ZK multiplayer) that doubles a
 1. **Move commitment binding** — prove a sealed move is valid at commit time, before the opponent stakes funds. Prevents commit-to-garbage griefing in any commit-reveal scheme.
 2. **Private accreditation** — prove allowlist membership without revealing which credential is yours. Same pattern as KYC-gated access; includes nullifier replay protection.
 
-A third pattern — **private reputation** (prove a track record without revealing it) — is spec'd but not built. See `docs/HACKMERIDIAN.md`.
+A third pattern — **private reputation** (prove a track record without revealing it) — is spec'd but not built. See `docs/HACKMERIDIAN.md` for the claim and `docs/MIDNIGHT_PLAN.md` for the build decision.
 
 ## What's real vs. demo scaffolding
 
@@ -24,7 +24,13 @@ Entered as the education + games story: playable wallet-free tutorial/tournament
 
 ## Docs
 
+- `design.md` — the design system and the reveal-room direction (the source of truth for look and motion)
+- `docs/REDESIGN_PLAN.md` — redesign phases, tickets and review rules
 - `docs/HACKMERIDIAN.md` — the three-pattern story, Pattern 3 (private reputation) spec, HackMeridian plan
+- `docs/MIDNIGHT_PLAN.md` — the Stellar × Midnight build decision: data path, sharpened gate, privacy wording
+- `docs/PATTERN3_TEST_VECTORS.md` — the shared Pattern 3 fixture and how the circuit, contract, and client consume it
+- `docs/PATTERN3_SEED.md` — identity-seed lifecycle: creation, backup, recovery, rotation, threat model
+- `docs/COMPREHENSION_TEST.md` — the 5-person protocol for the redesign's success criterion
 - `docs/PITCH.md` — pitch script, submission copy, two-wallet demo runbook
 - `docs/PRODUCT_REVIEW.md` — honest product review, gaps, what was fixed
 - `docs/ROADMAP.md` — build status, current design priority

@@ -357,11 +357,7 @@ export const PersonalityQuiz: React.FC<{
             </p>
 
             <div className="quiz-actions">
-              <button
-                type="button"
-                onClick={dismiss}
-                className="quiz-skip"
-              >
+              <button type="button" onClick={dismiss} className="quiz-skip">
                 Skip for now
               </button>
               <button

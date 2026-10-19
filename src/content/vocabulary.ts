@@ -144,3 +144,26 @@ export function transactionLine(confirmed: boolean, txId?: string) {
 /** Trust height = consecutive "Held" rounds. The drawing caps at 5 twists. */
 export const MAX_DRAWN_TWISTS = 5;
 export const MAX_DRAWN_TRUST = 5;
+
+/**
+ * How many turns the braid is drawn with — the one rule, for both stages.
+ *
+ * `altitude` is the height the caller has been told, and `settled` says whether
+ * that height already includes this round. During a reveal it has not: app state
+ * records the round a beat after the reveal starts, so the braid is drawn at the
+ * height the round is about to earn. Both the 2D stage and the reveal room call
+ * this, which is what stops them disagreeing about the height on screen — and
+ * what stops the count jumping when app state settles the round mid-animation.
+ *
+ * A thread that is not twisted draws no turns, whatever the height says: the
+ * drawing never claims a twist the outcome did not earn (design.md §6).
+ */
+export function drawnTwists(
+  thread: ThreadState,
+  altitude: number,
+  settled: boolean,
+): number {
+  if (thread !== "twisted") return 0;
+  const turns = settled ? altitude : altitude + 1;
+  return Math.min(Math.max(turns, 1), MAX_DRAWN_TWISTS);
+}

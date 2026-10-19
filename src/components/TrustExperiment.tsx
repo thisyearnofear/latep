@@ -1,7 +1,11 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Howl } from "howler";
-import { TrustStage, type TrustStageState } from "./visual/TrustStage";
+// The reveal is staged in the 3D reveal room where the device can run it, and
+// in the 2D stage everywhere else. `RevealStage` makes that choice
+// (design.md §12); this screen renders one stage either way.
+import { RevealStage } from "./visual/RevealStage";
+import type { TrustStageState } from "./visual/TrustStage";
 import { RoundReceipt } from "./receipt/RoundReceipt";
 import { primitiveForRound } from "./receipt/helpers";
 import { MOVE_HELPER, MOVE_LABEL } from "../content/vocabulary";
@@ -66,6 +70,29 @@ function roundReducer(state: RoundState, action: RoundAction): RoundState {
  * The result headline, in the locked vocabulary (design.md §7). The words on
  * the receipt are the canonical ones; these are just the sentence above it.
  */
+/**
+ * A committed move fills its tile with ink — design.md §8.
+ *
+ * The copy is drawn twice and the second one is clipped to the wipe, because
+ * the label has to change from ink-on-stock to stock-on-ink at exactly the
+ * moment the ink passes over it. One label would either vanish under the ink
+ * or stay legible while the tile inverted. The duplicate is hidden from the
+ * accessibility tree, so the button still reads as one word.
+ *
+ * The wipe is driven entirely by `aria-pressed`, which app state sets: the
+ * animation never decides anything.
+ */
+function MoveTileLabel({ label }: { label: string }) {
+  return (
+    <>
+      <span className="trust-btn-ink" aria-hidden="true">
+        {label}
+      </span>
+      <span className="trust-btn-label">{label}</span>
+    </>
+  );
+}
+
 const RESULT_TITLE: Record<string, string> = {
   CC: "You held each other up.",
   DC: "You took it. They leaned for nothing.",
@@ -220,7 +247,7 @@ export function TrustExperiment() {
         Illustration only — not a ZK proof or transaction.
       </p>
 
-      <TrustStage
+      <RevealStage
         state={stageState}
         roundKey={state.round}
         commitmentIllustration
@@ -241,7 +268,7 @@ export function TrustExperiment() {
                   aria-pressed={state.move === "C"}
                   onClick={() => dispatch({ type: "choose", move: "C" })}
                 >
-                  {MOVE_LABEL.C}
+                  <MoveTileLabel label={MOVE_LABEL.C} />
                 </button>
                 <span className="trust-choice-note">{MOVE_HELPER.C}</span>
               </div>
@@ -253,7 +280,7 @@ export function TrustExperiment() {
                   aria-pressed={state.move === "D"}
                   onClick={() => dispatch({ type: "choose", move: "D" })}
                 >
-                  {MOVE_LABEL.D}
+                  <MoveTileLabel label={MOVE_LABEL.D} />
                 </button>
                 <span className="trust-choice-note">{MOVE_HELPER.D}</span>
               </div>

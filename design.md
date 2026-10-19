@@ -20,12 +20,18 @@ The cryptography shows up as four things you already know from a counter: a
 **Seal** (a stamped stub), a **Handshake** (two torn halves that must match),
 a **Net** (woven thread), and a **Pass** (a punched ticket).
 
+**Pencil becomes ink.** Before a choice, both players are drawn in pencil:
+undecided, and the opponent stays pencil until reveal. Committing a move inks
+your side. At reveal both sides are inked together and the thread twists or
+snaps. Colour therefore means "decided", for you and for the other player.
+The reveal itself is staged in one 3D moment, the reveal room (section 12).
+
 **Why this direction.** Users called the old UI outdated, generic, and
 unrelated to their lives. Everyone keeps receipts, and "show me the receipts"
 already means "prove it", which is what a zero-knowledge proof does.
-Threads ("ties", "no strings attached") carry the relationship side. The look
-explains the mechanics instead of decorating them, and it's built from SVG
-and CSS, not WebGL.
+Threads ("ties", "no strings attached") carry the relationship side.The look explains the mechanics instead of decorating them. The 2D stage is built
+from SVG and CSS. The one 3D moment, the reveal room (section 12), is optional and
+falls back to the 2D stage.
 
 ---
 
@@ -57,14 +63,14 @@ need a value that doesn't exist, add it to `tokens.css` and this table.
 
 **Counter (the dark surface)**
 
-| Token                    | Value                 | Use                                     |
-| ------------------------ | --------------------- | --------------------------------------- |
-| `--color-counter`        | `oklch(23% 0.012 60)` | Page background                         |
-| `--color-counter-2`      | `oklch(28% 0.014 60)` | Raised strip on the counter (nav, tray) |
-| `--color-counter-rule`   | `oklch(38% 0.012 60)` | Hairlines on the counter                |
-| `--color-counter-text`   | `oklch(94% 0.010 85)` | Text on the counter                     |
-| `--color-counter-text-2` | `oklch(78% 0.012 80)` | Secondary text on the counter           |
-| `--color-counter-muted`  | `oklch(66% 0.012 75)` | Helper text on the counter (≥ 4.5:1)    |
+| Token                    | Value                  | Use                                             |
+| ------------------------ | ---------------------- | ----------------------------------------------- |
+| `--color-counter`        | `oklch(23% 0.012 60)`  | Page background                                 |
+| `--color-counter-2`      | `oklch(28% 0.014 60)`  | Raised strip on the counter (nav, tray)         |
+| `--color-counter-rule`   | `oklch(38% 0.012 60)`  | Hairlines on the counter                        |
+| `--color-counter-text`   | `oklch(94% 0.010 85)`  | Text on the counter                             |
+| `--color-counter-text-2` | `oklch(78% 0.012 80)`  | Secondary text on the counter                   |
+| `--color-counter-muted`  | `oklch(66% 0.012 75)`  | Helper text on the counter (≥ 4.5:1)            |
 | `--color-scrim`          | `oklch(0% 0 0 / 0.62)` | Modal overlay: the page stays legible behind it |
 
 **Receipt (the light surface)**
@@ -103,7 +109,9 @@ Rules:
   allowed is inside shadow tokens and `--color-scrim` (a modal must not erase
   the page behind it).
 - Texture: one static, pre-rendered dither/grain image on receipts at ≤ 6 %
-  opacity. No runtime shaders, canvas, or animated backgrounds.
+  opacity. No animated backgrounds. Runtime GLSL and WebGL are allowed only inside
+  the reveal room (section 12), behind a capability check, and never in page
+  chrome, receipts, or the 2D stage.
 
 ---
 
@@ -275,6 +283,11 @@ reveal**. Everything else is quiet.
 - `--ease-feed` (stepped) is the only non-smooth easing allowed, and only for
   the receipt feed. No springs, overshoot, shimmer, electric borders, custom
   cursors, hover glows, scroll-triggered fade-ups, or decorative loops.
+- **Commit = ink.** Committing a move fills your tile with ink along a brush-like
+  wipe (`clip-path` plus a noise mask, 420ms, `--ease-out`). It fires only when
+  app state confirms the move was sealed, never when an animation finishes. The
+  opponent's tile stays pencil until reveal. Under reduced motion it is a flat
+  fill with no wipe.
 - Buttons: `translateY(1px)` on press, background shift on hover. That's all.
 - `prefers-reduced-motion: reduce`: no feed, tear, or twist animation; final
   states appear with a 150ms opacity crossfade. The full flow still works.
@@ -332,3 +345,140 @@ Wordmark, tokens, the three fonts in their roles, the counter/receipt split,
 the receipt kit, the thread, the rig, the four marks, the vocabulary above,
 and the takeaway. Pages may differ only in which family layout they use
 (section 2).
+
+---
+
+## 12. The reveal room (direction, decided 2026-10-14)
+
+The one 3D moment in the product. Everything else is 2D. This section
+amends sections 1, 3 and 8, which previously ruled out WebGL and shaders.
+
+**What it is.** At reveal, the stage becomes a lit paper table. Each player's
+sealed stub is a card on it. The thread is a rope between two hands. The commit
+ink lands on both cards together. The camera settles on a close framing.
+
+**Status.** Built and measured (spike S1). The S1 sign-off is still open, so
+the room is **opt-in**: `?room=on` enables it on a device that can render it,
+and the default route uses the 2D stage. Once the owner signs off, the default
+can return to the capability probe (`shouldUseRevealRoom()`); `?room=off`
+remains the comparison path.
+
+**Engine and loading.**
+
+- Three.js directly, not React Three Fiber. `three` was already a dependency
+  and R3F plus drei would have been two new ones to buy a render loop that
+  GSAP already owns; the room is one component holding the scene's whole
+  lifetime, which is the case R3F helps least.
+- Lazy-loaded and code-split behind one dynamic import. Warms itself once the
+  choices are sealed (or after a breath on the choose step), so the download
+  is not paid at the peak of the round. Never fetched on a device that cannot
+  show it.
+- GLSL for the paper grain and the ink wipe. GSAP drives every animated value,
+  as in section 8; no shader reads a clock.
+- Procedural geometry and shaders only. No new asset files at all: no
+  generated worlds, no third-party or AI-generated models in v1.
+- The rig is the 2D rig. `trustFallRig.ts` is the single source of joint
+  numbers; the room walks the same joints and interpolates between poses the
+  way the 2D figure's CSS transitions do. The outcome pose table lives in
+  `components/visual/outcomePoses.ts` so both stages read one copy.
+
+**Two rules the camera has to obey.** Both were found the hard way and both are
+load-bearing:
+
+- **The sheet is sized to the frame, not to the figures.** A table sized to the
+  figures puts its far edge inside the shot, and everything above that edge is
+  empty space, which silhouettes two dark figures against a dark void. The
+  paper covers every pixel the camera can see and the renderer clears to stock,
+  so the figures are always on paper, as the 2D stage prints them.
+- **The camera's downward pitch exceeds its half-field-of-view.** Below that the
+  horizon is inside the frame and no sheet, however large, reaches the top of
+  it. The pitch is what makes the room a sheet rather than a strip.
+
+**Input and honesty.**
+
+- The room takes the same props as the 2D stage (`TrustStageProps`). It never
+  computes outcomes, never reads a hidden move, and never shows a pose or
+  thread state the 2D stage wouldn't.
+- It renders only in `revealing` and `outcome`, so it cannot show a card that
+  was not sealed, and there is nothing for it to reveal early.
+- Ink lands on a card because app state says the move was sealed. The same rule
+  drives the 2D tile's wipe: the animation never decides anything.
+- The stamp and the outcome word are printed markup beside the canvas, never
+  pixels inside it. The canvas is `aria-hidden`; the outcome is announced the
+  way it always was.
+- Lighting follows the outcome state. It adds no claim that the receipt doesn't
+  print.
+
+**Fallback and parity.** The 2D stage renders when WebGL is unavailable, when
+the device reports two cores or less or a 2 GB memory limit, or under
+`prefers-reduced-motion`. A render error or a chunk that never arrives falls
+back to the 2D stage mid-round without losing state. It shows the same states
+with the same words, stamps and thread states, and every outcome is legible
+without the 3D. The room is never the only carrier of meaning.
+
+Three rules keep the two stages from drifting apart, all added with the room:
+
+- **One twist count.** Both stages call `drawnTwists()`
+  (`src/content/vocabulary.ts`) instead of computing a braid height locally. A
+  thread that is not `twisted` draws no braid, whatever the height says.
+- **The height the round is earning.** App state records a round's height a beat
+  _after_ the reveal starts, so the reveal draws the height that round is
+  earning, and nothing moves when the state settles. Reading the settled height
+  instead made the 2D thread jump a turn mid-animation and left it one turn
+  behind the room for the rest of the round.
+- **The reveal is keyed to `revealing`, not to the raw phase.** `TrustStage`
+  collapses `outcome` onto `revealing` for its choreography, because app state
+  flips the phase ~150 ms after the sequence ends; keyed to the raw phase, the
+  tear/pose/thread/stamp sequence played a second time under the reader.
+
+**Budget (measured, spike S1).**
+
+- Lazy chunk: **137 kB gzipped** (536 kB raw, three included), against a
+  proposed ceiling of 150 kB. Plus 0.5 kB of CSS.
+- New asset weight: **0 bytes.** Every file stays under the 2 MB cap.
+- **25 draw calls, 1,886 triangles, 4 programs, no textures**, for the whole
+  scene at 620 x 320.
+- **60 fps** (16.7 ms median frame) through the reveal measured on the dev Mac.
+- **Phone-class budget (measured 2026-10-14, `npm run measure:reveal-room`).**
+  There is no Android device on this machine, so this is a calibrated throttle
+  and not a phone: Chrome's own CPU throttling at 4x (the mechanism behind
+  DevTools' "4x slowdown"), a 412 x 915 viewport at DPR 2.625, and slow-4G
+  network emulation, measured through the production build. The choreography
+  held **59.88 fps median, p95 17.7 ms, 4 missed vsyncs in 316 frames, and zero
+  main-thread tasks over 50 ms** while it ran. The one heavy task is start-up:
+  building the scene and compiling its four programs takes 110-116 ms at 4x,
+  before the first frame, which puts the room on screen **84-91 ms after the tap**
+  (51-57 ms on this Mac). The render surface is small by any phone's standard —
+  **660 x 340, about 0.2 megapixels**, 25 draw calls, 1,886 triangles, 4
+  programs, no textures, with the pixel ratio capped at 2. The figures above are
+  one run of four; across them the spread is a few milliseconds (p95 17.6-18.6
+  ms), so read them as the pace the reveal holds rather than as a single sample.
+- **What that still does not prove.** CPU throttling does not slow the GPU, so
+  the phone's own driver and its thermal envelope are unmeasured, and a device
+  trace remains the confirmation. The harness also runs the scene under
+  SwiftShader to bound the GPU — and that run is reported as a diagnostic, not
+  as a bar, because a CPU rasteriser is not a phone GPU: it misses frames by
+  5-40x depending on the run, and cutting its pixel count by four did not change
+  that, so its cost is its own fixed overhead rather than the fill a phone would
+  do. It is not evidence in either direction, which is why the criterion above
+  closes on the throttled measurement and names the GPU as the residual.
+- Below the target the room falls back rather than degrading.
+
+**Mobile.** Portrait framing: the camera pulls back rather than cropping. The
+room sits in the same box as the 2D scene and is sized the same way, so
+switching between them never moves the page. A tile inks when the move is
+sealed, on a tap or from the keyboard (section 8).
+
+**Not in v1.** Generated worlds, third-party or AI-generated models, a walkable
+corridor, and scroll-linked camera moves. Each needs its own decision. Also not
+in v1: contact shadows or any other gradient under the figures (section 3 bans
+decorative falloff), and physics on the thread — the four thread states are
+drawn, not simulated.
+
+**Influences.** Codrops, "Sketching the Impossible" (2026): a hover-paint
+shader on sketch textures. Codrops, "More Than a Portfolio" (2026): one
+continuous scroll-driven world. CodePen, "Receipt prints using
+animation-timeline" (2026): scroll-linked printing with a printed fallback.
+Nicky Case, _The Evolution of Trust_ (public domain, github.com/ncase/trust):
+the rule-changing explainer this game adapts. We borrow mechanisms from these,
+not their looks.

@@ -29,5 +29,11 @@ jobs:
       - name: Build application
         run: npm run build
 
+      - name: Check design-system ratchet
+        run: npm run design:check
+
+      - name: Check Pattern 3 vectors
+        run: npm run check:pattern3-vectors
+
       - name: Run tests
         run: npm test --if-present

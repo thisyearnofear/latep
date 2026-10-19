@@ -4,6 +4,12 @@ Comprehensive review of product design, UI/UX, system architecture, reliability/
 
 ## Product direction — September 2026
 
+> **Superseded in part, 2026-10-14.** The owner chose a 3D reveal room with a
+> 2D fallback. The "no second animation engine" and "reserve Three.js" lines
+> below are amended by `design.md` §12 and `REDESIGN_PLAN.md` Decision 6. The
+> rest of this section still holds. The text below is kept as the historical
+> record.
+
 The next demo iteration is an interactive world about trust, not a dashboard with more effects.
 
 ### Agreed primitives
@@ -50,12 +56,12 @@ Shared journey audio starts muted, loads existing assets on opt-in, synchronizes
 
 A fresh visitor can play without a modal or wallet; all controls work by keyboard and touch; opponent choice is not exposed before reveal; replay cannot race pending timers; reduced motion preserves the full flow; sound starts off; the stage works without WebGL; layouts remain usable at 320, 375, 414, 768, and desktop widths. No contract or proof-service changes are required for this slice.
 
-> **Caveat on the 320px claim (audited 2026-10-12).** Every media query in the
-> codebase bottoms out at `max-width: 400px`; there is no CSS below 400px. The
-> 320px floor therefore rests entirely on fluid layouts never overflowing and
-> has not been screenshot-verified at that width. The redesign retires this
-> claim one way or the other — either A8 verifies 320 in `npm run shots`, or the
-> documented floor moves to 360px (`REDESIGN_PLAN.md` A8).
+> **320px claim — verified 2026-10-19.** A8 ran `SHOTS_STRICT=1 npm run shots`
+> (36 captures: 6 routes × 320/375/390/414/768/1440) and the reduced-motion
+> pass; both reported no horizontal overflow at any width. With the dev server
+> running, `check:hidden-moves` and `check:stage-parity` also pass. The
+> remaining A8 items are keyboard-only walkthroughs and the contrast check, not
+> the width floor.
 
 The historical review below is retained as context; its implementation and deployment claims are not revalidated by this visual-design work.
 
@@ -236,7 +242,7 @@ failure surfaces instead of hanging. The 120s figure is deliberately far above
 the measured generation time — it is a hang-detector, not an expectation.
 Recovery is still a page reload.
 
-**~~Bundle size is large.~~** ✅ **Fixed.** bb.js and noir_js are now lazy-loaded via dynamic `import()`. The initial page load bundle is ~200KB; the ~10MB WASM only downloads when the user first triggers proof generation.
+**~~Bundle size is large.~~** ✅ **Mostly fixed.** bb.js and noir_js are now lazy-loaded via dynamic `import()`, so the ~10MB WASM only downloads when the user first triggers proof generation. The initial route is larger than the old ~200KB claim: the current production build's main chunk is **351.60 kB gzip** (1,084.73 kB raw), plus ~16 kB gzip for the React vendor chunk and ~24 kB gzip of CSS. Re-measure with `npm run build` before quoting a number.
 
 **Polling is inefficient.** The frontend polls `get_game` every 5 seconds for each active game. With N games, that's N requests every 5 seconds. No batching, no websocket, no event subscription.
 
