@@ -16,6 +16,7 @@
     "design:check:write": "node scripts/design-check.cjs --write",
     "check:hidden-moves": "node scripts/check-hidden-moves.cjs",
     "check:stage-parity": "node scripts/check-stage-parity.cjs",
+    "check:pattern3-vectors": "node scripts/check-pattern3-vectors.cjs",
     "measure:reveal-room": "node scripts/measure-reveal-room.cjs",
     "shots": "node scripts/shots.cjs",
     "prepare": "husky",

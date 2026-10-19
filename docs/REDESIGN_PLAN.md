@@ -648,6 +648,16 @@ routing and fallback.
 - **A8 · Mobile and a11y QA** (M): every route at 320/375/414/768/1440;
   keyboard-only run of the practice round, a lesson, and the tournament;
   contrast check on both surfaces with devtools; fix findings.
+  - **Width pass — verified 2026-10-19.** `SHOTS_STRICT=1 npm run shots`
+    captured 6 routes at 320/375/390/414/768/1440 (36 screenshots); the
+    reduced-motion pass captured the same 36 under `prefers-reduced-motion`.
+    Both runs reported **no horizontal overflow at any width**. With the dev
+    server running, `npm run check:hidden-moves` and
+    `npm run check:stage-parity` also pass. This closes the 320px caveat in
+    `PRODUCT_REVIEW.md`.
+  - **Still open:** keyboard-only walkthrough of the practice round, a lesson,
+    and the tournament; contrast check on both surfaces. The width floor is
+    verified; tap targets and text wrap are not.
 - **B8 · Motion QA** (S): reduced-motion pass on every animated screen; no
   `transition: all`, no springs; `--ease-feed` used only for the receipt feed;
   one orchestrated moment per view.
@@ -663,7 +673,9 @@ routing and fallback.
   (`design.md` §12) uses it. Do not remove it. Restore with
   `git revert e02b9a3`.
 - **Merge `redesign` → `main`** after the lead's final review and the 5-person
-  comprehension test from section 1.
+  comprehension test from section 1. The protocol and results table live in
+  [`COMPREHENSION_TEST.md`](COMPREHENSION_TEST.md); the table is not filled
+  yet.
 
 ---
 

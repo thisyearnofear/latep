@@ -5,8 +5,10 @@
 > [`REDESIGN_PLAN.md`](REDESIGN_PLAN.md) for phases and tickets. `main` is
 > frozen until the Oct 14 submission; all redesign work lands on `redesign`.
 >
-> **Next after the redesign:** Pattern 3 — Private Reputation, the
-> HackMeridian 2026 build. See [`HACKMERIDIAN.md`](HACKMERIDIAN.md).
+> **Next after the redesign:** Pattern 3 — Private Reputation. The claim and
+> product story are in [`HACKMERIDIAN.md`](HACKMERIDIAN.md); the Stellar ×
+> Midnight decision, data path, and gate are in
+> [`MIDNIGHT_PLAN.md`](MIDNIGHT_PLAN.md).
 
 ## Design priority — the redesign (Oct 2026)
 
@@ -84,7 +86,7 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
   → reveal ×2 → escrow settlement, resolved on testnet. Run log with tx hashes:
   [`E2E_TESTNET_RUN.md`](E2E_TESTNET_RUN.md).
 - ▶️ **Redesign execution** — `REDESIGN_PLAN.md`, starting at Phase 1 / A0.
-- ▶️ Pattern 3 (Private Reputation) spec + build — see `HACKMERIDIAN.md`
+- ▶️ Pattern 3 (Private Reputation) spec + build — see `HACKMERIDIAN.md` and `MIDNIGHT_PLAN.md`
 
 ## 🔧 Technical Debt & Optimizations
 
@@ -101,6 +103,7 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - ✅ **Dead code removal** — single-player contract stub removed, tutorial uses local simulation
 - ✅ **Strategy architecture** — refactored from stateless functions to stateful IteratedStrategy classes
 - ✅ **Payoff matrix** — refactored from hardcoded values to configurable PayoffMatrix interface
+- **Private reputation (pattern 3)** — prove a track record without revealing it. Spec'd in `docs/HACKMERIDIAN.md`; build plan in `docs/MIDNIGHT_PLAN.md`; shared fixture in `docs/PATTERN3_TEST_VECTORS.md`; seed lifecycle in `docs/PATTERN3_SEED.md`
 - **Performance monitoring** and optimization
 - **Accessibility compliance** (WCAG 2.1)
 - **Internationalization** support
