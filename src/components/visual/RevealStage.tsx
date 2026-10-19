@@ -2,9 +2,9 @@
  * The stage, with a choice of two renderers — design.md §12.
  *
  * `RevealStage` is what the round screens render. It draws `TrustStage`, the 2D
- * stage, in every case except the one it was built for: a device that can run
- * WebGL, a player who has not asked for reduced motion, and a reveal in
- * progress. Then the reveal room takes over.
+ * stage, by default. The reveal room takes over only when `?room=on` asks for
+ * it and the reveal is in progress. The S1 sign-off is still open, so the
+ * default stays 2D until the owner reviews the room.
  *
  * The 2D stage is not a degraded version of the room — it is the same stage
  * that has always carried the scene, and every state, word, stamp and thread
@@ -20,7 +20,8 @@
  *
  * `?room=on` and `?room=off` force one path or the other on one device, which
  * is how the room is reviewed and how the two are compared in a screenshot
- * pass.
+ * pass. When S1 is signed off, `shouldUseRevealRoom()` can return to the
+ * capability probe without touching this component.
  */
 
 import {

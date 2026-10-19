@@ -355,11 +355,13 @@ amends sections 1, 3 and 8, which previously ruled out WebGL and shaders.
 
 **What it is.** At reveal, the stage becomes a lit paper table. Each player's
 sealed stub is a card on it. The thread is a rope between two hands. The commit
-ink lands on both cards together. The camera settles on a close framing.**Status.** Built and measured (spike S1). It is live on the practice round for
-devices that pass the capability check; `?room=off` forces the 2D stage and
-`?room=on` forces the room on any device. If the S1 gate is failed, making it
-opt-in is one line: `revealRoomSupport()` returns `disabled` unless the query
-forces it.
+ink lands on both cards together. The camera settles on a close framing.
+
+**Status.** Built and measured (spike S1). The S1 sign-off is still open, so
+the room is **opt-in**: `?room=on` enables it on a device that can render it,
+and the default route uses the 2D stage. Once the owner signs off, the default
+can return to the capability probe (`shouldUseRevealRoom()`); `?room=off`
+remains the comparison path.
 
 **Engine and loading.**
 

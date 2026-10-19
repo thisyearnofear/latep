@@ -9,6 +9,9 @@
  * `?room=on` / `?room=off` override the probe. Reviewers and `npm run shots`
  * need both paths on one device, and the design-system gate asks for a
  * keyboard run with the room on and off.
+ *
+ * The S1 sign-off is still open (REDESIGN_PLAN.md), so the room is opt-in:
+ * the default route uses the 2D stage until `?room=on` asks for the room.
  */
 
 export type RevealRoomReason =
@@ -86,7 +89,10 @@ export function shouldUseRevealRoom(): boolean {
   const mode = revealRoomMode();
   if (mode === "off") return false;
   if (mode === "on") return true;
-  return revealRoomSupport() === "ok";
+  // S1 sign-off is still open (REDESIGN_PLAN.md). Keep the room opt-in until
+  // the owner reviews the recording; `revealRoomSupport()` is the switch to
+  // flip back to `=== "ok"` when the gate closes.
+  return false;
 }
 
 /**

@@ -636,10 +636,9 @@ routing and fallback.
   gitignored): it plays all four outcomes in the room in one take and asserts,
   as it records, that the room — not the fallback — carried each reveal.
 - Decision gate: **still open.** The owner reviews the S1 recording and
-  measurements before any other screen adopts the room. The room is currently
-  live on the practice round behind `?room=on`/`?room=off`; if the gate fails,
-  `revealRoomSupport()` returns `disabled` unless the query forces it, and the
-  2D stage ships unchanged.
+  measurements before any other screen adopts the room. The room is now
+  opt-in (`?room=on`) pending that review; the default route uses the 2D stage.
+  If the gate fails, the 2D stage ships unchanged.
 
 ### Phase 4 — Clean up and prove it
 
