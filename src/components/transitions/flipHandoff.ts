@@ -17,6 +17,7 @@ interface FlipStash {
   rect: FlipRect;
   entryId: string;
   at: number;
+  mode: "vt" | "manual";
 }
 
 let stash: FlipStash | null = null;
@@ -33,6 +34,7 @@ export function stashFlip(el: Element, entryId: string): void {
       },
       entryId,
       at: Date.now(),
+      mode: "manual",
     };
   } catch {
     stash = null;
@@ -50,4 +52,10 @@ export function takeFlip(): FlipStash | null {
 /** The id of the stash without consuming it — the outgoing layer hides it. */
 export function peekFlipId(): string | null {
   return stash && Date.now() - stash.at <= STASH_TTL_MS ? stash.entryId : null;
+}
+
+/** Called by the VT interceptor when a View Transition will carry the
+   receipt — the manual gsap flight then stands down. */
+export function markFlightVT(): void {
+  if (stash) stash.mode = "vt";
 }

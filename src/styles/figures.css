@@ -344,6 +344,7 @@
 
 .gallery__tab-name {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-md);
   letter-spacing: var(--tracking-display);
 }

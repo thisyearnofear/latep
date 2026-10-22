@@ -84,3 +84,89 @@
 [data-clone-hidden] {
   visibility: hidden;
 }
+
+/* ============================================================================
+ * View Transitions choreography (the prototype)
+ * Modes on <html data-vt>: "swap" = same surface, "feed" = surface change.
+ * ========================================================================== */
+
+::view-transition {
+  pointer-events: none;
+}
+
+/* swap: old fades out fast, new comes in after — sequenced, not together.
+   The page-title name morphs the old h1 (or clicked nav label) into the
+   new page's h1 via the default group animation. */
+html[data-vt="swap"]::view-transition-old(root) {
+  animation: vt-old-out 180ms var(--ease-in) both;
+}
+
+html[data-vt="swap"]::view-transition-new(root) {
+  animation: vt-new-in var(--dur-long) var(--ease-out) 120ms both;
+}
+
+html[data-vt="swap"]::view-transition-group(page-title) {
+  animation-duration: var(--dur-long);
+  animation-timing-function: var(--ease-out);
+}
+
+@keyframes vt-old-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-new-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* feed: desk ↔ counter — the new root prints in top-down, stepped like a
+   receipt; the old root stays put underneath. No title morph. */
+html[data-vt="feed"]::view-transition-old(root) {
+  animation: none;
+}
+
+html[data-vt="feed"]::view-transition-new(root) {
+  animation: vt-feed-in var(--dur-print) var(--ease-feed) both;
+}
+
+@keyframes vt-feed-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0% 0);
+  }
+}
+
+/* The shared name for the receipt that flies to /record (VT path). */
+.receipt-flight {
+  view-transition-name: receipt-flight;
+}
+
+h1[data-vt-title] {
+  view-transition-name: page-title;
+}
+
+/* Reduced motion: 150ms crossfade, no morph, no clip. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-group(page-title),
+  ::view-transition-group(receipt-flight),
+  ::view-transition-image-pair(page-title),
+  ::view-transition-image-pair(receipt-flight),
+  ::view-transition-old(page-title),
+  ::view-transition-new(page-title),
+  ::view-transition-old(receipt-flight),
+  ::view-transition-new(receipt-flight) {
+    animation-duration: 150ms;
+    animation-timing-function: linear;
+    clip-path: none;
+  }
+}

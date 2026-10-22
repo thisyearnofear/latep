@@ -30,6 +30,7 @@
   gap: var(--space-2xs);
   text-decoration: none;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   letter-spacing: var(--tracking-display);
   color: var(--color-counter-text);

@@ -86,11 +86,11 @@ const BASE = "http://localhost:5173";
     });
   await page.goto(BASE + "/", { waitUntil: "networkidle" });
   await page.waitForTimeout(900);
+  // Home's bands are now stacking sheets (dither edges moved to /real-life).
   const st1 = await page.evaluate(
-    () =>
-      (window.__stcount = document.querySelectorAll(".band[data-edge]").length),
+    () => document.querySelectorAll(".sheet").length,
   );
-  check("e) edges marked on Home", st1 >= 5, `bands=${st1}`);
+  check("e) sheets present on Home", st1 >= 7, `sheets=${st1}`);
 
   // reduced motion: no transform animates
   const page2 = await browser.newPage({
@@ -133,12 +133,14 @@ const BASE = "http://localhost:5173";
   if (await link.count()) {
     await link.click();
     await page.waitForTimeout(350); // mid-Flip
-    const midTransform = await page.evaluate(
-      () =>
-        !!document.querySelector(".record-slip[data-flip-id]") &&
-        getComputedStyle(document.querySelector(".record-slip[data-flip-id]"))
-          .transform !== "none",
-    );
+    const flight = await page.evaluate(() => {
+      const el = document.querySelector(".record-slip[data-flip-id]");
+      if (!el) return "missing";
+      if (getComputedStyle(el).transform !== "none") return "manual";
+      if (getComputedStyle(el).viewTransitionName === "receipt-flight")
+        return "vt";
+      return "none";
+    });
     const after = await page.evaluate(
       () =>
         JSON.parse(localStorage.getItem("latep:practice-record") || "[]")
@@ -149,11 +151,19 @@ const BASE = "http://localhost:5173";
       after === before + 1,
       `before=${before} after=${after}`,
     );
-    check("g) Flip ran (transform mid-flight)", midTransform === true);
+    check(
+      "g) receipt transitioned (vt name or transform)",
+      flight === "vt" || flight === "manual",
+      String(flight),
+    );
   } else {
     check("g) record link present", false, "link not found");
   }
 
+  check(
+    "h) startViewTransition used for nav clicks",
+    await page.evaluate(() => !!document.__vtUsed),
+  );
   check(
     "f) no console/page errors",
     errors.length === 0,

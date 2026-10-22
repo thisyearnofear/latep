@@ -171,6 +171,9 @@
    * except the network badge. Nothing has a shadow but a receipt.
    * ----------------------------------------------------------------------- */
   --radius-sm: 3px;
+  /* A chapter sheet's torn top edge, cast up onto the sheet beneath it
+     (design.md §13.6). Smaller than a receipt's: the sheet lies flat. */
+  --shadow-sheet: 0 -4px 8px oklch(0% 0 0 / 0.12);
   --shadow-receipt:
     0 1px 0 oklch(20% 0.01 60 / 0.18), 0 6px 18px oklch(0% 0 0 / 0.22);
 

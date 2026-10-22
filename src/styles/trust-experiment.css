@@ -112,6 +112,7 @@
 .trust-status {
   margin: 16px 0 4px;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
   text-align: center;
@@ -471,6 +472,7 @@
 .trust-result-title {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   color: var(--color-counter-text);
   scroll-margin-top: 128px;

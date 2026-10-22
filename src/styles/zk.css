@@ -104,6 +104,7 @@
 
 .zk-title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   color: var(--color-counter-text);
   margin: 0 0 var(--space-3xs) 0;
@@ -372,6 +373,7 @@
 
 .zk-commit__title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-receipt-ink);
   margin: 0 0 var(--space-3xs) 0;
@@ -603,6 +605,7 @@
 .zk-gameid__value {
   display: block;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   color: var(--color-counter-text);
   letter-spacing: 0.02em;
@@ -660,6 +663,7 @@
 
 .zk-setup__title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
   margin: 0 0 var(--space-3xs) 0;
@@ -753,6 +757,7 @@
 
 .zk-onboard__title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   color: var(--color-receipt-ink);
   margin: 0 0 var(--space-sm) 0;
@@ -1042,6 +1047,7 @@
 
 .zk-result__title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
   text-align: center;
@@ -1176,6 +1182,7 @@
 
 .zk-score__num {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
   margin-bottom: var(--space-3xs);
@@ -1278,6 +1285,7 @@
 
 .zk-stat__num {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
   line-height: 1.1;
@@ -1322,6 +1330,7 @@
 
 .zk-pass__title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   color: var(--color-counter-text);
   margin: 0 0 var(--space-2xs);

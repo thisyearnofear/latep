@@ -29,7 +29,13 @@ import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
 import { prefetchRoute } from "../App";
 import { DeskHero } from "../components/hero/DeskHero";
-import { useEdgeDissolve } from "../components/transitions/useEdgeDissolve";
+import {
+  useSheetStack,
+  useLineReveals,
+  useFocusAboveSheets,
+  useCurrentChapter,
+} from "../components/transitions/homeMotion";
+import { ChapterRail } from "../components/hero/ChapterRail";
 import { FigureGallery } from "../components/figures/FigureGallery";
 import { GALLERY_PLATES } from "../components/figures/figures";
 import { ClaimDemo } from "../components/claim/ClaimDemo";
@@ -104,7 +110,17 @@ function ChapterLabel({
 }
 
 const Home: React.FC = () => {
-  const rootRef = useEdgeDissolve<HTMLDivElement>();
+  const rootRef = useRef<HTMLDivElement>(null);
+  // The title variant is read once — ?type=1|2|3, default 1 (no switcher).
+  const typeRef = useRef(
+    new URLSearchParams(window.location.search).get("type") ?? "1",
+  );
+  const type = typeRef.current;
+  const chapterIds = CHAPTERS.map((c) => c.id);
+  const rail = useCurrentChapter(rootRef, chapterIds);
+  useSheetStack(rootRef);
+  useLineReveals(rootRef);
+  useFocusAboveSheets();
   const { address } = useWallet();
   const { unlock, milestones, stage } = useFirstRun();
   const profile = getStoredProfile();
@@ -141,7 +157,7 @@ const Home: React.FC = () => {
   }, [location.hash]);
 
   return (
-    <div className="home" ref={rootRef}>
+    <div className="home" data-type={type} ref={rootRef}>
       {intro === "welcome" && (
         <FirstRunWizard manual onClose={() => setIntro(null)} />
       )}
@@ -151,7 +167,11 @@ const Home: React.FC = () => {
 
       {/* The hero: the Desk plate on a sage wash, decoration around the
           headline. The headline renders first and carries the meaning. */}
-      <section className="home-hero" aria-label="Opening">
+      <section
+        className="home-hero sheet"
+        data-sheet="stack"
+        aria-label="Opening"
+      >
         <figure
           className="home-hero-figure"
           role="img"
@@ -161,8 +181,8 @@ const Home: React.FC = () => {
         </figure>
       </section>
 
-      <header className="home-opening band" data-edge>
-        <h1 className="home-title">
+      <header className="home-opening sheet" data-sheet="stack">
+        <h1 className="home-title" data-vt-title>
           {HERO.title}
           <br />
           <span className="home-title-tint">{HERO.tint}</span>
@@ -180,7 +200,8 @@ const Home: React.FC = () => {
 
       {/* 01 — the problem */}
       <section
-        className="chapter chapter--desk band"
+        className="chapter chapter--desk sheet"
+        data-sheet="stack"
         id={CHAPTERS[0].id}
         aria-labelledby={`${CHAPTERS[0].id}-h`}
       >
@@ -207,8 +228,8 @@ const Home: React.FC = () => {
 
       {/* 02 — the fourth option */}
       <section
-        className="chapter chapter--sand band"
-        data-edge
+        className="chapter chapter--sand sheet"
+        data-sheet="flow"
         id={CHAPTERS[1].id}
         aria-labelledby={`${CHAPTERS[1].id}-h`}
       >
@@ -224,6 +245,25 @@ const Home: React.FC = () => {
           <p className="chapter-lede">{FOURTH.line}</p>
           <p className="chapter-payoff">{FOURTH.payoff}</p>
           <p className="chapter-close">{FOURTH.close}</p>
+          {type === "2" && (
+            <p
+              className="chapter-figure"
+              aria-label={`${CLAIM_DEMO.collateralLabel}`}
+            >
+              <span className="chapter-figure-num">
+                {CLAIM_DEMO.stranger.collateralPct}%
+              </span>
+              <span className="chapter-figure-arrow" aria-hidden="true">
+                →
+              </span>
+              <span className="chapter-figure-num chapter-figure-num--moss">
+                {CLAIM_DEMO.holder.collateralPct}%
+              </span>
+              <span className="chapter-figure-cap">
+                {CLAIM_DEMO.collateralLabel}
+              </span>
+            </p>
+          )}
           <ClaimDemo />
         </div>
       </section>
@@ -231,8 +271,8 @@ const Home: React.FC = () => {
       {/* 03 — earn a record. The counter band: the stage lives here, so it
           keeps its own dark surface and reads as the workbench it is. */}
       <section
-        className="chapter chapter--counter band"
-        data-edge
+        className="chapter chapter--counter sheet"
+        data-sheet="flow"
         id={CHAPTERS[2].id}
         aria-labelledby={`${CHAPTERS[2].id}-h`}
       >
@@ -256,8 +296,8 @@ const Home: React.FC = () => {
 
       {/* 04 — where it goes */}
       <section
-        className="chapter chapter--sage band"
-        data-edge
+        className="chapter chapter--sage sheet"
+        data-sheet="stack"
         id={CHAPTERS[3].id}
         aria-labelledby={`${CHAPTERS[3].id}-h`}
       >
@@ -288,8 +328,8 @@ const Home: React.FC = () => {
 
       {/* 05 — underneath */}
       <section
-        className="chapter chapter--desk band"
-        data-edge
+        className="chapter chapter--desk sheet"
+        data-sheet="flow"
         id={CHAPTERS[4].id}
         aria-labelledby={`${CHAPTERS[4].id}-h`}
       >
@@ -317,7 +357,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Where next, the nudge and the credit — on the desk. */}
-      <section className="chapter chapter--desk home-next">
+      <section
+        className="chapter chapter--desk home-next sheet"
+        data-sheet="flow"
+      >
         <div className="chapter-inner">
           <h2 className="chapter-h chapter-h--quiet">Where next</h2>
           <ul className="home-next-list">
@@ -344,7 +387,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      <div className="chapter-inner">
+      <div className="chapter-inner chapter--desk sheet" data-sheet="flow">
         {/* The stage-aware nudge stays; everything else is quiet. */}
         <div className="home-nudge">
           {stage === "new" || stage === "complete" ? (
@@ -393,6 +436,7 @@ const Home: React.FC = () => {
           enhanced with ZK proofs on Stellar.
         </p>
       </div>
+      {type !== "3" && <ChapterRail rail={rail} variant={type} />}
     </div>
   );
 };

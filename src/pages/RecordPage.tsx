@@ -14,7 +14,7 @@ import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useLayoutEffect } from "react";
 import gsap from "gsap";
-import { takeFlip } from "../components/transitions/flipHandoff";
+import { peekFlipId, takeFlip } from "../components/transitions/flipHandoff";
 import { Receipt, ReceiptLine, Stamp } from "../components/receipt";
 import { Thread } from "../components/receipt/Thread";
 import { ClaimDemo } from "../components/claim/ClaimDemo";
@@ -39,12 +39,15 @@ interface RecordRound {
 }
 
 const RecordPage: React.FC = () => {
+  // Under View Transitions the strip slip is the flight's landing target —
+  // it must carry the shared name in the new snapshot.
+  const flightId = peekFlipId();
   // The receipt carries you here (design.md §13.6): if a Flip stash is
   // waiting and its receipt is on screen, play it into its slot.
   useLayoutEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const stash = takeFlip();
-    if (!stash) return;
+    if (!stash || stash.mode === "vt") return;
     const target = document.querySelector<HTMLElement>(
       `[data-flip-id="${stash.entryId}"]`,
     );
@@ -124,7 +127,7 @@ const RecordPage: React.FC = () => {
   return (
     <div className="record-page">
       <header className="record-head">
-        <h1 className="record-title">
+        <h1 className="record-title" data-vt-title>
           {RECORD.title} <span className="record-tint">{RECORD.tint}</span>
         </h1>
         <p className="record-lede">{RECORD.lede}</p>
@@ -219,6 +222,11 @@ const RecordPage: React.FC = () => {
                   title={`Round ${practice.length - i}`}
                   className="record-slip"
                   data-flip-id={p.id}
+                  style={
+                    p.id === flightId
+                      ? { viewTransitionName: "receipt-flight" }
+                      : undefined
+                  }
                 >
                   <ReceiptLine label="You" value={MOVE_LABEL[p.yourMove]} />
                   <ReceiptLine

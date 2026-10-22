@@ -8,9 +8,16 @@
  */
 
 import React, { useEffect, useRef, useState } from "react";
-import { Outlet, NavLink, useLocation } from "react-router-dom";
+import { flushSync } from "react-dom";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router-dom";
 import gsap from "gsap";
-import { peekFlipId } from "./transitions/flipHandoff";
+import { markFlightVT, peekFlipId } from "./transitions/flipHandoff";
+import {
+  cssToken,
+  tokenMs,
+  cubicBezier,
+  prefersReducedMotion,
+} from "./transitions/motion";
 import "../styles/transitions.css";
 import { Volume2, VolumeX } from "lucide-react";
 import ConnectAccount from "./ConnectAccount.tsx";
@@ -41,41 +48,6 @@ const NAV_ITEMS = [
  */
 const DESK_ROUTES = new Set(["/", "/record", "/real-life"]);
 
-/* Read a CSS timing/easing token — the transition's motion comes from the
-   tokens, not literals. */
-function cssToken(name: string): string {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(name)
-    .trim();
-}
-
-function ms(v: string): number {
-  const n = parseFloat(v);
-  return v.trim().endsWith("ms") ? n : n * 1000;
-}
-
-/** cubic-bezier(...) → a GSAP ease function (tokens are authored as CSS). */
-function cubicBezier(spec: string): (t: number) => number {
-  const m = spec.match(/cubic-bezier\(([^)]+)\)/);
-  if (!m) return (t) => t;
-  const [x1, y1, x2, y2] = m[1].split(",").map(Number);
-  const cx = (t: number) =>
-    3 * x1 * t * (1 - t) * (1 - t) + 3 * x2 * t * t * (1 - t) + t * t * t;
-  const cy = (t: number) =>
-    3 * y1 * t * (1 - t) * (1 - t) + 3 * y2 * t * t * (1 - t) + t * t * t;
-  return (t: number) => {
-    let lo = 0,
-      hi = 1,
-      mid = t;
-    for (let i = 0; i < 8; i++) {
-      mid = (lo + hi) / 2;
-      if (cx(mid) < t) lo = mid;
-      else hi = mid;
-    }
-    return cy(mid);
-  };
-}
-
 const samePage = (a: string, b: string) => {
   if (a === b) return true;
   // /play and /play/:gameId are one screen — no transition between them.
@@ -84,6 +56,7 @@ const samePage = (a: string, b: string) => {
 
 const AppShell: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const pathname = location.pathname;
   const isLesson = pathname === "/learn";
   const surface = DESK_ROUTES.has(pathname) ? "desk" : "counter";
@@ -92,6 +65,8 @@ const AppShell: React.FC = () => {
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const scrollMap = useRef(new Map<string, number>());
   const prevRef = useRef(location);
+  const vtPending = useRef(false);
+  const runningVt = useRef<ViewTransition | null>(null);
   const audioManager = useAudioSettings();
   const [audioOpen, setAudioOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -108,6 +83,84 @@ const AppShell: React.FC = () => {
     setAudioOpen(false);
     setMenuOpen(false);
   };
+
+  // --- view-transition navigation -------------------------------------------
+  //
+  // The app uses declarative <Routes>, so the VT is driven manually: a
+  // delegated document listener intercepts internal link clicks (bubble
+  // phase — React's synthetic onClick runs first, so the Flip stash and the
+  // receipt's view-transition-name are set before the snapshot). Back/forward
+  // keeps the GSAP clone fallback below (POP can't be intercepted here).
+  const navigateWithTransition = (to: string, linkEl?: HTMLElement | null) => {
+    runningVt.current?.skipTransition();
+    const toPath = to.split(/[?#]/)[0];
+    const mode =
+      DESK_ROUTES.has(pathname) !== DESK_ROUTES.has(toPath) ? "feed" : "swap";
+    document.documentElement.dataset.vt = mode;
+    if (mode === "swap" && linkEl) {
+      // The nav label morphs into the new h1 — only one element may hold the
+      // name, so strip it from the old h1 first.
+      for (const el of document.querySelectorAll("[data-vt-title]"))
+        el.removeAttribute("data-vt-title");
+      linkEl.style.viewTransitionName = "page-title";
+    }
+    vtPending.current = true;
+    const vt = document.startViewTransition(() => {
+      // The Flip stash is created by the link's React onClick — which runs
+      // after this capture-phase intercept — so mark the flight here, inside
+      // the VT callback, where the stash already exists.
+      if (toPath === "/record") markFlightVT();
+      // eslint-disable-next-line react-dom/no-flush-sync -- view transitions need a synchronous DOM swap
+      flushSync(() => {
+        void navigate(to);
+      });
+      window.scrollTo(0, 0);
+    });
+    (document as Document & { __vtUsed?: boolean }).__vtUsed = true;
+    runningVt.current = vt;
+    void vt.finished.finally(() => {
+      delete document.documentElement.dataset.vt;
+      if (linkEl) linkEl.style.viewTransitionName = "";
+      const hash = to.split("#")[1];
+      if (!hash) {
+        const h1 = document.querySelector<HTMLElement>("main h1");
+        if (h1) {
+          if (!h1.hasAttribute("tabindex")) h1.setAttribute("tabindex", "-1");
+          h1.focus({ preventScroll: true });
+        }
+      }
+    });
+  };
+
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (
+        e.defaultPrevented ||
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      )
+        return;
+      const a = (e.target as HTMLElement).closest?.("a[href]");
+      if (!a || !(a instanceof HTMLAnchorElement)) return;
+      if (a.target || a.hasAttribute("download")) return;
+      const url = new URL(a.href);
+      if (url.origin !== window.location.origin) return;
+      // Hash-only or same-path links (incl. /play <-> /play/:gameId) stay with
+      // the router — no transition.
+      if (samePage(url.pathname, pathname)) return;
+      if (!("startViewTransition" in document)) return;
+      e.preventDefault();
+      navigateWithTransition(url.pathname + url.search + url.hash, a);
+    };
+    // Capture phase: intercept BEFORE React Router's link handler sees the
+    // click, so our preventDefault keeps ownership of the navigation.
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   // --- route transition (design.md §13.6) -----------------------------------
   //
@@ -127,15 +180,20 @@ const AppShell: React.FC = () => {
     // Skip: same pathname (hash/search change), /play <-> /play/:gameId.
     if (samePage(prev.pathname, location.pathname)) return;
 
+    // A View Transition already animated this navigation — the browser
+    // ran it; nothing to clone. (POP never sets this flag.)
+    if (vtPending.current) {
+      vtPending.current = false;
+      return;
+    }
+
     // Interrupting: kill any running transition and drop its layer.
     tlRef.current?.kill();
     layerRef.current?.remove();
     layerRef.current = null;
 
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    const dur = ms(cssToken("--dur-long")) / 1000;
+    const reduced = prefersReducedMotion();
+    const dur = tokenMs("--dur-long") / 1000;
     const easeIn = cubicBezier(cssToken("--ease-in"));
     const easeOut = cubicBezier(cssToken("--ease-out"));
 

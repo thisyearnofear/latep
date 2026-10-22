@@ -91,7 +91,7 @@ export const RealLifePage: React.FC = () => {
   return (
     <div className="everyday" ref={rootRef}>
       <header className="everyday-opening">
-        <h1 className="everyday-title">
+        <h1 className="everyday-title" data-vt-title>
           {WHERE_IT_GOES.title}{" "}
           <span className="everyday-tint">{WHERE_IT_GOES.tint}</span>
         </h1>

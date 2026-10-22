@@ -27,6 +27,7 @@
 .everyday-title {
   margin: 0 0 var(--space-xs);
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   letter-spacing: var(--tracking-display);
   color: var(--color-desk-ink);
@@ -110,6 +111,7 @@
 .everyday-situation-title {
   margin: 0 0 var(--space-2xs);
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   color: var(--color-receipt-ink);
 }

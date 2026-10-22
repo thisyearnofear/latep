@@ -360,6 +360,11 @@ async function runStage(browser, stage) {
     };
   });
   await page.goto(BASE + stage.url, { waitUntil: "domcontentloaded" });
+  // Instant scrolls — global scroll-behavior:smooth makes Playwright's
+  // scroll-into-view animate and hit-test mid-animation forever.
+  await page.addStyleTag({
+    content: "html { scroll-behavior: auto !important }",
+  });
   await page.waitForTimeout(800);
 
   console.log(`\n${stage.name} (${stage.url})`);

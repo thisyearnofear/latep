@@ -30,6 +30,7 @@
 
 .sandbox-title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-3xl);
   color: var(--color-counter-text);
   margin: 0 0 var(--space-2xs) 0;

@@ -371,11 +371,18 @@ export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
                 onClick={() => {
                   // The receipt carries you to your record (design.md §13.6):
                   // its Flip state travels to /record with the entry id.
-                  const receipt = document.querySelector(
+                  const receipt = document.querySelector<HTMLElement>(
                     ".trust-experiment .receipt",
                   );
                   const id = getEntries()[0]?.id;
-                  if (receipt && id) stashFlip(receipt, id);
+                  if (receipt && id) {
+                    stashFlip(receipt, id);
+                    // Under View Transitions the receipt morphs across the
+                    // navigation via a shared name (manual flight = fallback).
+                    if ("startViewTransition" in document) {
+                      receipt.style.viewTransitionName = "receipt-flight";
+                    }
+                  }
                 }}
               >
                 {EARN.addToRecord}

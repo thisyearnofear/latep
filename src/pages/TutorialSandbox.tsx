@@ -387,7 +387,9 @@ export const TutorialSandbox: React.FC = () => {
     <div className="sandbox">
       <header className="sandbox-head">
         <div>
-          <h1 className="sandbox-title">See how trust changes.</h1>
+          <h1 className="sandbox-title" data-vt-title>
+            See how trust changes.
+          </h1>
           <p className="sandbox-lede">
             Play the iterated dilemma against 9 stateful strategies. Local
             simulation — scores are practice points; no wallet or funds.
