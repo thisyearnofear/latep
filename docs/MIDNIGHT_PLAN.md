@@ -4,6 +4,27 @@
 
 **Date set:** 19 October 2026 · **HackMeridian:** 25–26 October 2026 · **Wave 3 build window:** 27 October – 16 November 2026
 
+> **Subordinated 2026-10-21 — read `docs/VISION.md` first.** The product position
+> changed after this plan was written. The reputation primitive is now meant to
+> be an **open, issuer-agnostic module with a real consumer** (a gate in the
+> agent-payment decision layer), not a feature of a game. That changes the
+> "additive" test in rule 3 below:
+>
+> - A **second verifier** (Compact on Midnight) is only additive if there is a
+>   **second consumer** that needs it. There is not one yet. Building the same
+>   primitive twice — Noir on Stellar, then Compact on Midnight — is two
+>   implementations, and the second is a port of the first, which is exactly
+>   what rule 3 exists to prevent.
+> - The gate is therefore now: **"does a second consumer exist, and is Compact
+>   easier for it?"** — not "is Compact easier than Noir?"
+> - The _decision itself_ does not change: keep Latep on Stellar, do not
+>   migrate. Midnight stays deferred, and the Wave 3 build window is better
+>   spent on the issuer-agnostic amendment and the first consumer.
+>
+> The rest of this doc stands — the Compact/Poseidon research, the data path,
+> and the sharpened gate are all still valid if the second-consumer condition
+> is ever met.
+
 > **Two deadlines, two scopes.** If both dates are live, they are not the same
 > deliverable. HackMeridian gets the smallest honest demo: the reputation
 > circuit plus a fixture tree, with the on-chain gate mocked **and labelled as

@@ -104,6 +104,8 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - ✅ **Strategy architecture** — refactored from stateless functions to stateful IteratedStrategy classes
 - ✅ **Payoff matrix** — refactored from hardcoded values to configurable PayoffMatrix interface
 - **Private reputation (pattern 3)** — prove a track record without revealing it. Spec'd in `docs/HACKMERIDIAN.md`; build plan in `docs/MIDNIGHT_PLAN.md`; shared fixture in `docs/PATTERN3_TEST_VECTORS.md`; seed lifecycle in `docs/PATTERN3_SEED.md`
+- **Issuer-agnostic reputation** — make the tree per-issuer so a second issuer can mint a leaf without patching this contract. Spec'd as the 2026-10-21 amendment in `docs/HACKMERIDIAN.md`; this is what turns a game feature into a primitive
+- **Open primitive + first consumer** — the long-horizon position (market analysis, the "canonical or bust" answer, the three scale assumptions) is in `docs/VISION.md`. The reference implementation is latep; the first decision-layer consumer is a gate
 - **Performance monitoring** and optimization
 - **Accessibility compliance** (WCAG 2.1)
 - **Internationalization** support

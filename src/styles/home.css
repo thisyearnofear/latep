@@ -51,57 +51,36 @@
   color: var(--color-counter-muted);
 }
 
-/* --- 4. the four primitives, as stubs ------------------------------------- */
+/* --- 2. the three ways, and the fourth option ------------------------------ */
 
-.home-primitives {
+.home-ways {
   display: flex;
   flex-direction: column;
+  gap: var(--space-sm);
 }
 
-.home-primitive-row {
+.home-way-row {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: var(--space-2xs);
 }
 
-.home-primitive {
+.home-way {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
   height: 100%;
   padding: var(--space-sm);
-  text-decoration: none;
   background: var(--color-receipt);
   color: var(--color-receipt-ink);
   border: 1px dashed var(--color-receipt-rule);
   border-radius: var(--radius-sm);
-  transition:
-    background var(--dur-short) var(--ease-out),
-    transform var(--dur-micro) var(--ease-out);
 }
 
-.home-primitive:hover {
-  background: var(--color-receipt-2);
-}
-
-.home-primitive:active {
-  transform: translate(1px, 1px);
-}
-
-.home-primitive:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.home-primitive-mark {
-  color: var(--color-receipt-ink);
-  margin-bottom: var(--space-3xs);
-}
-
-.home-primitive-name {
+.home-way-name {
   font-family: var(--font-print);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-print-label);
@@ -109,14 +88,149 @@
   color: var(--color-receipt-faded);
 }
 
-.home-primitive-line {
+.home-way-line {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   line-height: var(--leading-body);
   color: var(--color-receipt-ink);
 }
 
-/* --- 5. where next -------------------------------------------------------- */
+/* The fourth option is the only thing on the page with a solid edge. */
+.home-fourth {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-receipt);
+  border: 1px solid var(--color-receipt-ink);
+  border-left: 3px solid var(--color-you);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-width: var(--measure-prose);
+}
+
+.home-fourth-kicker {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-you-print);
+}
+
+.home-fourth-line {
+  margin: 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-ink);
+}
+
+.home-fourth-payoff {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+}
+
+.home-fourth-close {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+/* --- 3. the plate --------------------------------------------------------- */
+
+.home-plate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* --- 4. the mechanism, and the first issuer ------------------------------- */
+
+.home-mechanic,
+.home-issuer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  max-width: var(--measure-prose);
+}
+
+.home-mechanic-line,
+.home-issuer-line {
+  margin: 0;
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+.home-mechanic-line--second,
+.home-issuer-line--second {
+  font-size: var(--text-sm);
+  color: var(--color-counter-muted);
+}
+
+/* --- 5. the plates -------------------------------------------------------- */
+
+.home-plates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* --- 6. where it goes ----------------------------------------------------- */
+
+.home-directions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.home-direction-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-counter-rule);
+}
+
+.home-direction {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-2xs);
+  border-bottom: 1px solid var(--color-counter-rule);
+}
+
+.home-direction-title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-counter-text);
+}
+
+.home-direction-line {
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-text-2);
+}
+
+.home-scope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  max-width: var(--measure-prose);
+}
+
+.home-scope-line {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-counter-muted);
+}
+
+/* --- where next ----------------------------------------------------------- */
 
 .home-next {
   display: flex;
@@ -253,5 +367,11 @@
 
   .home-next-line {
     grid-column: 1 / -1;
+  }
+
+  /* The same for the three directions. */
+  .home-direction {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-3xs);
   }
 }

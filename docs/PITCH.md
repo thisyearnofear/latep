@@ -1,5 +1,11 @@
 # Pitch Package — Find Your Way (General Track)
 
+> **Historical artifact.** This is the package submitted to Find Your Way
+> (Stellar General Track, deadline Oct 14). It is kept as the record of what was
+> submitted then and is not rewritten. The current pitch is
+> [`PITCH_HACKMERIDIAN.md`](PITCH_HACKMERIDIAN.md); the product position and
+> the problem → gap → use-case argument are in [`VISION.md`](VISION.md).
+
 Deadline: Oct 14, 0:59. Everything below is supported by evidence already in this repo.
 
 ## One-liner

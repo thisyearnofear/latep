@@ -2,14 +2,15 @@
  * Home — the landing page.
  *
  * Stage-led and left-biased (design.md §2). The order matters more than the
- * styling: the visitor should meet the situation first, play a round, and only
- * then meet the vocabulary. So —
+ * styling: the visitor should meet the situation first, see the fourth
+ * option work, play a round, and only then meet the vocabulary. So —
  *
- *   1. a situation everyone has lived through, and the one question
- *   2. the scene (B3) with the two move tiles under it
- *   3. the round receipt, feeding out after each reveal
- *   4. the four primitives, as a row of stubs — not cards
- *   5. where next, as three text rows
+ *   1. a situation someone is in, and the three dead ends it has
+ *   2. the fourth option, as a plate you can operate
+ *   3. how the mechanism works, in two lines
+ *   4. the first issuer, and the round itself
+ *   5. the plates: the primitives, one figure each
+ *   6. where it goes, and where next
  *
  * The guided deck is at /learn, the sandbox at /learn/play, the tournament at
  * /tournament, and on-chain play at /play.
@@ -26,10 +27,21 @@ import {
 import { TrustExperiment } from "../components/TrustExperiment";
 import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
-import { MARKS } from "../components/marks";
-import { PRIMITIVES } from "../content/primitives";
 import { prefetchRoute } from "../App";
+import { Plate } from "../components/figures/Plate";
+import { FigureGallery } from "../components/figures/FigureGallery";
+import { GALLERY_PLATES, STORY_PLATE } from "../components/figures/figures";
+import {
+  DEAD_ENDS,
+  DIRECTIONS,
+  FIRST_ISSUER,
+  FOURTH,
+  MECHANIC,
+  SCOPE,
+  SITUATION,
+} from "../content/story";
 import "../styles/home.css";
+import "../styles/figures.css";
 
 /**
  * Where next. Three text rows, each a name, a line of explanation, and a
@@ -51,6 +63,11 @@ const NEXT = [
     to: "/play",
     title: "Play with a friend",
     line: "Real stakes on Stellar. Every move is sealed and proven before anyone commits.",
+  },
+  {
+    to: "/real-life",
+    title: "See the same things in real life",
+    line: "The four primitives, as they turn up outside the game.",
   },
 ] as const;
 
@@ -80,47 +97,95 @@ const Home: React.FC = () => {
         <PersonalityQuiz manual onClose={() => setIntro(null)} />
       )}
 
-      {/* 1 — the situation, then the question. No eyebrow, nothing centred. */}
+      {/* 1 — the situation, then the three ways it fails. */}
       <header className="home-opening">
-        <h1 className="home-title">Lean in. Will they?</h1>
-        <p className="home-situation">
-          You&rsquo;ve paid a stranger before and hoped they&rsquo;d deliver.
-          That&rsquo;s the whole game. Play one round.
-        </p>
+        <h1 className="home-title">{SITUATION.title}</h1>
+        <p className="home-situation">{SITUATION.lede}</p>
       </header>
 
-      {/* 2 + 3 — the scene, its move tiles, and the round receipt */}
-      <TrustExperiment />
-
-      {/* 4 — the four primitives, as stubs rather than cards */}
-      <section className="home-primitives" aria-labelledby="home-primitives-h">
-        <h2 id="home-primitives-h" className="home-section-heading">
-          Four things you&rsquo;ll use
+      <section className="home-ways" aria-labelledby="home-ways-h">
+        <h2 id="home-ways-h" className="home-section-heading">
+          Three ways, and what each one costs
         </h2>
-        <ul className="home-primitive-row">
-          {PRIMITIVES.map((p) => {
-            const Mark = MARKS[p.mark];
-            return (
-              <li key={p.id}>
-                <Link
-                  to={p.meetItAt}
-                  className="home-primitive"
-                  onClick={() => {
-                    if (p.meetItAt.startsWith("/learn"))
-                      unlock("visited_learn");
-                  }}
-                >
-                  <Mark size={24} className="home-primitive-mark" />
-                  <span className="home-primitive-name">{p.name}</span>
-                  <span className="home-primitive-line">{p.oneLine}</span>
-                </Link>
-              </li>
-            );
-          })}
+        <ul className="home-way-row">
+          {DEAD_ENDS.map((way) => (
+            <li key={way.id} className="home-way">
+              <span className="home-way-name">{way.name}</span>
+              <span className="home-way-line">{way.line}</span>
+            </li>
+          ))}
         </ul>
+        <div className="home-fourth">
+          <span className="home-fourth-kicker">{FOURTH.kicker}</span>
+          <p className="home-fourth-line">{FOURTH.line}</p>
+          <p className="home-fourth-payoff">{FOURTH.payoff}</p>
+          <p className="home-fourth-close">{FOURTH.close}</p>
+        </div>
       </section>
 
-      {/* 5 — where next */}
+      {/* 2 — the fourth option, as a plate you can operate. */}
+      <section className="home-plate" aria-labelledby="home-plate-h">
+        <h2 id="home-plate-h" className="home-section-heading">
+          The fourth option
+        </h2>
+        <Plate definition={STORY_PLATE} size="wide" />
+      </section>
+
+      {/* 3 — the mechanism, in two lines. */}
+      <section className="home-mechanic" aria-labelledby="home-mechanic-h">
+        <h2 id="home-mechanic-h" className="home-section-heading">
+          {MECHANIC.kicker}
+        </h2>
+        <p className="home-mechanic-line">{MECHANIC.line}</p>
+        <p className="home-mechanic-line home-mechanic-line--second">
+          {MECHANIC.line2}
+        </p>
+      </section>
+
+      {/* 4 — why a game is the first issuer, then the round itself. */}
+      <section className="home-issuer" aria-labelledby="home-issuer-h">
+        <h2 id="home-issuer-h" className="home-section-heading">
+          {FIRST_ISSUER.kicker}
+        </h2>
+        <p className="home-issuer-line">{FIRST_ISSUER.line}</p>
+        <p className="home-issuer-line home-issuer-line--second">
+          {FIRST_ISSUER.line2}
+        </p>
+      </section>
+
+      <TrustExperiment />
+
+      {/* 5 — the plates: the vocabulary, one figure each. */}
+      <section className="home-plates" aria-labelledby="home-plates-h">
+        <h2 id="home-plates-h" className="home-section-heading">
+          What it&rsquo;s made of
+        </h2>
+        <FigureGallery plates={GALLERY_PLATES} />
+      </section>
+
+      {/* 6 — where it goes, then where next. */}
+      <section className="home-directions" aria-labelledby="home-directions-h">
+        <h2 id="home-directions-h" className="home-section-heading">
+          Where it goes
+        </h2>
+        <ul className="home-direction-list">
+          {DIRECTIONS.map((direction) => (
+            <li key={direction.id} className="home-direction">
+              <span className="home-direction-title">{direction.title}</span>
+              <span className="home-direction-line">{direction.line}</span>
+            </li>
+          ))}
+        </ul>
+        <div className="home-scope">
+          <span className="home-section-heading">{SCOPE.kicker}</span>
+          {SCOPE.lines.map((line) => (
+            <p key={line} className="home-scope-line">
+              {line}
+            </p>
+          ))}
+        </div>
+      </section>
+
       <section className="home-next" aria-labelledby="home-next-h">
         <h2 id="home-next-h" className="home-section-heading">
           Where next

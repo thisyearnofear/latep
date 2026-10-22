@@ -7,7 +7,7 @@
  * the PR (design.md §3 rule: amend the doc in the same PR).
  */
 
-export type PrimitiveId = "seal" | "handshake" | "net" | "pass";
+export type PrimitiveId = "seal" | "handshake" | "net" | "pass" | "record";
 
 export interface Primitive {
   id: PrimitiveId;
@@ -64,6 +64,19 @@ export const PRIMITIVES: readonly Primitive[] = [
     // itself the collection of everything you've already met, so linking here
     // would be circular.
     meetItAt: "/play",
+  },
+  {
+    id: "record",
+    name: "The Record",
+    mark: "record",
+    oneLine: "Prove your track record without publishing it.",
+    whatItIs: "ZK reputation threshold + per-issuer Merkle tree + nullifier",
+    everyday: "Lending desks, escrow markets, agent payments",
+    // The fifth primitive is the one the product is being built around, and it
+    // is the one not finished yet. The plate on Home shows what it will do;
+    // /real-life shows where it lands. It points at the plate, not at a
+    // screen that claims more than the app can show.
+    meetItAt: "/real-life",
   },
 ] as const;
 

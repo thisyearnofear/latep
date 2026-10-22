@@ -123,6 +123,11 @@ export const STAMPS = {
   dropped: "DROPPED",
   taken: "TAKEN",
   standoff: "STANDOFF",
+  // A plate is a drawing of a mechanism, not a receipt of a settlement. Any
+  // figure that shows an outcome it did not measure carries this stamp, and
+  // so does anything standing in for a claim that is still being built.
+  illustrative: "ILLUSTRATIVE — NOT A PROOF",
+  building: "IN BUILD — PATTERN 3",
 } as const;
 
 export type StampText = (typeof STAMPS)[keyof typeof STAMPS];

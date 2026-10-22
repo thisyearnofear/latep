@@ -69,8 +69,22 @@
   --chart-tint-4: oklch(78% 0.03 70);
 
   /* --------------------------------------------------------------------------
-   * Typography
+   * Colour — plates (the isometric figures)
    *
+   * A plate is a hairline drawing printed on receipt stock. Pencil is a
+   * dashed hairline in the faded ink; ink and the two thread colours are
+   * solid hairlines. There is no translucency here — a decided shape is
+   * filled with the pressed stock and the colour is in the stroke.
+   * ----------------------------------------------------------------------- */
+  --color-figure-ink: oklch(20% 0.01 60);
+  --color-figure-faint: oklch(52% 0.012 72);
+  --color-figure-you: oklch(48% 0.16 255);
+  --color-figure-partner: oklch(52% 0.14 55);
+  --color-figure-void: var(--color-receipt);
+
+  /* --------------------------------------------------------------------------
+   * Typography
+   * ---------------------------------------------------------------------------
    * Display: page headings on the counter.
    * Body:    every sentence you read.
    * Print:   what the receipt printer prints — line items, times, hashes,
