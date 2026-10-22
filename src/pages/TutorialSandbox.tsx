@@ -23,6 +23,7 @@ import {
   type TrustStageState,
 } from "../components/visual/TrustStage";
 import { useFirstRun } from "../hooks/useFirstRun";
+import { usePracticeRecord } from "../hooks/usePracticeRecord";
 import { useMascot } from "../components/MascotContext";
 import {
   createStrategy,
@@ -91,6 +92,7 @@ export const TutorialSandbox: React.FC = () => {
   const [inspectedStrategy, setInspectedStrategy] = useState<StrategyId | null>(
     null,
   );
+  const { recordRound } = usePracticeRecord();
 
   const strategyRef = useRef<IteratedStrategy>(createStrategy("tft"));
   const [currentStrategyId, setCurrentStrategyId] = useState<StrategyId>("tft");
@@ -252,7 +254,7 @@ export const TutorialSandbox: React.FC = () => {
           : playerMove === "D" && aiMove === "C"
             ? "exploited"
             : "mutual-destruction";
-    return {
+    const record: RoundRecord = {
       round: historyLength + 1,
       playerMove,
       aiMove,
@@ -261,6 +263,15 @@ export const TutorialSandbox: React.FC = () => {
       outcome,
       noiseEvent,
     };
+    // The round has settled in app state — this is where the outcome is
+    // decided for both playRound and autoPlay, before any animation or
+    // feedback runs (design.md §7: recorded by state, never by animation).
+    recordRound({
+      source: "sandbox",
+      yourMove: record.playerMove,
+      partnerMove: record.aiMove,
+    });
+    return record;
   };
 
   /** The aria-live line says what the receipt prints, in the same words. */

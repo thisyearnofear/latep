@@ -25,20 +25,48 @@ export interface PlateProps {
   definition: PlateDefinition;
   /** The story plate is bigger than a gallery plate. */
   size?: "wide" | "gallery";
+  /**
+   * Controlled step: a step id from `definition.steps`. When given, the plate
+   * shows that step and its part buttons report the press instead of
+   * switching — the caller owns the state. Omit it and the plate keeps its
+   * own step, exactly as before.
+   */
+  step?: string;
+  /** Fires when a part is pressed under a controlled `step`. */
+  onStepPress?: (part: PlatePart) => void;
   className?: string;
 }
 
-export function Plate({ definition, size = "gallery", className }: PlateProps) {
-  const [stepIndex, setStepIndex] = useState(0);
+export function Plate({
+  definition,
+  size = "gallery",
+  step: controlledStep,
+  onStepPress,
+  className,
+}: PlateProps) {
+  const [ownStepIndex, setOwnStepIndex] = useState(0);
   const [pressedId, setPressedId] = useState<string | null>(null);
+
+  const controlled = controlledStep !== undefined;
+  const stepIndex = controlled
+    ? Math.max(
+        0,
+        definition.steps.findIndex((s) => s.id === controlledStep),
+      )
+    : ownStepIndex;
 
   const step = definition.steps[stepIndex] ?? definition.steps[0];
   const scene = step.scene;
 
   const press = (part: PlatePart) => {
+    if (controlled) {
+      setPressedId(part.id);
+      onStepPress?.(part);
+      return;
+    }
     const next = definition.steps.findIndex((s) => s.id === part.id);
     if (next === -1 || next === stepIndex) return;
-    setStepIndex(next);
+    setOwnStepIndex(next);
     setPressedId(part.id);
   };
 

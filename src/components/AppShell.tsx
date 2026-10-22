@@ -12,18 +12,21 @@ import { Outlet, NavLink, useLocation } from "react-router-dom";
 import { Volume2, VolumeX } from "lucide-react";
 import ConnectAccount from "./ConnectAccount.tsx";
 import { useAudioSettings } from "../hooks/useAudioSettings";
+import { useGameStats } from "../hooks/useGameStats";
+import { usePracticeRecord } from "../hooks/usePracticeRecord";
 import { TrustFallCharacter } from "./TrustFallCharacter";
 import "../styles/shell.css";
 
 /**
- * Nav labels are Decision 2 in REDESIGN_PLAN §9: plain language over jargon.
- * `/real-life` is _Everyday_ and `/play` is _Play with a friend_ — the latter
- * is also the only label that can hint at the stake without promising it.
+ * Nav labels are Decision 2 in REDESIGN_PLAN §9, amended by design.md §10:
+ * plain language over jargon, and the third link now reads "Where it goes".
+ * `/play` is _Play with a friend_ — still the only label that can hint at
+ * the stake without promising it.
  */
 const NAV_ITEMS = [
   { to: "/learn", label: "Learn" },
   { to: "/tournament", label: "Tournament" },
-  { to: "/real-life", label: "Everyday" },
+  { to: "/real-life", label: "Where it goes" },
   { to: "/play", label: "Play with a friend" },
 ] as const;
 
@@ -35,6 +38,12 @@ const AppShell: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const audioButtonRef = React.useRef<HTMLButtonElement>(null);
   const menuButtonRef = React.useRef<HTMLButtonElement>(null);
+  const { getStats } = useGameStats();
+  const { getEntries } = usePracticeRecord();
+  // Every receipt on the record: on-chain games plus practice rounds. The
+  // count is hidden when there is nothing yet — a zero is not an achievement
+  // (design.md §13.7).
+  const recordCount = getStats().history.length + getEntries().length;
 
   const closeMenus = () => {
     setAudioOpen(false);
@@ -73,6 +82,18 @@ const AppShell: React.FC = () => {
         </nav>
 
         <div className="shell-actions">
+          {/* The record chip sits before the wallet (design.md §10, §13.7). */}
+          <NavLink
+            to="/record"
+            className="shell-record-chip"
+            onClick={closeMenus}
+          >
+            Your record
+            {recordCount > 0 && (
+              <span className="shell-record-count"> · {recordCount}</span>
+            )}
+          </NavLink>
+
           {/* Under 768px the links move into this sheet. */}
           <button
             type="button"
@@ -177,6 +198,16 @@ const AppShell: React.FC = () => {
                 {item.label}
               </NavLink>
             ))}
+            <NavLink
+              to="/record"
+              className={({ isActive }) =>
+                isActive ? "shell-sheet-link is-active" : "shell-sheet-link"
+              }
+              onClick={closeMenus}
+            >
+              Your record
+              {recordCount > 0 && ` · ${recordCount}`}
+            </NavLink>
           </nav>
         </div>
       )}

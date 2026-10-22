@@ -48,6 +48,35 @@
   --color-stamp: oklch(55% 0.19 28);
   --color-focus: oklch(62% 0.17 255);
 
+  /* --------------------------------------------------------------------------
+   * Colour — the desk (third surface, design.md §13.2)
+   *
+   * Story pages (/, /real-life, /record) sit on the desk: light warm paper,
+   * ink text. Workbench and lesson pages keep the counter. On the desk,
+   * people keep the print colours (--color-you-print, --color-partner-print),
+   * exactly as on a receipt.
+   * ----------------------------------------------------------------------- */
+  --color-desk: oklch(95% 0.018 85);
+  --color-desk-2: oklch(91% 0.022 85);
+  --color-desk-rule: oklch(80% 0.02 80);
+  --color-desk-ink: oklch(22% 0.015 60);
+  --color-desk-ink-2: oklch(38% 0.015 60);
+  --color-desk-muted: oklch(48% 0.015 65);
+
+  /* --------------------------------------------------------------------------
+   * Colour — earth washes (design.md §13.3)
+   *
+   * Muted earth grounds for chapters and illustrations, so a story page is
+   * not grey top to bottom. A wash is a ground only — never a button fill,
+   * never an outcome, never a person. Moss is the only earth colour used for
+   * type: one tinted phrase per display heading, and the chapter numbers.
+   * ----------------------------------------------------------------------- */
+  --color-moss: oklch(42% 0.05 130);
+  --color-moss-wash: oklch(88% 0.035 125);
+  --color-sand-wash: oklch(90% 0.05 85);
+  --color-clay-wash: oklch(84% 0.055 45);
+  --color-sage-wash: oklch(90% 0.03 160);
+
   /* The modal scrim. An overlay must not erase the page behind it — losing
      context is what makes a wizard feel like a wall — but a translucent
      black is the only translucency allowed outside the shadow tokens, so it

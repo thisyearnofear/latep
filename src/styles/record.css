@@ -1,0 +1,104 @@
+/* ============================================================================
+ * /record — design.md §13.7, a story page on the desk (§13.2).
+ *
+ * Light warm paper, ink text. Receipts lie on the desk exactly as they lie
+ * on the counter — two strips joined by the thread, the summary printed as
+ * receipt lines, and the claim demo below.
+ * ========================================================================== */
+
+.record-page {
+  min-height: 100vh;
+  margin-top: calc(-1 * var(--shell-height, 64px));
+  padding: calc(var(--shell-height, 64px) + var(--space-xl)) var(--space-md)
+    var(--space-2xl);
+  background: var(--color-desk);
+  color: var(--color-desk-ink);
+}
+
+.record-head {
+  max-width: var(--measure-prose);
+  margin: 0 auto var(--space-lg);
+}
+
+.record-title {
+  margin: 0 0 var(--space-xs);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-display);
+  overflow-wrap: anywhere;
+}
+
+/* The one tinted phrase per display heading — roman, moss, never italic
+   (design.md §13.3). */
+.record-tint {
+  display: block;
+  font-style: normal;
+  color: var(--color-moss);
+}
+
+.record-lede {
+  margin: 0;
+  font-size: var(--text-lg);
+  line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+}
+
+.record-summary {
+  margin: 0 auto var(--space-lg);
+}
+
+.record-strip {
+  max-width: var(--layout-max);
+  margin: 0 auto var(--space-lg);
+}
+
+.record-strip-title {
+  margin: 0 0 var(--space-sm);
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-desk-muted);
+}
+
+.record-empty {
+  margin: 0;
+  max-width: var(--measure-prose);
+  color: var(--color-desk-muted);
+}
+
+/* The strip: receipts side by side, joined by the thread. The row scrolls
+   horizontally inside itself — never the page (design.md §10). */
+.record-strip__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  overflow-x: auto;
+  padding-block: var(--space-2xs);
+}
+
+.record-slip {
+  flex: 0 0 240px;
+  max-width: 240px;
+}
+
+.record-slip__stamp {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+  margin-top: var(--space-sm);
+}
+
+.record-strip__thread {
+  flex: 0 0 auto;
+}
+
+.record-prove {
+  max-width: var(--measure-prose);
+  margin: 0 auto;
+}
+
+.record-prove-line {
+  margin: 0 0 var(--space-md);
+  color: var(--color-desk-ink-2);
+}

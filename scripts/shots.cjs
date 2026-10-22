@@ -41,6 +41,7 @@ const ROUTES = [
   { name: "tournament", path: "/tournament" },
   { name: "play", path: "/play" },
   { name: "real-life", path: "/real-life" },
+  { name: "record", path: "/record" },
 ];
 
 const slug = (route) =>

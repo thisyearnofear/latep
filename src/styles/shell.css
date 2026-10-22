@@ -205,6 +205,44 @@
   min-height: 0;
 }
 
+/* --- the record chip ------------------------------------------------------ */
+
+/* A small printed counter before the wallet (design.md §10, §13.7). One line
+   always — the chip never wraps, and under 768px it leaves the strip for the
+   sheet, where "Your record" is a menu item like the rest. */
+.shell-record-chip {
+  display: none;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-xs);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  color: var(--color-counter-text-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.shell-record-chip:hover {
+  color: var(--color-counter-text);
+  border-color: var(--color-counter-text-2);
+}
+
+.shell-record-chip:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.shell-record-count {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 768px) {
+  .shell-record-chip {
+    display: inline-flex;
+  }
+}
+
 /* --- under 768px: the links move into the sheet --------------------------- */
 
 @media (max-width: 767px) {

@@ -43,7 +43,10 @@ falls back to the 2D stage.
   navigation, page headings, and the scene frame. **Receipts** (light thermal
   stock) hold everything you read closely: lessons, results, history, forms.
   Long text never sits directly on the counter.
-- **Story pages** (`/`, `/real-life`, the epilogue): _Stage-led_. A wide
+- **Amended 2026-10-21 (section 13):** story pages sit on a third surface, the
+  **desk** (light warm paper), and are told in numbered chapters. Lesson and
+  workbench pages keep the counter.
+- **Story pages** (`/`, `/real-life`, `/record`, the epilogue): _Stage-led_. A wide
   receipt "ticket" carries the scene. Copy sits beside it, aligned left.
   Below, the four primitives as a row of stubs.
 - **Lesson pages** (`/learn`): _Lesson player_. Scene left (about 60 %), the
@@ -108,6 +111,9 @@ Rules:
 - No gradients, glows, `backdrop-filter`, or glass. The only translucency
   allowed is inside shadow tokens and `--color-scrim` (a modal must not erase
   the page behind it).
+- **Amended 2026-10-21 (section 13):** the desk surface and the earth washes
+  add colour beyond people and stamps, and paper is a rendered material, not a
+  6 % grain image. The rules below still hold everywhere section 13 is silent.
 - Texture: one static, pre-rendered dither/grain image on receipts at ≤ 6 %
   opacity. No animated backgrounds. Runtime GLSL and WebGL are allowed only inside
   the reveal room (section 12), behind a capability check, and never in page
@@ -259,6 +265,10 @@ The source of truth for these strings is `src/content/primitives.ts` and
 
 ## 8. Motion
 
+_Amended 2026-10-21 (section 13): route transitions and chapter dissolves are
+added as quiet, state-free motion. The reveal is still the only orchestrated
+moment inside a view._
+
 Library: GSAP (already installed). One orchestrated moment per view: **the
 reveal**. Everything else is quiet.
 
@@ -334,6 +344,9 @@ Shared kit in `src/components/receipt/`: `Receipt`, `ReceiptLine`,
   (`overflow-x: clip` on `html` and `body`), no clickable text wrapping to two
   lines, grid tracks `minmax(0, 1fr)`, long headings `overflow-wrap: anywhere`,
   long hashes truncated in the middle with the full value in a copy button.
+- Nav (amended 2026-10-21, section 13): the third link reads "Where it goes";
+  a "Your record" chip sits before the wallet. The strip takes the surface of
+  the page it sits on.
 - Nav: wordmark left, four links, wallet right, on a `--color-counter-2`
   strip. Under 768px: the wordmark plus a "Menu" button. Never two rows.
 
@@ -482,3 +495,244 @@ animation-timeline" (2026): scroll-linked printing with a printed fallback.
 Nicky Case, _The Evolution of Trust_ (public domain, github.com/ncase/trust):
 the rule-changing explainer this game adapts. We borrow mechanisms from these,
 not their looks.
+
+---
+
+## 13. Materials, story, and motion (amendment, 2026-10-21)
+
+**Why this amendment.** The first redesign followed the system to the letter and
+came out flat: a near-colourless counter, receipts drawn as flat polygons,
+clip-art figures, and a site that told the story of a game. The product is a
+**private reputation**: prove your track record to a stranger without
+publishing it. The game is its first issuer. This section adds the story
+surfaces that say so, and the materials (paper, pencil, ink) that make
+"proof you can hold" look holdable. It amends sections 1–3, 6, 8 and 10 where
+it says so, and leaves the rest standing.
+
+### 13.1 The story, in order
+
+Every story surface tells some part of this, in this order, and none skips
+ahead:
+
+1. **The problem.** Strangers can only trust blindly, demand full collateral, or
+   publish their history. Each costs something.
+2. **The fourth option.** Prove your record, reveal nothing else.
+3. **Earn it.** Every round you play prints a receipt, and your receipts are
+   your record.
+4. **Spend it.** A proven record lowers what a stranger asks of you.
+5. **Underneath.** The Seal, the Handshake, the Net, the Pass and the Record,
+   with proofs on Stellar.
+
+The copy lives in `src/content/story.ts`. Components never retype it.
+
+### 13.2 The desk (third surface)
+
+Story pages (`/`, `/real-life`, `/record`) sit on the **desk**: light warm
+paper, ink text. Receipts lie on the desk exactly as they lie on the counter.
+Lesson and workbench pages keep the counter, where the dark ground frames a
+live scene. Nav, footer and modals take the surface of the page they sit on.
+
+| Token                | Value                 | Use                                  |
+| -------------------- | --------------------- | ------------------------------------ |
+| `--color-desk`       | `oklch(95% 0.018 85)` | Story page ground                    |
+| `--color-desk-2`     | `oklch(91% 0.022 85)` | Raised strip on the desk (nav, tray) |
+| `--color-desk-rule`  | `oklch(80% 0.02 80)`  | Hairlines on the desk                |
+| `--color-desk-ink`   | `oklch(22% 0.015 60)` | Text on the desk                     |
+| `--color-desk-ink-2` | `oklch(38% 0.015 60)` | Secondary text on the desk           |
+| `--color-desk-muted` | `oklch(48% 0.015 65)` | Helper text on the desk (≥ 4.5:1)    |
+
+On the desk, people keep the print colours (`--color-you-print`,
+`--color-partner-print`), as on a receipt.
+
+### 13.3 Earth washes
+
+Muted earth colours give chapters and illustration their ground, so that a page
+is not grey from top to bottom.
+
+| Token               | Value                  | Use                                                     |
+| ------------------- | ---------------------- | ------------------------------------------------------- |
+| `--color-moss`      | `oklch(42% 0.05 130)`  | The tinted phrase in a display heading; chapter numbers |
+| `--color-moss-wash` | `oklch(88% 0.035 125)` | Chapter ground                                          |
+| `--color-sand-wash` | `oklch(90% 0.05 85)`   | Chapter ground                                          |
+| `--color-clay-wash` | `oklch(84% 0.055 45)`  | Chapter ground; the illustration's warm wash            |
+| `--color-sage-wash` | `oklch(90% 0.03 160)`  | Chapter ground; the illustration's cool wash            |
+
+Rules:
+
+- A wash is a **ground**: a chapter band or the wash under an illustration.
+  It never fills a button, never marks an outcome, and never stands for a person.
+- Moss is the only earth colour used for type: one tinted phrase per display
+  heading ("Prove you keep your word. _Without publishing your history._" is
+  set roman, in moss, never italic) and the chapter numbers.
+- Blue is still you, amber is still your partner, and stamp red is still for
+  stamps and errors. No wash may sit close enough in hue to read as one of them.
+- No gradients between washes. A chapter changes ground at a dithered edge
+  (13.6), not with a blend.
+
+### 13.4 Paper is a material
+
+- **One shared paper texture.** On load, a capable device renders the paper
+  once with `@paper-design/shaders` (`paperTexture`: fibre, roughness, faint
+  folds, no crumples or drops) into an offscreen canvas. Its data URL becomes
+  `--paper-texture`, the canvas is disposed, and the GL context is released.
+  Receipts and the desk both read `--paper-texture` as a `background-image`
+  blended over their stock colour. A device that can't render it uses the
+  pre-rendered fallback in `public/assets/paper/`. The surface looks the same
+  either way. It just isn't generated on the device.
+- **One live shader per view, at most.** A page may hold one live WebGL
+  canvas: the story hero (13.5) or the reveal room, never both at once. Every
+  other surface is DOM over the baked texture. Browsers cap the number of WebGL
+  contexts, and the budget is spent on the one moment that earns it.
+- Paper does not move. No animated grain, no parallax on the texture.
+
+### 13.5 Drawing: pencil and ink (amends section 6)
+
+- **The sketch material** is how scenes are drawn in 3D: ballpoint hatching
+  that follows the light, wobbly pen outlines that overshoot the corners, and
+  hatched cast shadows. It is written in GLSL for our raw three.js setup, ported
+  from R3FSketchMaterial (MIT, credited in `THIRD-PARTY-NOTICES.md`). Raw
+  three.js, not R3F, for the reasons section 12 gives.
+- **Pencil means undecided, ink means committed.** Pencil is sparse grey
+  hatching with a faint outline. Ink is denser hatching in receipt ink with a
+  firm outline. The thread's colours are ink. A figure moves from pencil to ink
+  because app state says the move was sealed, never because an animation
+  finished. This is section 1's "pencil becomes ink", now drawn.
+- **The story hero** is one drawn scene in the sketch material: Maria's desk at
+  the counter, the counterparty across it, a stack of receipt slips between
+  them, and the thread. It sits on a hand-made watercolour wash in clay and
+  sage. It draws itself in once on load (the sketch "wash/reveal": hatching
+  arrives in blotches) and then holds still. No idle loop.
+- **Hero fallback.** Without WebGL, under reduced motion, or on a low-power
+  device, the hero is the isometric Desk plate (`components/figures/`) on the
+  same wash, fully drawn. The hero is decoration around the headline. The
+  headline is the page's largest text, renders before three.js loads, and
+  carries the meaning without the drawing.
+- The 2D stage's rig figures lose the smiley faces: a figure is a head, a
+  body and two hands holding a thread. The rig's joints don't change.
+
+### 13.6 Motion (amends section 8)
+
+Two kinds of quiet motion are added. Neither decides anything, and both
+collapse to a 150 ms crossfade under reduced motion.
+
+- **Route transitions** (after amber). The outgoing and incoming pages share
+  one GSAP timeline: the old page settles down 16 px and fades out
+  (`--dur-long`, `--ease-in`), while the new page feeds in from the top with a
+  `clip-path` reveal (`--dur-long`, `--ease-out`). Focus moves to the new page's
+  `h1` when the timeline completes. Back and forward navigation run the same
+  timeline. A transition never delays data loading, and it is skipped when the
+  same route re-renders.
+- **The receipt carries you to your record.** Finishing a practice round offers
+  "Add to your record". Following it carries the round's receipt across the
+  route change into its place in the `/record` strip (GSAP Flip). If the
+  receipt isn't on screen, the generic transition runs instead.
+- **Chapter dissolves** (after atelier-north). Where one chapter's wash meets
+  the next, the edge is a 4×4 Bayer dither, baked once with
+  `@paper-design/shaders` (`dithering`) into a mask image. As a chapter enters
+  the viewport, ScrollTrigger moves the mask so the new ground dissolves in
+  pixel by pixel. Scroll stays native: no smooth-scroll library, no scroll
+  hijacking, no pinning longer than one viewport.
+
+### 13.7 Narrative surfaces
+
+**Home (`/`), told in chapters.** The hero (13.5), then a headline with a tinted
+phrase and a one-sentence lede. Then five numbered chapters, each on its own
+wash, each opening with a print-font number ("01") and a short title:
+
+| #   | Chapter           | Holds                                                                                   |
+| --- | ----------------- | --------------------------------------------------------------------------------------- |
+| 01  | The problem       | Maria's situation and the three dead ends                                               |
+| 02  | The fourth option | The fourth-option copy and the **claim demo**                                           |
+| 03  | Earn a record     | Why a game is the first issuer, then the practice round, ending in "Add to your record" |
+| 04  | Where it goes     | The three directions, linking to `/real-life`                                           |
+| 05  | Underneath        | The primitive plates, the two-line mechanism, and the honest scope                      |
+
+"Where next" and the credit follow the chapters.
+
+**The claim demo.** Two counterparties stand at Maria's counter. The
+**stranger** has no record and posts the full deposit (100 %). The **holder**
+shows a proof ("at least 90 % of 200 recorded deals kept") and posts 40 %. The
+viewer can switch between the two, and the collateral plinth rises or falls. The
+demo is stamped `ILLUSTRATIVE — NOT A PROOF` and `IN BUILD — PATTERN 3`,
+visible in the view, not in a tooltip, and links to the Pattern 3 status. It
+calls the claim through the reputation interface (13.8), so the real proof
+replaces the simulated one without touching the UI.
+
+**Your record (`/record`).** Your receipts, side by side and joined by the
+thread, in two strips:
+
+- **On-chain**: games played with a friend, read from the existing stats
+  history. Each receipt prints its game id.
+- **Practice**: rounds from the home stage and the sandbox. Each is stamped
+  `PRACTICE — NOT ON-CHAIN`.
+
+Above the strips, printed as receipt lines: rounds recorded, rounds kept (you
+leaned in), the kept percentage, and the current trust height. Below them,
+"Prove it" opens the claim demo with your own numbers. It is stamped exactly as
+on Home, because it is the same simulation. The empty state says "No receipts
+yet" and links to the practice round, and never shows a zero as though it were
+an achievement.
+
+**Where it goes (`/real-life`).** Three illustrated scenarios, each labelled
+`ILLUSTRATIVE — NOT A PROOF`: Maria's remittance desk (credit), a marketplace
+deposit (escrow), and an agent paying a stranger (agent payments). Each names the
+primitives it uses, the Record among them, and ends at the claim demo. The four
+primitive receipts that exist today stay below, under "Live today".
+
+### 13.8 The reputation seam
+
+The UI never talks to a proof system directly. It talks to one interface:
+
+```ts
+// src/reputation/types.ts
+export interface ReputationSummary {
+  recorded: number; // rounds in the record
+  kept: number; // rounds where you leaned in
+  keptPct: number; // 0–100, integer
+}
+export type ClaimResult =
+  | {
+      kind: "simulated";
+      meets: boolean;
+      threshold: number;
+      summary: ReputationSummary;
+    }
+  | {
+      kind: "proven";
+      meets: true;
+      threshold: number;
+      nullifier: string;
+      txHash?: string;
+    };
+export interface ReputationClaimer {
+  claim(threshold: number, context: string): Promise<ClaimResult>;
+}
+```
+
+v1 ships `simulatedClaimer` only. A `simulated` result always renders with the
+two stamps above. A `proven` result renders only when the Pattern 3 circuit
+produced it, and it follows the honesty rules in section 7: a tx id appears only
+once it is confirmed.
+
+### 13.9 What we take from each reference, and what we leave
+
+| Reference                         | We take                                                                                                                                      | We leave                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| kylon.io                          | One human illustration that depicts the product; warm grained paper; a muted earth palette; numbered chapters; one tinted phrase per heading | Logo walls, testimonials and metrics we don't have; rounded cards everywhere |
+| twotwentytwo-studio/codrops-paper | Paper as a material, rendered once from Paper Shaders and shared by every surface                                                            | WebGPU, WGSL, domgl, Nuxt                                                    |
+| abhishekmill/R3FSketchMaterial    | Light-following hatching, overshooting pen outlines, hatched shadows, the wash/reveal: pencil and ink                                        | R3F, the leva panel, the camera tour                                         |
+| codrops/atelier-north             | Dithered pixel edges between sections, driven by native scroll                                                                               | Lenis, the architecture-portfolio tone, its fonts                            |
+| ismamz/amber                      | Parallel route transitions on one GSAP timeline                                                                                              | Its layouts                                                                  |
+
+### 13.10 Budgets and gates
+
+- The hero's lazy chunk (three.js plus the scene) stays under the reveal room's
+  150 kB gzipped ceiling. Under the phone-class profile in
+  `npm run measure:reveal-room`, it may add no main-thread task over 50 ms
+  before the headline paints.
+- `@paper-design/shaders` is pinned to an exact version that was at least seven
+  days old when added.
+- Every existing gate still runs (`design:check`, `check:hidden-moves`,
+  `check:stage-parity`, `shots`), plus `/record` in the shot list.
+- The comprehension test (`docs/COMPREHENSION_TEST.md`) gains one question:
+  "What could you do with your record?"

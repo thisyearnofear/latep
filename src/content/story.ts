@@ -118,3 +118,140 @@ export const SCOPE = {
     "The Record is in build. Its plate on this page shows the mechanism, not a proof — it is stamped for what it is.",
   ],
 } as const;
+
+/* -------------------------------------------------------------------------- */
+/* The hero and the chapters (design.md §13.7)                                 */
+/* -------------------------------------------------------------------------- */
+
+export const HERO = {
+  title: "Prove you keep your word.",
+  tint: "Without publishing your history.",
+  lede: "Latep is a private reputation for Stellar: show a stranger your track record, and nothing else. It's being built on top of a trust game you can play today.",
+  illustrationLabel:
+    "Drawing: Maria at her remittance desk, a counterparty across the counter, a stack of receipt slips between them.",
+} as const;
+
+export interface Chapter {
+  id: "problem" | "fourth" | "earn" | "goes" | "underneath";
+  number: string;
+  title: string;
+}
+
+export const CHAPTERS: readonly Chapter[] = [
+  { id: "problem", number: "01", title: "The problem" },
+  { id: "fourth", number: "02", title: "The fourth option" },
+  { id: "earn", number: "03", title: "Earn a record" },
+  { id: "goes", number: "04", title: "Where it goes" },
+  { id: "underneath", number: "05", title: "Underneath" },
+] as const;
+
+/* -------------------------------------------------------------------------- */
+/* The claim demo (design.md §13.7). Worked example, not measured.             */
+/* -------------------------------------------------------------------------- */
+
+export const CLAIM_DEMO = {
+  heading: "Same counter, two counterparties",
+  stranger: {
+    label: "A stranger",
+    line: "No record Maria can check. She asks for the full amount up front.",
+    collateralPct: 100,
+  },
+  holder: {
+    label: "A proven holder",
+    line: "Shows a proof: at least 90% of 200 recorded deals kept. Maria learns nothing else.",
+    collateralPct: 40,
+    threshold: 90,
+    recorded: 200,
+  },
+  collateralLabel: "Collateral asked",
+  learnsLabel: "What Maria learns",
+  learnsStranger: "Nothing — so she assumes the worst.",
+  learnsHolder: "One fact: the threshold was met.",
+  statusLink: "Where Pattern 3 is",
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* Earn a record — the close of chapter 03                                      */
+/* -------------------------------------------------------------------------- */
+
+export const EARN = {
+  line: "Every round you play prints a receipt. Lean in and the thread twists tighter. Your receipts, tied together, are your record.",
+  addToRecord: "Add to your record",
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* /record (design.md §13.7)                                                    */
+/* -------------------------------------------------------------------------- */
+
+export const RECORD = {
+  title: "Your record",
+  tint: "Yours to prove, not to publish.",
+  lede: "Every round you've played, tied together by the thread. When Pattern 3 ships, this is what you'll prove a threshold over — without showing a single receipt.",
+  onChain: "On-chain",
+  onChainEmpty: "No on-chain games yet. Play with a friend to record one.",
+  practice: "Practice",
+  practiceEmpty: "No receipts yet. Play a practice round to print your first.",
+  practiceCta: "Play a practice round",
+  recorded: "Rounds recorded",
+  kept: "Rounds kept",
+  keptPct: "Kept",
+  height: "Trust height",
+  prove: "Prove it",
+  proveLine:
+    "See what a counterparty would learn from your record — and what it wouldn't.",
+} as const;
+
+/* -------------------------------------------------------------------------- */
+/* /real-life — where it goes (design.md §13.7). All illustrative.             */
+/* -------------------------------------------------------------------------- */
+
+export interface Scenario {
+  id: "credit" | "escrow" | "agents";
+  kicker: string;
+  title: string;
+  today: string;
+  withLatep: string;
+  uses: readonly ("seal" | "handshake" | "net" | "pass" | "record")[];
+}
+
+export const WHERE_IT_GOES = {
+  title: "Where it goes",
+  tint: "Trust you can carry between strangers.",
+  lede: "The game is the first place a record is earned. These are the places it gets spent.",
+  liveToday: "Live today",
+  liveTodayLine:
+    "The four pieces already working in the app, and where you've met them.",
+} as const;
+
+export const SCENARIOS: readonly Scenario[] = [
+  {
+    id: "credit",
+    kicker: "Credit",
+    title: "A remittance desk extends credit to a stranger",
+    today:
+      "Maria demands the full amount up front, so capital sits locked on both ends of the corridor.",
+    withLatep:
+      "The counterparty proves 90% of their recorded deals were kept. Maria asks for 40% and learns nothing about who they've dealt with.",
+    uses: ["record", "net"],
+  },
+  {
+    id: "escrow",
+    kicker: "Escrow",
+    title: "A marketplace sets a seller's deposit",
+    today:
+      "Every new seller posts the same large deposit, because the market can't tell a careful seller from a careless one.",
+    withLatep:
+      "A seller proves a kept-delivery threshold from another market's record. The deposit shrinks; neither market sees the other's customers.",
+    uses: ["record", "net", "handshake"],
+  },
+  {
+    id: "agents",
+    kicker: "Agents",
+    title: "An AI agent pays a service it has never used",
+    today:
+      "A new agent has no history to show, so it starts at zero trust and prepays everything.",
+    withLatep:
+      "The agent arrives with a proof — kept 95% of its last 200 commitments — checked in seconds, revealing nothing else.",
+    uses: ["record", "seal"],
+  },
+] as const;

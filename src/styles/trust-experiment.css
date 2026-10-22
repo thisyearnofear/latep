@@ -277,7 +277,12 @@
   white-space: nowrap;
 }
 
+/* The caption is a label, not a control, so it may wrap onto two lines when
+   the scene is narrow — that is what keeps it clear of the neighbouring
+   stub instead of colliding with it or being clipped. */
 .trust-seal-caption {
+  max-width: 26ch;
+  text-align: center;
   font-family: var(--font-print);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-print-label);
