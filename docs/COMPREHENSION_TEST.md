@@ -46,7 +46,12 @@ rather than inventing one.
    happening? Did you think it was on-chain?”
    - The practice round is local. A participant who believes a proof or
      transaction happened is a failure of the receipt, even if they liked it.
-6. **One improvement.** “What was the most confusing thing on the page?”
+6. **The record** (added with design.md §13). After they open “Your record”:
+   “What could you do with your record?”
+   - A 2 names proving a track record to someone without showing it (lower
+     collateral, a deposit, an agent). Anyone who thinks the claim demo
+     produced a real proof is a failure of its stamps.
+7. **One improvement.** “What was the most confusing thing on the page?”
 
 ## Scoring
 
@@ -63,6 +68,8 @@ Pass bar:
 
 - **≥ 4 of 5** score 2 on at least one primitive's purpose.
 - **≥ 3 of 5** can give a real-life example that is not the app itself.
+- **≥ 3 of 5** score 2 on “what could you do with your record”, and **0 of 5**
+  believe the claim demo was a real proof.
 - **0 of 5** say “it's just a game” or believe the practice round was on-chain.
 - **No one** needs the moderator to explain the core loop before finishing.
 

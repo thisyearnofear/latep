@@ -8,7 +8,10 @@ import { RevealStage } from "./visual/RevealStage";
 import type { TrustStageState } from "./visual/TrustStage";
 import { RoundReceipt } from "./receipt/RoundReceipt";
 import { primitiveForRound } from "./receipt/helpers";
+import { usePracticeRecord } from "../hooks/usePracticeRecord";
+import { stashFlip } from "./transitions/flipHandoff";
 import { MOVE_HELPER, MOVE_LABEL } from "../content/vocabulary";
+import { EARN } from "../content/story";
 import { calculatePayoff, NC_DEFAULT, type GameMove } from "../util/strategies";
 import "../styles/trust-experiment.css";
 
@@ -105,8 +108,9 @@ const points = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-export function TrustExperiment() {
+export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
   const [state, dispatch] = useReducer(roundReducer, initialState);
+  const { recordRound, getEntries } = usePracticeRecord();
   const [soundOn, setSoundOn] = useState(false);
   const outcomeRef = useRef<HTMLHeadingElement>(null);
   const cooperateRef = useRef<HTMLButtonElement>(null);
@@ -117,6 +121,9 @@ export function TrustExperiment() {
     lose: Howl;
   } | null>(null);
   const prevPhaseRef = useRef<Phase>("choose");
+  // Which practice rounds are already on the record — keyed by round number so
+  // a StrictMode double-effect or a re-render can never record one twice.
+  const recordedRoundsRef = useRef<Set<number>>(new Set());
 
   const resultKey =
     state.move && state.opponent ? `${state.move}${state.opponent}` : null;
@@ -151,6 +158,20 @@ export function TrustExperiment() {
     const timer = window.setTimeout(() => dispatch({ type: "finish" }), delay);
     return () => window.clearTimeout(timer);
   }, [state.phase]);
+
+  // The round settles when app state lands on "outcome" — never on an
+  // animation callback (design.md §7). The ref guards the write, not a flag
+  // on the store, so the record is made exactly once per round.
+  useEffect(() => {
+    if (state.phase !== "outcome" || !state.move) return;
+    if (recordedRoundsRef.current.has(state.round)) return;
+    recordedRoundsRef.current.add(state.round);
+    recordRound({
+      source: "home",
+      yourMove: state.move,
+      partnerMove: state.opponent,
+    });
+  }, [state.phase, state.move, state.opponent, state.round, recordRound]);
 
   useEffect(() => {
     if (state.phase === "outcome") {
@@ -343,6 +364,30 @@ export function TrustExperiment() {
             >
               Play another round
             </button>
+            {recordLink && (
+              <Link
+                to="/record"
+                className="trust-btn trust-btn-secondary"
+                onClick={() => {
+                  // The receipt carries you to your record (design.md §13.6):
+                  // its Flip state travels to /record with the entry id.
+                  const receipt = document.querySelector<HTMLElement>(
+                    ".trust-experiment .receipt",
+                  );
+                  const id = getEntries()[0]?.id;
+                  if (receipt && id) {
+                    stashFlip(receipt, id);
+                    // Under View Transitions the receipt morphs across the
+                    // navigation via a shared name (manual flight = fallback).
+                    if ("startViewTransition" in document) {
+                      receipt.style.viewTransitionName = "receipt-flight";
+                    }
+                  }
+                }}
+              >
+                {EARN.addToRecord}
+              </Link>
+            )}
           </div>
         )}
       </div>

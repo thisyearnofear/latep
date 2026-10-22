@@ -62,8 +62,12 @@ function SealedStub({
     <div className={`trust-seal trust-seal-stub trust-seal-stub-${side}`}>
       <ReceiptStub>
         <Stamp text={STAMPS.sealed} />
-        <span className="trust-seal-caption">{label}</span>
       </ReceiptStub>
+      {/* The caption sits under the stub, not inside it: two stubs carrying
+          a stamp AND a one-line caption each are too wide to share the scene
+          28% apart — the second stamp lands on the first caption (design.md
+          §10, no overlap). Stub = stamp only; the label is its own line. */}
+      <span className="trust-seal-caption">{label}</span>
     </div>
   );
 }

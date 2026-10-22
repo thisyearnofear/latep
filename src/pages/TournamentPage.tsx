@@ -13,7 +13,9 @@ const TournamentPage: React.FC = () => {
   return (
     <div className="till-page">
       <header className="till-page__head">
-        <h1 className="till-page__title">The Tournament</h1>
+        <h1 className="till-page__title" data-vt-title>
+          The Tournament
+        </h1>
         <p className="till-page__lede">
           Watch trust evolve. All 9 strategies compete in a round-robin
           tournament — the weak are eliminated, the strong reproduce.

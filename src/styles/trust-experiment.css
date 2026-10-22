@@ -112,6 +112,7 @@
 .trust-status {
   margin: 16px 0 4px;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
   text-align: center;
@@ -277,7 +278,12 @@
   white-space: nowrap;
 }
 
+/* The caption is a label, not a control, so it may wrap onto two lines when
+   the scene is narrow — that is what keeps it clear of the neighbouring
+   stub instead of colliding with it or being clipped. */
 .trust-seal-caption {
+  max-width: 26ch;
+  text-align: center;
   font-family: var(--font-print);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-print-label);
@@ -466,6 +472,7 @@
 .trust-result-title {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   color: var(--color-counter-text);
   scroll-margin-top: 128px;
@@ -488,6 +495,14 @@
 .trust-result .trust-btn {
   width: auto;
   min-width: 200px;
+}
+
+/* The "Add to your record" action is a link wearing the button's clothes. */
+a.trust-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .trust-details {

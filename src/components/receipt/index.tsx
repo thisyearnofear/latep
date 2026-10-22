@@ -38,6 +38,8 @@ export interface ReceiptProps {
   feeding?: boolean;
   className?: string;
   style?: CSSProperties;
+  /** Attributes forwarded to the outer div (e.g. data-flip-id). */
+  [attr: `data-${string}`]: string | undefined;
 }
 
 const MAX_TILT = 0.8;
@@ -53,6 +55,7 @@ export function Receipt({
   feeding,
   className,
   style,
+  ...attrs
 }: ReceiptProps) {
   const classes = [
     "receipt",
@@ -69,6 +72,7 @@ export function Receipt({
   return (
     <div
       className={classes}
+      {...attrs}
       style={
         tilt !== undefined && tilt !== 0
           ? ({

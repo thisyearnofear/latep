@@ -1,0 +1,388 @@
+/* ============================================================================
+ * Plates — the isometric figures (design.md §2, §6).
+ *
+ * A plate is a hairline drawing on receipt stock: an object drawn in 2:1
+ * dimetric projection, with parts the reader can press. Pressing a part inks
+ * it and prints a new set of lines underneath.
+ *
+ * Rules that come from the design system, not from this file:
+ *   - Hairlines only. 1px strokes, round joins, no fills of colour.
+ *   - Colour means decided. Pencil is a dashed hairline in the faded ink;
+ *     ink and the two thread colours are solid.
+ *   - No text on the drawing. SVG type scales with the drawing, and the page
+ *     has to work from 320px to 1440px, so the words live in the HTML around
+ *     the plate instead.
+ * ========================================================================== */
+
+.plate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin: 0;
+  padding: var(--space-md);
+  background: var(--color-receipt);
+  color: var(--color-receipt-ink);
+  border: 1px dashed var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+}
+
+.plate--wide {
+  max-width: 680px;
+}
+
+/* --- the head ------------------------------------------------------------- */
+
+.plate__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.plate__number {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-receipt-faded);
+}
+
+.plate__mark {
+  color: var(--color-receipt-ink);
+}
+
+.plate__name {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-receipt-ink);
+}
+
+.plate__caption {
+  margin: 0;
+  max-width: 62ch;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-receipt-faded);
+}
+
+/* --- the drawing ---------------------------------------------------------- */
+
+.plate__stage {
+  padding: var(--space-sm);
+  background: var(--color-receipt);
+  border: 1px solid var(--color-receipt-rule);
+}
+
+.plate__figure {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  margin-inline: auto;
+}
+
+.plate__face {
+  fill: none;
+  stroke: var(--color-figure-ink);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.plate__face--faint {
+  stroke: var(--color-figure-faint);
+  stroke-dasharray: 3 4;
+}
+
+.plate__face--solid.plate__face--ink {
+  fill: var(--color-receipt-2);
+}
+
+.plate__face--you {
+  stroke: var(--color-figure-you);
+}
+
+.plate__face--partner {
+  stroke: var(--color-figure-partner);
+}
+
+.plate__face--void {
+  fill: var(--color-figure-void);
+  stroke: var(--color-figure-ink);
+}
+
+.plate__face--hidden {
+  display: none;
+}
+
+.plate__line-art {
+  fill: none;
+  stroke-width: 1;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.plate__line-art--faint {
+  stroke: var(--color-figure-faint);
+  stroke-dasharray: 3 4;
+}
+
+.plate__line-art--ink {
+  stroke: var(--color-figure-ink);
+}
+
+.plate__line-art--you {
+  stroke: var(--color-figure-you);
+}
+
+.plate__line-art--partner {
+  stroke: var(--color-figure-partner);
+}
+
+.plate__thread {
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.plate__thread-a {
+  stroke: var(--color-figure-you);
+}
+
+.plate__thread-b {
+  stroke: var(--color-figure-partner);
+}
+
+/* The ring marks where a part is. It fills once that part has been pressed. */
+.plate__marker {
+  fill: none;
+  stroke: var(--color-figure-ink);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.plate__marker--spent {
+  fill: var(--color-figure-ink);
+}
+
+/* --- the controls --------------------------------------------------------- */
+
+.plate__controls {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
+
+.plate__control {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-height: 44px;
+  padding: var(--space-2xs) var(--space-xs);
+  background: var(--color-receipt-2);
+  color: var(--color-receipt-ink);
+  border: 1px solid var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--dur-short) var(--ease-out),
+    transform var(--dur-micro) var(--ease-out);
+}
+
+.plate__control:hover {
+  background: var(--color-receipt);
+}
+
+.plate__control:active {
+  transform: translate(1px, 1px);
+}
+
+.plate__control:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.plate__control-label {
+  font-weight: 700;
+}
+
+.plate__control-hint {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  color: var(--color-receipt-faded);
+}
+
+/* --- the printed lines ---------------------------------------------------- */
+
+.plate__lines {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px dashed var(--color-receipt-rule);
+  padding-top: var(--space-2xs);
+}
+
+.plate__line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-sm);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+}
+
+.plate__line dt {
+  color: var(--color-receipt-faded);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+}
+
+.plate__line dd {
+  margin: 0;
+  text-align: right;
+}
+
+.plate__line--total {
+  margin-top: var(--space-3xs);
+  padding-top: var(--space-3xs);
+  border-top: 1px solid var(--color-receipt-ink);
+  font-weight: 700;
+}
+
+.plate__line--total dt {
+  color: var(--color-receipt-ink);
+}
+
+.plate__link {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.plate__link a {
+  color: var(--color-receipt-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.plate__link a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* ============================================================================
+ * The gallery — a list of plates, and the one being shown.
+ * ========================================================================== */
+
+.gallery {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: start;
+}
+
+.gallery__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+}
+
+.gallery__tab {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--space-2xs) var(--space-xs);
+  background: transparent;
+  color: var(--color-counter-text-2);
+  border: 1px solid var(--color-counter-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background var(--dur-short) var(--ease-out),
+    color var(--dur-short) var(--ease-out);
+}
+
+.gallery__tab:hover {
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+}
+
+.gallery__tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.gallery__tab--active {
+  background: var(--color-counter-2);
+  color: var(--color-counter-text);
+  border-color: var(--color-counter-muted);
+}
+
+.gallery__tab-number {
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+  color: var(--color-counter-muted);
+}
+
+.gallery__tab-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-display);
+}
+
+.gallery__tab-line {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-counter-muted);
+}
+
+/* --- narrow --------------------------------------------------------------- */
+
+@media (max-width: 760px) {
+  .gallery {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .gallery__list {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: var(--space-3xs);
+  }
+
+  .gallery__list > li {
+    flex: 0 0 auto;
+  }
+
+  .gallery__tab {
+    width: 200px;
+  }
+}
+
+@media (max-width: 420px) {
+  .plate {
+    padding: var(--space-sm);
+  }
+
+  .plate__stage {
+    padding: var(--space-2xs);
+  }
+}

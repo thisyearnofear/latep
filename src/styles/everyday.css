@@ -1,39 +1,51 @@
 /* ============================================================================
- * Everyday — design.md §2, story-page family.
+ * Where it goes (/real-life) — design.md §13.7, a story page on the desk.
  *
- * Left-biased, stage-led. Long text lives on receipts, never on the counter
- * (design.md §2), so each scenario is a wide receipt and the counter only
- * carries the opening and the two actions.
+ * Left-biased, stage-led. Long text lives on receipts; the desk only carries
+ * the opening, the chapter labels, and the scenario grounds.
  * ========================================================================== */
 
 .everyday {
-  max-width: var(--layout-max);
-  margin-inline: auto;
-  padding: var(--space-xl) var(--space-md) var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
+  padding-bottom: var(--space-2xl);
 }
 
+/* The desk supplies the ground (data-surface="desk" on the shell); the page
+   only lays out. Every text colour here is a desk token — the counter
+   palette does not exist on this page. */
 .everyday-opening {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-lg);
+}
+
+.everyday-opening > * {
   max-width: var(--measure-prose);
 }
 
 .everyday-title {
   margin: 0 0 var(--space-xs);
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   letter-spacing: var(--tracking-display);
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
   overflow-wrap: anywhere;
+}
+
+/* The one tinted phrase per display heading — roman, moss (§13.3). */
+.everyday-tint {
+  display: block;
+  font-style: normal;
+  color: var(--color-moss);
 }
 
 .everyday-situation {
   margin: 0;
-  max-width: var(--measure-prose);
   font-size: var(--text-lg);
   line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
 }
 
 /* The header scene: two figures leaning toward one another on the counter,
@@ -99,6 +111,7 @@
 .everyday-situation-title {
   margin: 0 0 var(--space-2xs);
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   color: var(--color-receipt-ink);
 }
@@ -143,75 +156,98 @@
   max-width: var(--measure-prose);
 }
 
-/* --- actions -------------------------------------------------------------- */
+/* --- the scenarios (design.md §13.7) --------------------------------------- */
 
-.everyday-actions {
+/* Each scenario is a full-bleed band: desk, clay, desk. The content inside
+   keeps the shared max width and the left bias; on ≥768px the text takes
+   ~60% and the "uses" receipt takes the rest. */
+.scenario-inner {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2xs);
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
 }
 
-/* Primary: a receipt-stock tile on the counter (design.md §9). */
-.everyday-primary {
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  padding: var(--space-2xs) var(--space-md);
-  background: var(--color-receipt);
-  color: var(--color-receipt-ink);
-  border: 2px solid var(--color-receipt-ink);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  font-weight: 700;
-  text-decoration: none;
-  transition: transform var(--dur-micro) var(--ease-out);
+.scenario--clay {
+  background: var(--color-clay-wash);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
 }
 
-.everyday-primary:active {
-  transform: translateY(1px);
+.scenario-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-md);
 }
 
-.everyday-secondary {
-  display: inline-flex;
-  align-items: center;
-  min-height: 48px;
-  padding: var(--space-2xs) var(--space-md);
-  background: transparent;
-  color: var(--color-counter-text-2);
-  border: 1px solid var(--color-counter-rule);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-body);
-  font-size: var(--text-sm);
-  text-decoration: none;
-  transition: background var(--dur-micro) var(--ease-out);
+@media (min-width: 768px) {
+  .scenario-body {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
 }
 
-.everyday-secondary:hover {
-  background: var(--color-counter-2);
-  color: var(--color-counter-text);
+.scenario-line {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+  max-width: var(--measure-prose);
 }
 
-.everyday-primary:focus-visible,
-.everyday-secondary:focus-visible {
+.scenario-line strong {
+  color: var(--color-desk-ink);
+}
+
+/* The §9 text link, on the desk. */
+.everyday-link {
+  color: var(--color-desk-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.everyday-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.everyday-link:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
 
-/* --- narrow --------------------------------------------------------------- */
+.scenario-uses {
+  margin: 0;
+}
 
-@media (max-width: 700px) {
-  .everyday {
-    padding-top: var(--space-lg);
-    gap: var(--space-md);
-  }
+.scenario-use {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) 0;
+  color: var(--color-receipt-ink);
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print-label);
+  text-transform: uppercase;
+}
 
-  .everyday-title {
-    font-size: var(--text-xl);
-  }
+.scenario-uses__stamp {
+  margin-top: var(--space-sm);
+}
 
-  .everyday-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
+.everyday-live-line {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-desk-muted);
+}
+
+.everyday-scope {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: 0 var(--space-md);
 }

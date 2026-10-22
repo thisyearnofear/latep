@@ -1,35 +1,96 @@
 /* ============================================================================
- * Home — design.md §2, story-page family.
+ * Home — design.md §13.7, the landing page told in chapters.
  *
- * Stage-led, left-biased. The content never centres except the move buttons
- * under the scene, and the max width is the shared --layout-max.
+ * A story page on the desk (the shell supplies the ground via
+ * `data-surface="desk"`). Full-bleed bands carry the washes; `.chapter-inner`
+ * keeps the shared 1200px max and the left bias. No gradients between
+ * washes, no rounded bands — a chapter changes ground at a straight edge
+ * until §13.6's dither lands.
  * ========================================================================== */
 
 .home {
-  max-width: var(--layout-max);
-  margin-inline: auto;
-  padding: var(--space-xl) var(--space-md) var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
 }
 
-/* --- 1. the opening ------------------------------------------------------- */
+/* --- the hero ------------------------------------------------------------- */
 
+/* The illustration band: the Desk plate drawn large on the sage wash. */
+.home-hero {
+  background: var(--color-sage-wash);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
+  padding: var(--space-xl) var(--space-md) var(--space-lg);
+}
+
+.home-hero-figure {
+  margin: 0 auto;
+  max-width: 720px;
+}
+
+/* The live drawing fills the hero band for exactly one draw-in, then
+   freezes into an image (design.md §13.5). */
+/* Full-bleed across the band: the canvas IS the band's surface, so it
+   breaks out of the 720px figure column to the viewport edges — no visible
+   canvas edge can form (design.md §13.5). */
+.desk-hero {
+  position: relative;
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  height: min(56vh, 560px);
+  min-height: 240px;
+
+  overflow: hidden;
+}
+
+.desk-hero__canvas,
+.desk-hero__frozen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.desk-hero[data-state="plate"] {
+  width: 100%;
+  margin-left: 0;
+  height: auto;
+  min-height: 0;
+}
+
+.home-hero-figure .plate--bare .plate__stage {
+  background: transparent;
+  border: none;
+}
+
+/* Below the band, on the desk: headline, lede, actions. */
 .home-opening {
-  max-width: var(--measure-prose);
+  background: var(--color-desk);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
+  /* full-bleed sheet; the prose keeps the centred column's left edge */
+  padding: var(--space-xl)
+    max(var(--space-md), calc((100vw - var(--layout-max)) / 2)) var(--space-lg);
 }
 
-/* Display tracking, roman, never italic. */
+/* Display tracking, roman, never italic; the tinted phrase is moss. */
 .home-title {
   margin: 0 0 var(--space-xs);
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-3xl);
-  font-stretch: 80%; /* the condensed width, for the story hero */
+  font-stretch: 80%;
   line-height: 1.05;
   letter-spacing: var(--tracking-display);
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
   overflow-wrap: anywhere;
+}
+
+.home-title-tint {
+  font-style: normal;
+  color: var(--color-moss);
 }
 
 .home-situation {
@@ -37,71 +98,251 @@
   max-width: var(--measure-prose);
   font-size: var(--text-lg);
   line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+}
+
+/* The two hero actions, per §9 on the desk: the primary is an ink-filled
+   tile with desk-coloured text; the secondary a 1px desk-rule border. */
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.home-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.home-action:active {
+  transform: translateY(1px);
+}
+
+.home-action:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.home-action--primary {
+  background: var(--color-desk-ink);
+  color: var(--color-desk);
+  border: 2px solid var(--color-desk-ink);
+}
+
+.home-action--primary:hover {
+  background: var(--color-desk-ink-2);
+  border-color: var(--color-desk-ink-2);
+}
+
+.home-action--secondary {
+  background: transparent;
+  color: var(--color-desk-ink);
+  border: 1px solid var(--color-desk-rule);
+}
+
+.home-action--secondary:hover {
+  border-color: var(--color-desk-muted);
+}
+
+/* --- the chapters --------------------------------------------------------- */
+
+.chapter {
+  scroll-margin-top: var(--shell-height, 64px);
+}
+
+.chapter--desk {
+  background: var(--color-desk);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
+}
+
+.chapter--sand {
+  background: var(--color-sand-wash);
+
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
+}
+
+.chapter--sage {
+  background: var(--color-sage-wash);
+
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
+}
+
+/* Chapter 03 is the counter: the practice stage is a workbench surface and
+   keeps its own dark ground inside the story page. */
+.chapter--counter {
+  background: var(--color-counter);
+  color: var(--color-counter-text);
+}
+
+.chapter-inner {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+/* The label row: print-face number in moss, chapter title in body weight.
+   Sentence case — it is wayfinding, not a stamp. */
+.chapter-label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  margin: 0;
+}
+
+.chapter-number {
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-moss);
+}
+
+.chapter-name {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-desk-ink-2);
+}
+
+.chapter--counter .chapter-name {
   color: var(--color-counter-text-2);
 }
 
-/* --- shared section heading ----------------------------------------------- */
+.chapter-h {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+  color: var(--color-desk-ink);
+  overflow-wrap: anywhere;
+}
 
-.home-section-heading {
-  margin: 0 0 var(--space-sm);
-  font-family: var(--font-print);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-print-label);
-  text-transform: uppercase;
+.chapter-h:focus {
+  outline: none;
+}
+
+.chapter-h:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.chapter--counter .chapter-h {
+  color: var(--color-counter-text);
+}
+
+.chapter-h--quiet {
+  font-size: var(--text-xl);
+}
+
+.chapter-lede {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+}
+
+.chapter-lede--second {
+  font-size: var(--text-sm);
+  color: var(--color-desk-muted);
+}
+
+.chapter--counter .chapter-lede {
+  color: var(--color-counter-text-2);
+}
+
+.chapter--counter .chapter-lede--second {
   color: var(--color-counter-muted);
 }
 
-/* --- 4. the four primitives, as stubs ------------------------------------- */
-
-.home-primitives {
-  display: flex;
-  flex-direction: column;
+.chapter-payoff {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-desk-ink);
 }
 
-.home-primitive-row {
+.chapter-close {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-desk-muted);
+}
+
+.chapter--counter .chapter-close {
+  color: var(--color-counter-muted);
+}
+
+/* The §9 text link on the desk: ink, 1px underline offset 3px. */
+.chapter-linkrow {
+  margin: 0;
+}
+
+.chapter-link {
+  color: var(--color-desk-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.chapter-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.chapter-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* --- the dead ends (chapter 01) ------------------------------------------- */
+
+.home-way-row {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: var(--space-2xs);
 }
 
-.home-primitive {
+.home-way {
   display: flex;
   flex-direction: column;
   gap: var(--space-3xs);
   height: 100%;
   padding: var(--space-sm);
-  text-decoration: none;
   background: var(--color-receipt);
   color: var(--color-receipt-ink);
   border: 1px dashed var(--color-receipt-rule);
   border-radius: var(--radius-sm);
-  transition:
-    background var(--dur-short) var(--ease-out),
-    transform var(--dur-micro) var(--ease-out);
 }
 
-.home-primitive:hover {
-  background: var(--color-receipt-2);
-}
-
-.home-primitive:active {
-  transform: translate(1px, 1px);
-}
-
-.home-primitive:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
-.home-primitive-mark {
-  color: var(--color-receipt-ink);
-  margin-bottom: var(--space-3xs);
-}
-
-.home-primitive-name {
+.home-way-name {
   font-family: var(--font-print);
   font-size: var(--text-xs);
   letter-spacing: var(--tracking-print-label);
@@ -109,25 +350,72 @@
   color: var(--color-receipt-faded);
 }
 
-.home-primitive-line {
+.home-way-line {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   line-height: var(--leading-body);
   color: var(--color-receipt-ink);
 }
 
-/* --- 5. where next -------------------------------------------------------- */
+/* --- the directions (chapter 04) ------------------------------------------- */
 
-.home-next {
+.home-direction-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-desk-rule);
+}
+
+.home-direction {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-2xs);
+  border-bottom: 1px solid var(--color-desk-rule);
+}
+
+.home-direction-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-md);
+  letter-spacing: var(--tracking-display);
+  color: var(--color-desk-ink);
+}
+
+.home-direction-line {
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+}
+
+/* --- honest scope (chapter 05) --------------------------------------------- */
+
+.home-scope {
   display: flex;
   flex-direction: column;
+  gap: var(--space-3xs);
+  max-width: var(--measure-prose);
+}
+
+.home-scope-line {
+  margin: 0;
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-desk-muted);
+}
+
+/* --- where next ------------------------------------------------------------ */
+
+.home-next .chapter-inner {
+  gap: var(--space-sm);
 }
 
 .home-next-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--color-counter-rule);
+  border-top: 1px solid var(--color-desk-rule);
 }
 
 .home-next-row {
@@ -137,13 +425,13 @@
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-2xs);
   text-decoration: none;
-  color: var(--color-counter-text);
-  border-bottom: 1px solid var(--color-counter-rule);
+  color: var(--color-desk-ink);
+  border-bottom: 1px solid var(--color-desk-rule);
   transition: background var(--dur-short) var(--ease-out);
 }
 
 .home-next-row:hover {
-  background: var(--color-counter-2);
+  background: var(--color-desk-2);
 }
 
 .home-next-row:focus-visible {
@@ -153,18 +441,19 @@
 
 .home-next-title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
 }
 
 .home-next-line {
   font-size: var(--text-sm);
   line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
 }
 
 .home-next-go {
-  color: var(--color-you);
+  color: var(--color-desk-ink);
 }
 
 /* --- the nudge, the optional actions, the credit ------------------------- */
@@ -180,7 +469,7 @@
   margin: 0;
   font-size: var(--text-sm);
   line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
 }
 
 .home-optional {
@@ -194,7 +483,7 @@
   padding: var(--space-3xs) 0;
   border: none;
   background: transparent;
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
   font-family: var(--font-body);
   font-size: var(--text-sm);
   text-decoration: underline;
@@ -204,7 +493,7 @@
 }
 
 .home-quiet-button:hover {
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
 }
 
 .home-quiet-button:focus-visible {
@@ -214,11 +503,11 @@
 
 .home-profile {
   font-size: var(--text-sm);
-  color: var(--color-counter-muted);
+  color: var(--color-desk-muted);
 }
 
 .home-profile strong {
-  color: var(--color-you);
+  color: var(--color-you-print);
 }
 
 .home-fineprint,
@@ -226,7 +515,7 @@
   margin: 0;
   font-size: var(--text-xs);
   line-height: var(--leading-body);
-  color: var(--color-counter-muted);
+  color: var(--color-desk-muted);
 }
 
 .home-credit {
@@ -236,11 +525,6 @@
 /* --- narrow --------------------------------------------------------------- */
 
 @media (max-width: 700px) {
-  .home {
-    padding-top: var(--space-lg);
-    gap: var(--space-lg);
-  }
-
   .home-title {
     font-size: var(--text-2xl);
   }
@@ -253,5 +537,308 @@
 
   .home-next-line {
     grid-column: 1 / -1;
+  }
+
+  /* The same for the three directions. */
+  .home-direction {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-3xs);
+  }
+}
+
+@media (max-width: 480px) {
+  /* Portrait: a shorter, squarer band so the scene fills it. */
+  .desk-hero {
+    height: min(70vw, 360px);
+    min-height: 200px;
+  }
+}
+
+/* ============================================================================
+ * Stacking sheets, chapter rail, line reveals
+ * (replaces the dither edges on Home; /real-life keeps its own)
+ * ========================================================================== */
+
+/* --- sheets --------------------------------------------------------------- */
+
+.home {
+  overflow-anchor: none;
+}
+
+.sheet {
+  box-sizing: border-box;
+  /* Flex items: min-width:auto lets a breakout child (the hero canvas)
+     widen the sheet — clamp it so every sheet stays inside the viewport. */
+  min-width: 0;
+  margin: 0;
+  position: relative;
+  /* Sticky pin-state changes are layout shifts — don't let Chrome's scroll
+     anchoring undo the focus-guard's reveal scroll. */
+  overflow-anchor: none;
+}
+
+/* Torn top edge + upward shadow — the receipt tear technique, top edge only.
+   Sheets after the first get the edge. */
+.sheet[data-sheet="stack"] {
+  position: sticky;
+  top: min(0px, calc(100svh - var(--sheet-h, 100svh)));
+}
+
+.sheet + .sheet {
+  border-top: 6px solid transparent;
+  border-image-source: var(--tear-tile);
+  border-image-slice: 6 0 0 0;
+  border-image-width: 6px 0 0 0;
+  border-image-repeat: repeat;
+  /* subtle upward shadow, not a heavy blurred card shadow */
+  box-shadow: var(--shadow-sheet);
+}
+
+/* The scrim as a sheet is covered (--sheet-dim scrubbed 0 → 0.45). */
+.sheet::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  opacity: var(--sheet-dim, 0);
+  pointer-events: none;
+  z-index: 3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* --- chapter titles ---------------------------------------------------- */
+
+/* Hero h1 — no synthetic stretch, real optical sizing. */
+.home-title {
+  font-stretch: normal;
+  font-weight: 700;
+  font-variation-settings: "wdth" 100;
+  font-optical-sizing: auto;
+  font-size: clamp(2.25rem, 1.6rem + 2.4vw, 3.25rem);
+  text-wrap: balance;
+}
+
+.chapter-lede,
+.home-situation {
+  text-wrap: pretty;
+}
+
+/* Chapter titles at sentence scale — hierarchy from space, not size. */
+.home .chapter-h {
+  font-size: clamp(1.6rem, 1.3rem + 1.1vw, 2.25rem);
+  font-weight: 600;
+  line-height: 1.15;
+  max-width: 24ch;
+  text-wrap: balance;
+  /* hierarchy from space */
+  margin-top: var(--space-lg);
+}
+
+/* The data figure above the claim demo (100% → 40%) */
+.chapter-figure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  margin: var(--space-lg) 0;
+}
+
+.chapter-figure-num {
+  font-family: var(--font-display);
+  font-weight: 780;
+  font-variation-settings: "wdth" 85;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(3.5rem, 2rem + 6vw, 7rem);
+  line-height: 1;
+  color: var(--color-desk-ink);
+}
+
+.chapter-figure-num--moss {
+  color: var(--color-moss);
+}
+
+.chapter-figure-arrow {
+  font-size: clamp(1.6rem, 1rem + 2.5vw, 3rem);
+  color: var(--color-desk-ink-2);
+}
+
+.chapter-figure-cap {
+  flex-basis: 100%;
+  font-family: var(--font-print);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-print);
+  text-transform: uppercase;
+  color: var(--color-desk-ink-2);
+}
+
+/* The inline label row is visually hidden at ≥1100px — the rail carries
+   the number/title there. The h2 association is aria-labelledby. */
+@media (min-width: 1100px) {
+  .home .chapter-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+/* --- chapter rail ---------------------------------------------------------- */
+
+.chapter-rail {
+  display: none;
+}
+
+@media (min-width: 1100px) {
+  .chapter-rail {
+    display: block;
+    position: fixed;
+    left: var(--space-md);
+    top: 40%;
+    z-index: 50;
+    font-family: var(--font-print);
+    opacity: 0;
+    transition: opacity var(--dur-short) var(--ease-out);
+    pointer-events: none;
+  }
+
+  /* Visible only while a chapter is current — not over the hero and not
+     past chapter 05. */
+  .chapter-rail[data-current] {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .chapter-rail-num {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2.25rem;
+    line-height: 1;
+    color: var(--color-desk-ink);
+    margin-bottom: var(--space-sm);
+  }
+
+  .chapter-rail-num {
+    font-size: 4rem;
+    font-weight: 780;
+    font-stretch: 85%;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chapter-rail-num-mask {
+    display: block;
+    overflow: hidden;
+    height: 1em;
+    position: relative;
+  }
+
+  .chapter-rail-digit {
+    display: block;
+  }
+
+  .chapter-rail-digit--in {
+    animation: rail-roll-in var(--dur-short) var(--ease-feed);
+  }
+
+  /* The old digit leaves on top of the new one rather than above it in flow,
+     otherwise it holds the mask and the new digit sits outside it. */
+  .chapter-rail-digit--out {
+    position: absolute;
+    inset: 0 auto auto 0;
+    animation: rail-roll-out var(--dur-short) var(--ease-feed) forwards;
+  }
+
+  /* Reduced motion: no roll, and the old digit (whose animationend never
+     fires without an animation) simply isn't drawn. */
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-rail-digit--in {
+      animation: none;
+    }
+    .chapter-rail-digit--out {
+      display: none;
+    }
+  }
+
+  @keyframes rail-roll-out {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-100%);
+    }
+  }
+
+  @keyframes rail-roll-in {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .chapter-rail-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2xs);
+  }
+
+  .chapter-rail-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-print);
+    text-decoration: none;
+    color: var(--color-desk-ink-3, var(--color-desk-ink-2));
+  }
+
+  .chapter-rail-tick {
+    width: 0;
+    height: 1px;
+    background: currentColor;
+    transition: width var(--dur-short) var(--ease-out);
+  }
+
+  .chapter-rail-link[aria-current="true"] {
+    color: var(--color-desk-ink);
+  }
+
+  .chapter-rail-link[aria-current="true"] .chapter-rail-tick {
+    width: var(--space-sm);
+  }
+
+  /* On the counter sheet the rail flips to dark-surface colours. */
+  .chapter-rail--counter .chapter-rail-num,
+  .chapter-rail--counter .chapter-rail-link[aria-current="true"] {
+    color: var(--color-counter-text);
+  }
+
+  .chapter-rail--counter .chapter-rail-link {
+    color: var(--color-counter-muted);
+  }
+}
+
+/* When the chapter rail shows (≥1100px) the prose column keeps a left
+   margin for it inside the centered column — the rail overlays padding,
+   never content. */
+@media (min-width: 1100px) {
+  .home .chapter-inner {
+    padding-left: 210px;
+  }
+
+  /* Opening h1 shares the chapter column's left edge. */
+  .home .home-opening {
+    padding-left: calc(210px + var(--space-md));
   }
 }

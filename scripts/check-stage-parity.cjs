@@ -70,9 +70,14 @@ window.__startSample = (ms) => {
   // the reader. Attached here rather than at load, when there is no document
   // element to observe yet.
   if (!window.__canvasWatch) {
+    // The story hero mounts its own WebGL canvas on / for one draw-in and
+    // removes it again (design.md §13.5). It is not the room's renderer
+    // rebuilding, so canvases it carries are excluded from this count.
     const holdsCanvas = (n) =>
       n.nodeType === 1 &&
-      (n.tagName === "CANVAS" || !!n.querySelector?.("canvas"));
+      (n.tagName === "CANVAS" || !!n.querySelector?.("canvas")) &&
+      !n.querySelector?.("canvas[data-hero]") &&
+      !(n.tagName === "CANVAS" && n.dataset?.hero);
     window.__canvasWatch = new MutationObserver((records) => {
       for (const r of records) {
         for (const n of r.addedNodes) {
@@ -355,6 +360,11 @@ async function runStage(browser, stage) {
     };
   });
   await page.goto(BASE + stage.url, { waitUntil: "domcontentloaded" });
+  // Instant scrolls — global scroll-behavior:smooth makes Playwright's
+  // scroll-into-view animate and hit-test mid-animation forever.
+  await page.addStyleTag({
+    content: "html { scroll-behavior: auto !important }",
+  });
   await page.waitForTimeout(800);
 
   console.log(`\n${stage.name} (${stage.url})`);

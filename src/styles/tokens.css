@@ -48,6 +48,49 @@
   --color-stamp: oklch(55% 0.19 28);
   --color-focus: oklch(62% 0.17 255);
 
+  /* --------------------------------------------------------------------------
+   * Colour — the desk (third surface, design.md §13.2)
+   *
+   * Story pages (/, /real-life, /record) sit on the desk: light warm paper,
+   * ink text. Workbench and lesson pages keep the counter. On the desk,
+   * people keep the print colours (--color-you-print, --color-partner-print),
+   * exactly as on a receipt.
+   * ----------------------------------------------------------------------- */
+  --color-desk: oklch(95% 0.018 85);
+  --color-desk-2: oklch(91% 0.022 85);
+  --color-desk-rule: oklch(80% 0.02 80);
+  --color-desk-ink: oklch(22% 0.015 60);
+  --color-desk-ink-2: oklch(38% 0.015 60);
+  --color-desk-muted: oklch(48% 0.015 65);
+
+  /* --------------------------------------------------------------------------
+   * Colour — earth washes (design.md §13.3)
+   *
+   * Muted earth grounds for chapters and illustrations, so a story page is
+   * not grey top to bottom. A wash is a ground only — never a button fill,
+   * never an outcome, never a person. Moss is the only earth colour used for
+   * type: one tinted phrase per display heading, and the chapter numbers.
+   * ----------------------------------------------------------------------- */
+  --color-moss: oklch(42% 0.05 130);
+  --color-moss-wash: oklch(88% 0.035 125);
+  --color-sand-wash: oklch(90% 0.05 85);
+  --color-clay-wash: oklch(84% 0.055 45);
+  --color-sage-wash: oklch(90% 0.03 160);
+
+  /* --------------------------------------------------------------------------
+   * The shared paper texture (design.md §13.4)
+   *
+   * Rendered once on a capable device (components/paper/bakePaper.ts) and
+   * blended under every stock and wash with `background-blend-mode: multiply`.
+   * The value below is the pre-rendered fallback for devices that can't run
+   * the bake — the surface looks the same either way.
+   * ----------------------------------------------------------------------- */
+  --paper-texture: url(/assets/paper/paper.png);
+
+  /* The chapter-edge dither mask (design.md §13.6): runtime-baked by
+     components/transitions/dither.ts; this static file is the fallback. */
+  --dither-edge: url(/assets/dither/edge.png);
+
   /* The modal scrim. An overlay must not erase the page behind it — losing
      context is what makes a wizard feel like a wall — but a translucent
      black is the only translucency allowed outside the shadow tokens, so it
@@ -69,8 +112,22 @@
   --chart-tint-4: oklch(78% 0.03 70);
 
   /* --------------------------------------------------------------------------
-   * Typography
+   * Colour — plates (the isometric figures)
    *
+   * A plate is a hairline drawing printed on receipt stock. Pencil is a
+   * dashed hairline in the faded ink; ink and the two thread colours are
+   * solid hairlines. There is no translucency here — a decided shape is
+   * filled with the pressed stock and the colour is in the stroke.
+   * ----------------------------------------------------------------------- */
+  --color-figure-ink: oklch(20% 0.01 60);
+  --color-figure-faint: oklch(52% 0.012 72);
+  --color-figure-you: oklch(48% 0.16 255);
+  --color-figure-partner: oklch(52% 0.14 55);
+  --color-figure-void: var(--color-receipt);
+
+  /* --------------------------------------------------------------------------
+   * Typography
+   * ---------------------------------------------------------------------------
    * Display: page headings on the counter.
    * Body:    every sentence you read.
    * Print:   what the receipt printer prints — line items, times, hashes,
@@ -114,6 +171,9 @@
    * except the network badge. Nothing has a shadow but a receipt.
    * ----------------------------------------------------------------------- */
   --radius-sm: 3px;
+  /* A chapter sheet's torn top edge, cast up onto the sheet beneath it
+     (design.md §13.6). Smaller than a receipt's: the sheet lies flat. */
+  --shadow-sheet: 0 -4px 8px oklch(0% 0 0 / 0.12);
   --shadow-receipt:
     0 1px 0 oklch(20% 0.01 60 / 0.18), 0 6px 18px oklch(0% 0 0 / 0.22);
 

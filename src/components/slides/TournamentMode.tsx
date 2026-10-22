@@ -169,11 +169,6 @@ export const TournamentMode: React.FC = () => {
         No heading of its own: the page already says "The Tournament", and two
         headings and two trophy emoji said the same thing twice.
       */}
-      <p className="till-intro">
-        All strategies play each other. The weak die. The strong reproduce.
-        Watch trust evolve over generations.
-      </p>
-
       {/* Winner banner — a finished tournament prints its own receipt. */}
       {winner && (
         <div className="till-winner receipt receipt-edge tf-fade-in-up">

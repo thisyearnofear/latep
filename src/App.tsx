@@ -21,6 +21,7 @@ export function prefetchRoute(to: string) {
   if (to === "/learn/play") void import("./pages/TutorialSandbox.tsx");
   else if (to === "/tournament") void import("./pages/TournamentPage.tsx");
   else if (to === "/learn") void import("./pages/LearnJourney.tsx");
+  else if (to === "/record") void import("./pages/RecordPage.tsx");
 }
 const LearnJourney = lazy(() => import("./pages/LearnJourney.tsx"));
 const TutorialSandbox = lazy(() =>
@@ -38,6 +39,7 @@ const RealLifePage = lazy(() =>
     default: m.RealLifePage,
   })),
 );
+const RecordPage = lazy(() => import("./pages/RecordPage.tsx"));
 
 function App() {
   return (
@@ -58,6 +60,7 @@ function App() {
             <Route path="/play" element={<ZKGamePage />} />
             <Route path="/play/:gameId" element={<ZKGamePage />} />
             <Route path="/real-life" element={<RealLifePage />} />
+            <Route path="/record" element={<RecordPage />} />
             <Route path="/debug" element={<Debugger />} />
             <Route path="/debug/:contractName" element={<Debugger />} />
           </Route>

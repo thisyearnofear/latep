@@ -1,9 +1,9 @@
 import type { SVGProps } from "react";
 
 /**
- * The four primitive marks — design.md §6.
+ * The primitive marks — design.md §6.
  *
- * All four share one register: `currentColor`, 2px stroke, round caps and
+ * All of them share one register: `currentColor`, 2px stroke, round caps and
  * joins, drawn on a 24px grid so they scale to 48px without redrawing. The
  * caller supplies the colour (a thread colour, receipt ink, counter text), so
  * a mark is never a decoration and never picks its own colour.
@@ -114,9 +114,32 @@ export function PassMark(props: MarkProps) {
   );
 }
 
+/**
+ * The Record — one leaf of a tree, with the path that reaches the root.
+ * Prove your track record without publishing it.
+ *
+ * Drawn as a leaf rather than a book: the credential is not a document you
+ * hand over, it is one entry in a tree whose root anyone can read. The vein is
+ * the path to that root — the part the proof carries and the part the counter
+ * party never sees.
+ */
+export function RecordMark(props: MarkProps) {
+  return (
+    <Mark {...props}>
+      {/* the leaf */}
+      <path d="M12 2.5c5 4.5 5 14.5 0 19-5-4.5-5-14.5 0-19Z" />
+      {/* the midrib: the path up to the root */}
+      <path d="M12 2.5v19" />
+      {/* two veins off it */}
+      <path d="M12 9.5l3.5 2.5M12 14l-3.5 2.5" />
+    </Mark>
+  );
+}
+
 export const MARKS = {
   seal: SealMark,
   handshake: HandshakeMark,
   net: NetMark,
   pass: PassMark,
+  record: RecordMark,
 } as const;

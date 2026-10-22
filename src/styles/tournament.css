@@ -70,6 +70,9 @@
   margin-bottom: var(--space-md);
   padding: var(--space-sm) var(--space-md) var(--space-md);
   background: var(--color-receipt);
+  /* Paper texture, same as .receipt (background shorthand would wipe it) */
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
   color: var(--color-receipt-ink);
   box-shadow: var(--shadow-receipt);
   border-radius: 0;
@@ -448,6 +451,7 @@
 
 .till-winner__line {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   color: var(--color-receipt-ink);
   margin: 0;
@@ -512,7 +516,9 @@
 
 .payoff-grid {
   display: grid;
-  grid-template-columns: auto 1fr 1fr;
+  /* minmax(0, …) so the inputs' fixed width can't force the grid past the
+     viewport at 320 (design.md §10: grid tracks minmax(0, 1fr)). */
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-3xs);
   max-width: 320px;
   margin-bottom: var(--space-2xs);
@@ -547,6 +553,7 @@
 
 .payoff-input {
   width: 44px;
+  min-width: 0;
   padding: 2px 4px;
   text-align: center;
   border: 1px solid var(--color-receipt-rule);
@@ -608,6 +615,7 @@
 
 .till-inspector__name {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   margin: 0;
 }
@@ -664,6 +672,7 @@
 
 .till-result__name {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   margin: 0 0 var(--space-3xs) 0;
 }
@@ -873,6 +882,7 @@
 
 .till-page__title {
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-2xl);
   color: var(--color-counter-text);
   margin: 0 0 var(--space-2xs);

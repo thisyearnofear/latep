@@ -16,7 +16,7 @@
  * The torn edge.
  *
  * A receipt's top and bottom edges are torn, not rounded (design.md §5). The
- * tear is a `border-image`: two 10px borders whose image is a zig-zag tile
+ * tear is a `border-image`: two 6px borders whose image is a zig-zag tile
  * filled with the receipt's own stock, so the teeth above the zig-zag stay
  * transparent and the counter shows through.
  *
@@ -26,23 +26,24 @@
  * and the obvious `intersect` compositing erases the whole receipt between the
  * bands. border-image is a single, universally supported primitive.
  *
- * The tile is 24x20: a 24px pitch (the zig-zag period) by two 10px tear
- * bands, sliced top-10 / bottom-10. `repeat` keeps the pitch exact instead of
- * stretching the teeth to fit.
+ * The tile is 10x12: a 10px pitch (the zig-zag period) by two 6px tear
+ * bands, sliced top-6 / bottom-6. Small teeth read as a fine tear; the old
+ * 24px pitch with 10px teeth read as a bold black-and-white zig-zag band.
+ * `repeat` keeps the pitch exact instead of stretching the teeth to fit.
  * -------------------------------------------------------------------------- */
 
 .receipt-edge {
-  --tear-pitch: 24px;
-  --tear-depth: 10px;
+  --tear-pitch: 10px;
+  --tear-depth: 6px;
 
   /* #f7f5ef is --color-receipt (oklch(97% 0.008 95)) in sRGB. A data URI
      cannot read a custom property, so the stock colour is baked in here; this
      file is exempt from the colour-literal check for that reason alone.
 
-     Each wedge is bounded to its own 10px band and closed along the band's
+     Each wedge is bounded to its own 6px band and closed along the band's
      inner edge. Letting either path reach the far edge fills both bands, and
      the two wedges then union into a solid rectangle — no tear at all. */
-  --tear-tile: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='20'><path d='M0 10 L6 0 L12 10 L18 0 L24 10 Z' fill='%23f7f5ef'/><path d='M0 10 L6 20 L12 10 L18 20 L24 10 Z' fill='%23f7f5ef'/></svg>");
+  --tear-tile: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='12'><path d='M0 6 L5 0 L10 6 Z' fill='%23f7f5ef'/><path d='M0 6 L5 12 L10 6 Z' fill='%23f7f5ef'/></svg>");
 }
 
 /* ----------------------------------------------------------------------------
@@ -51,6 +52,10 @@
 
 .receipt {
   position: relative;
+  /* border-box, not content-box: a receipt sized to `width: 100%` (the scene
+     receipt does this) must include its padding and torn border in that
+     100% — otherwise it runs past its column at narrow widths. */
+  box-sizing: border-box;
   max-width: var(--receipt-col-max);
   padding: var(--space-md);
   color: var(--color-receipt-ink);
@@ -64,15 +69,16 @@
      reset is exactly what fills the tear back in. */
   border: var(--tear-depth) 0 var(--tear-depth) 0 solid transparent;
   border-image-source: var(--tear-tile);
-  border-image-slice: 10 0 10 0;
+  border-image-slice: 6 0 6 0;
   border-image-width: var(--tear-depth) 0 var(--tear-depth) 0;
   border-image-repeat: repeat;
 
   background: var(--color-receipt);
   /* the stock must not paint under the border, or the tear fills in */
   background-clip: padding-box;
-  /* the grain: a static pre-rendered texture, never a shader (design.md §3) */
-  background-image: var(--receipt-grain, none);
+  /* the shared paper texture, blended over the stock (design.md §13.4). It is
+     a background-image, not a fill, so the tear notches stay transparent. */
+  background-image: var(--paper-texture);
   background-blend-mode: multiply;
 }
 

@@ -440,6 +440,7 @@
 .lesson-heading h2 {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: clamp(28px, 3vw, 40px);
   line-height: 1.1;
   color: var(--color-counter-text);
@@ -486,6 +487,7 @@
 .lesson-copy h3 {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-lg);
   color: var(--color-receipt-ink);
 }
@@ -650,6 +652,7 @@
 .lesson-dialog-header h2 {
   margin: 0;
   font-family: var(--font-display);
+  font-weight: 700;
   font-size: var(--text-xl);
   color: var(--color-counter-text);
 }

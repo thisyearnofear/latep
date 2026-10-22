@@ -1,0 +1,101 @@
+/* ============================================================================
+ * The claim demo — design.md §13.7.
+ *
+ * Two counterparties at Maria's counter, one collateral plinth between them.
+ * The demo is read closely, so it sits on receipt stock; the plate inside it
+ * is the same Desk figure the story page operates.
+ * ========================================================================== */
+
+.claim-demo {
+  max-width: var(--receipt-col-max);
+}
+
+/* No explicit width: .receipt is content-box, and width:100% would push the
+   padding and the torn border past the column at narrow widths. */
+.claim-demo__receipt {
+  max-width: 100%;
+}
+
+/* The toggle: a segmented control built on real radios, so arrow keys move
+   between the two options the way they do everywhere else. */
+.claim-demo__toggle {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2xs);
+  margin-bottom: var(--space-md);
+}
+
+.claim-demo__option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: var(--space-2xs) var(--space-sm);
+  border: 1px solid var(--color-receipt-rule);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-receipt-ink);
+  cursor: pointer;
+  text-align: center;
+}
+
+.claim-demo__option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.claim-demo__option--on {
+  border: 2px solid var(--color-receipt-ink);
+  font-weight: 700;
+}
+
+.claim-demo__option:has(input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Disabled reads as faded ink, never as lowered opacity — text contrast on
+   receipt stock stays ≥ 4.5:1 (design.md §3). */
+.claim-demo__option--disabled {
+  color: var(--color-receipt-faded);
+  cursor: not-allowed;
+}
+
+.claim-demo__empty {
+  margin: 0 0 var(--space-md);
+  font-size: var(--text-sm);
+  color: var(--color-receipt-faded);
+}
+
+.claim-demo__plate {
+  margin: 0 0 var(--space-md);
+}
+
+.claim-demo__line {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+}
+
+.claim-demo__lines {
+  margin-bottom: var(--space-sm);
+}
+
+.claim-demo__status {
+  margin: var(--space-sm) 0 0;
+  font-size: var(--text-sm);
+}
+
+.claim-demo__stamps {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs);
+}
