@@ -6,11 +6,14 @@
 > frozen until the Oct 14 submission; all redesign work lands on `redesign`.
 >
 > **2026-10-21: the story redesign** (`design.md` §13), on branch
-> `story-redesign`. The site now tells the product story, a private reputation
+> `story-redesign`, merged to `main` 2026-10-21 and deployed to
+> latep.trustfall.xyz (deploy steps: [README](../README.md#deploy)). The site
+> now tells the product story, a private reputation
 > whose first issuer is the game, across chaptered story pages, `/record`, and a
 > claim demo that runs through a `ReputationClaimer` seam (simulated until
-> Pattern 3 ships). Not merged yet: the 5-person comprehension test in
-> [`COMPREHENSION_TEST.md`](COMPREHENSION_TEST.md) still has to pass.
+> Pattern 3 ships). The 5-person comprehension test in
+> [`COMPREHENSION_TEST.md`](COMPREHENSION_TEST.md) still has to pass — it was
+> deferred to the next iteration cycle, not waived.
 >
 > **Next after the redesign:** Pattern 3 — Private Reputation. The claim and
 > product story are in [`HACKMERIDIAN.md`](HACKMERIDIAN.md); the Stellar ×

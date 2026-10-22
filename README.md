@@ -73,4 +73,24 @@ Needs Node 24+, plus a Stellar wallet with testnet XLM for the ZK multiplayer si
 
 Contract, circuits, and dev commands are documented alongside the code: `contracts/zk_dilemma/`, `circuits/move_commitment/`, `circuits/allowlist_membership/`.
 
+## Deploy
+
+The site is Cloudflare Pages, deployed by hand (no Git integration), at
+[latep.trustfall.xyz](https://latep.trustfall.xyz) / `latep.pages.dev`:
+
+```bash
+npm run build
+npx wrangler pages deploy dist --project-name=latep
+```
+
+Requires a `wrangler` login (`npx wrangler login`) on the account that owns the
+`latep` project — check `npx wrangler whoami` first. The dashboard env vars
+listed in `pages.toml` (`PUBLIC_STELLAR_*`, `VITE_ZK_DILEMMA_CONTRACT_ID`,
+`VITE_API_PROXY_URL`, …) must be set, or multiplayer won't work.
+
+The root `wrangler.toml` is for the Workers API (`api/`), a separate deploy;
+the site's redesigns don't touch it. Ignore wrangler's
+`pages_build_output_dir` warning on the frontend deploy — `dist` is passed
+explicitly.
+
 _Built for the Stellar Hacks: Real-World ZK hackathon. Adapts Nicky Case's ["The Evolution of Trust"](https://ncase.me/trust/). License: Apache 2.0._
