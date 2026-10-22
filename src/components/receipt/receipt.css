@@ -76,8 +76,9 @@
   background: var(--color-receipt);
   /* the stock must not paint under the border, or the tear fills in */
   background-clip: padding-box;
-  /* the grain: a static pre-rendered texture, never a shader (design.md §3) */
-  background-image: var(--receipt-grain, none);
+  /* the shared paper texture, blended over the stock (design.md §13.4). It is
+     a background-image, not a fill, so the tear notches stay transparent. */
+  background-image: var(--paper-texture);
   background-blend-mode: multiply;
 }
 

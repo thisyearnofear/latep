@@ -70,9 +70,14 @@ window.__startSample = (ms) => {
   // the reader. Attached here rather than at load, when there is no document
   // element to observe yet.
   if (!window.__canvasWatch) {
+    // The story hero mounts its own WebGL canvas on / for one draw-in and
+    // removes it again (design.md §13.5). It is not the room's renderer
+    // rebuilding, so canvases it carries are excluded from this count.
     const holdsCanvas = (n) =>
       n.nodeType === 1 &&
-      (n.tagName === "CANVAS" || !!n.querySelector?.("canvas"));
+      (n.tagName === "CANVAS" || !!n.querySelector?.("canvas")) &&
+      !n.querySelector?.("canvas[data-hero]") &&
+      !(n.tagName === "CANVAS" && n.dataset?.hero);
     window.__canvasWatch = new MutationObserver((records) => {
       for (const r of records) {
         for (const n of r.addedNodes) {

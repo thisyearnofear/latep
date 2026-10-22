@@ -28,9 +28,9 @@ import { TrustExperiment } from "../components/TrustExperiment";
 import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
 import { prefetchRoute } from "../App";
-import { Plate } from "../components/figures/Plate";
+import { DeskHero } from "../components/hero/DeskHero";
 import { FigureGallery } from "../components/figures/FigureGallery";
-import { GALLERY_PLATES, STORY_PLATE } from "../components/figures/figures";
+import { GALLERY_PLATES } from "../components/figures/figures";
 import { ClaimDemo } from "../components/claim/ClaimDemo";
 import {
   CHAPTERS,
@@ -155,7 +155,7 @@ const Home: React.FC = () => {
           role="img"
           aria-label={HERO.illustrationLabel}
         >
-          <Plate definition={STORY_PLATE} bare step="" size="wide" />
+          <DeskHero />
         </figure>
       </section>
 

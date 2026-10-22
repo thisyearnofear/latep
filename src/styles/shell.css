@@ -234,6 +234,8 @@
 
 .shell[data-surface="desk"] .shell-content {
   background: var(--color-desk);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
   color: var(--color-desk-ink);
 }
 

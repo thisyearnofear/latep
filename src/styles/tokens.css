@@ -77,6 +77,16 @@
   --color-clay-wash: oklch(84% 0.055 45);
   --color-sage-wash: oklch(90% 0.03 160);
 
+  /* --------------------------------------------------------------------------
+   * The shared paper texture (design.md §13.4)
+   *
+   * Rendered once on a capable device (components/paper/bakePaper.ts) and
+   * blended under every stock and wash with `background-blend-mode: multiply`.
+   * The value below is the pre-rendered fallback for devices that can't run
+   * the bake — the surface looks the same either way.
+   * ----------------------------------------------------------------------- */
+  --paper-texture: url(/assets/paper/paper.png);
+
   /* The modal scrim. An overlay must not erase the page behind it — losing
      context is what makes a wizard feel like a wall — but a translucent
      black is the only translucency allowed outside the shadow tokens, so it

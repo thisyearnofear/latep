@@ -171,6 +171,8 @@
 
 .scenario--clay {
   background: var(--color-clay-wash);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
 }
 
 .scenario-body {
