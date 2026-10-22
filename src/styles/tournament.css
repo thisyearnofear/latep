@@ -512,7 +512,9 @@
 
 .payoff-grid {
   display: grid;
-  grid-template-columns: auto 1fr 1fr;
+  /* minmax(0, …) so the inputs' fixed width can't force the grid past the
+     viewport at 320 (design.md §10: grid tracks minmax(0, 1fr)). */
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-3xs);
   max-width: 320px;
   margin-bottom: var(--space-2xs);
@@ -547,6 +549,7 @@
 
 .payoff-input {
   width: 44px;
+  min-width: 0;
   padding: 2px 4px;
   text-align: center;
   border: 1px solid var(--color-receipt-rule);

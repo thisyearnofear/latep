@@ -34,6 +34,12 @@ export interface PlateProps {
   step?: string;
   /** Fires when a part is pressed under a controlled `step`. */
   onStepPress?: (part: PlatePart) => void;
+  /**
+   * Drawing only: no header, caption, part buttons or printed lines. For a
+   * plate that is scenery inside a larger component which carries its own
+   * controls and copy (the claim demo does this with the Desk).
+   */
+  bare?: boolean;
   className?: string;
 }
 
@@ -42,6 +48,7 @@ export function Plate({
   size = "gallery",
   step: controlledStep,
   onStepPress,
+  bare = false,
   className,
 }: PlateProps) {
   const [ownStepIndex, setOwnStepIndex] = useState(0);
@@ -69,6 +76,18 @@ export function Plate({
     setOwnStepIndex(next);
     setPressedId(part.id);
   };
+
+  if (bare) {
+    return (
+      <div
+        className={["plate", `plate--${size}`, "plate--bare", className]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <Drawing scene={scene} parts={[]} pressedId={null} />
+      </div>
+    );
+  }
 
   const Mark = definition.mark ? MARKS[definition.mark] : null;
 

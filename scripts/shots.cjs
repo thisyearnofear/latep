@@ -119,6 +119,41 @@ async function main() {
         .catch(() => 0);
       if (px > 1) overflowing.push(`${label}  +${px}px`);
 
+      // Per-element probe: `overflow-x: clip` on html/body hides document
+      // overflow, so also catch any element whose right edge runs past the
+      // viewport. Elements inside a horizontal-scrolling container (an
+      // ancestor with computed overflow-x: auto|scroll) are ignored — a
+      // strip that scrolls itself is allowed.
+      const offenders = await page
+        .evaluate(() => {
+          const limit = window.innerWidth + 1;
+          const out = [];
+          for (const el of document.querySelectorAll("body *")) {
+            const rect = el.getBoundingClientRect();
+            if (rect.width === 0 || rect.right <= limit) continue;
+            let scrollable = false;
+            for (let a = el.parentElement; a; a = a.parentElement) {
+              const ox = getComputedStyle(a).overflowX;
+              if (ox === "auto" || ox === "scroll") {
+                scrollable = true;
+                break;
+              }
+            }
+            if (scrollable) continue;
+            const sel =
+              el.tagName.toLowerCase() +
+              (el.id ? `#${el.id}` : "") +
+              (el.className && typeof el.className === "string"
+                ? "." + el.className.trim().split(/\s+/).join(".")
+                : "");
+            out.push(`${sel} right=${Math.round(rect.right)}px`);
+            if (out.length >= 10) break;
+          }
+          return out;
+        })
+        .catch(() => []);
+      for (const o of offenders) overflowing.push(`${label}  element ${o}`);
+
       const file = path.join(dir, `${slug(route)}.png`);
       try {
         await page.screenshot({ path: file, fullPage: true, timeout: 60_000 });
@@ -161,7 +196,10 @@ async function main() {
     console.log(`✗ no screenshot:\n  ${failed.join("\n  ")}\n`);
   }
 
-  if ((overflowing.length && STRICT) || failed.length) process.exit(1);
+  // Element-level overflow is a failure, not a warning: it is invisible to
+  // the document-level probe because `overflow-x: clip` masks it.
+  if ((overflowing.length && STRICT) || overflowing.length || failed.length)
+    process.exit(1);
 }
 
 main().catch((err) => {

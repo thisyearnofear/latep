@@ -142,6 +142,7 @@ export function ClaimDemo({ summary }: { summary?: ReputationSummary }) {
         <Plate
           definition={STORY_PLATE}
           step={holder ? "claim" : ""}
+          bare
           className="claim-demo__plate"
         />
 

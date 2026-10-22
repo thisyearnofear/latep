@@ -52,6 +52,10 @@
 
 .receipt {
   position: relative;
+  /* border-box, not content-box: a receipt sized to `width: 100%` (the scene
+     receipt does this) must include its padding and torn border in that
+     100% — otherwise it runs past its column at narrow widths. */
+  box-sizing: border-box;
   max-width: var(--receipt-col-max);
   padding: var(--space-md);
   color: var(--color-receipt-ink);

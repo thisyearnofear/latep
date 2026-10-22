@@ -24,7 +24,7 @@ import {
   STAMPS,
   type ThreadState,
 } from "../content/vocabulary";
-import { EARN, RECORD } from "../content/story";
+import { RECORD } from "../content/story";
 import "../styles/record.css";
 
 /** One round on the record, whichever store it came from. */
@@ -153,7 +153,10 @@ const RecordPage: React.FC = () => {
         </h2>
         {practice.length === 0 ? (
           <p className="record-empty">
-            {RECORD.practiceEmpty} <Link to="/#earn">{EARN.addToRecord}</Link>
+            {RECORD.practiceEmpty}{" "}
+            <Link to="/#earn" className="record-link">
+              {RECORD.practiceCta}
+            </Link>
           </p>
         ) : (
           <div className="record-strip__row">

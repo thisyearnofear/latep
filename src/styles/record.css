@@ -1,23 +1,22 @@
 /* ============================================================================
  * /record — design.md §13.7, a story page on the desk (§13.2).
  *
- * Light warm paper, ink text. Receipts lie on the desk exactly as they lie
- * on the counter — two strips joined by the thread, the summary printed as
- * receipt lines, and the claim demo below.
+ * The desk ground comes from the shell (`data-surface="desk"` on .shell);
+ * this file only lays out the page. One left-biased column: the strips may
+ * run wider than the prose but share its left edge (design.md §10).
  * ========================================================================== */
 
 .record-page {
-  min-height: 100vh;
-  margin-top: calc(-1 * var(--shell-height, 64px));
-  padding: calc(var(--shell-height, 64px) + var(--space-xl)) var(--space-md)
-    var(--space-2xl);
-  background: var(--color-desk);
-  color: var(--color-desk-ink);
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 
 .record-head {
   max-width: var(--measure-prose);
-  margin: 0 auto var(--space-lg);
 }
 
 .record-title {
@@ -25,6 +24,7 @@
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   letter-spacing: var(--tracking-display);
+  color: var(--color-desk-ink);
   overflow-wrap: anywhere;
 }
 
@@ -44,16 +44,18 @@
 }
 
 .record-summary {
-  margin: 0 auto var(--space-lg);
+  margin: 0;
 }
 
 .record-strip {
-  max-width: var(--layout-max);
-  margin: 0 auto var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
 }
 
 .record-strip-title {
-  margin: 0 0 var(--space-sm);
+  margin: 0;
   font-family: var(--font-print);
   font-size: var(--text-sm);
   letter-spacing: var(--tracking-print-label);
@@ -67,6 +69,21 @@
   color: var(--color-desk-muted);
 }
 
+/* The §9 text link, on the desk: current ink colour, 1px underline offset
+   3px, thicker on hover. Never the browser default. */
+.record-empty a,
+.record-page .record-link {
+  color: var(--color-desk-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.record-empty a:hover,
+.record-page .record-link:hover {
+  text-decoration-thickness: 2px;
+}
+
 /* The strip: receipts side by side, joined by the thread. The row scrolls
    horizontally inside itself — never the page (design.md §10). */
 .record-strip__row {
@@ -77,9 +94,11 @@
   padding-block: var(--space-2xs);
 }
 
+/* Wide enough that "PRACTICE — NOT ON-CHAIN" prints on one line beside the
+   outcome stamp instead of wrapping under it. */
 .record-slip {
-  flex: 0 0 240px;
-  max-width: 240px;
+  flex: 0 0 272px;
+  max-width: 272px;
 }
 
 .record-slip__stamp {
@@ -89,13 +108,16 @@
   margin-top: var(--space-sm);
 }
 
+.record-slip__stamp .stamp {
+  white-space: nowrap;
+}
+
 .record-strip__thread {
   flex: 0 0 auto;
 }
 
 .record-prove {
   max-width: var(--measure-prose);
-  margin: 0 auto;
 }
 
 .record-prove-line {

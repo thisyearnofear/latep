@@ -221,6 +221,17 @@ export const WHERE_IT_GOES = {
   liveToday: "Live today",
   liveTodayLine:
     "The four pieces already working in the app, and where you've met them.",
+  todayLabel: "Today",
+  withLabel: "With a Latep proof",
+  usesLabel: "Uses",
+  demoLink: "Try the claim demo",
+  homeLink: "See where it goes",
+} as const;
+
+/** Calls to action under the hero. */
+export const HERO_ACTIONS = {
+  primary: "Play a practice round",
+  secondary: "See where it goes",
 } as const;
 
 export const SCENARIOS: readonly Scenario[] = [

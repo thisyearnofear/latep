@@ -30,9 +30,18 @@ const NAV_ITEMS = [
   { to: "/play", label: "Play with a friend" },
 ] as const;
 
+/**
+ * The surface a page sits on (design.md §13.2): story pages lie on the desk —
+ * light warm paper, ink text — while lesson and workbench pages keep the
+ * dark counter. The shell strip takes the surface of the page it sits on, so
+ * the nav, the chip and the wallet are restyled with it.
+ */
+const DESK_ROUTES = new Set(["/", "/record", "/real-life"]);
+
 const AppShell: React.FC = () => {
   const pathname = useLocation().pathname;
   const isLesson = pathname === "/learn";
+  const surface = DESK_ROUTES.has(pathname) ? "desk" : "counter";
   const audioManager = useAudioSettings();
   const [audioOpen, setAudioOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,7 +60,7 @@ const AppShell: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="shell" data-surface={surface}>
       {/*
         CustomCursor and TopographicBackground are deliberately NOT rendered.
         design.md §6 rules out custom cursors and §1 builds the look from SVG
@@ -217,7 +226,7 @@ const AppShell: React.FC = () => {
       >
         <Outlet />
       </main>
-    </>
+    </div>
   );
 };
 

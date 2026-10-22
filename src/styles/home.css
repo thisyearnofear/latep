@@ -1,35 +1,58 @@
 /* ============================================================================
- * Home — design.md §2, story-page family.
+ * Home — design.md §13.7, the landing page told in chapters.
  *
- * Stage-led, left-biased. The content never centres except the move buttons
- * under the scene, and the max width is the shared --layout-max.
+ * A story page on the desk (the shell supplies the ground via
+ * `data-surface="desk"`). Full-bleed bands carry the washes; `.chapter-inner`
+ * keeps the shared 1200px max and the left bias. No gradients between
+ * washes, no rounded bands — a chapter changes ground at a straight edge
+ * until §13.6's dither lands.
  * ========================================================================== */
 
 .home {
-  max-width: var(--layout-max);
-  margin-inline: auto;
-  padding: var(--space-xl) var(--space-md) var(--space-2xl);
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
 }
 
-/* --- 1. the opening ------------------------------------------------------- */
+/* --- the hero ------------------------------------------------------------- */
 
+/* The illustration band: the Desk plate drawn large on the sage wash. */
+.home-hero {
+  background: var(--color-sage-wash);
+  padding: var(--space-xl) var(--space-md) var(--space-lg);
+}
+
+.home-hero-figure {
+  margin: 0 auto;
+  max-width: 720px;
+}
+
+.home-hero-figure .plate--bare .plate__stage {
+  background: transparent;
+  border: none;
+}
+
+/* Below the band, on the desk: headline, lede, actions. */
 .home-opening {
-  max-width: var(--measure-prose);
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md) var(--space-lg);
 }
 
-/* Display tracking, roman, never italic. */
+/* Display tracking, roman, never italic; the tinted phrase is moss. */
 .home-title {
   margin: 0 0 var(--space-xs);
   font-family: var(--font-display);
   font-size: var(--text-3xl);
-  font-stretch: 80%; /* the condensed width, for the story hero */
+  font-stretch: 80%;
   line-height: 1.05;
   letter-spacing: var(--tracking-display);
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
   overflow-wrap: anywhere;
+}
+
+.home-title-tint {
+  font-style: normal;
+  color: var(--color-moss);
 }
 
 .home-situation {
@@ -37,27 +60,218 @@
   max-width: var(--measure-prose);
   font-size: var(--text-lg);
   line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+}
+
+/* The two hero actions, per §9 on the desk: the primary is an ink-filled
+   tile with desk-coloured text; the secondary a 1px desk-rule border. */
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2xs) var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.home-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: var(--space-2xs) var(--space-md);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.home-action:active {
+  transform: translateY(1px);
+}
+
+.home-action:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.home-action--primary {
+  background: var(--color-desk-ink);
+  color: var(--color-desk);
+  border: 2px solid var(--color-desk-ink);
+}
+
+.home-action--primary:hover {
+  background: var(--color-desk-ink-2);
+  border-color: var(--color-desk-ink-2);
+}
+
+.home-action--secondary {
+  background: transparent;
+  color: var(--color-desk-ink);
+  border: 1px solid var(--color-desk-rule);
+}
+
+.home-action--secondary:hover {
+  border-color: var(--color-desk-muted);
+}
+
+/* --- the chapters --------------------------------------------------------- */
+
+.chapter {
+  scroll-margin-top: var(--shell-height, 64px);
+}
+
+.chapter--desk {
+  background: transparent;
+}
+
+.chapter--sand {
+  background: var(--color-sand-wash);
+}
+
+.chapter--sage {
+  background: var(--color-sage-wash);
+}
+
+/* Chapter 03 is the counter: the practice stage is a workbench surface and
+   keeps its own dark ground inside the story page. */
+.chapter--counter {
+  background: var(--color-counter);
+  color: var(--color-counter-text);
+}
+
+.chapter-inner {
+  max-width: var(--layout-max);
+  margin-inline: auto;
+  padding: var(--space-xl) var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+/* The label row: print-face number in moss, chapter title in body weight.
+   Sentence case — it is wayfinding, not a stamp. */
+.chapter-label {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+  margin: 0;
+}
+
+.chapter-number {
+  font-family: var(--font-print);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-moss);
+}
+
+.chapter-name {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-desk-ink-2);
+}
+
+.chapter--counter .chapter-name {
   color: var(--color-counter-text-2);
 }
 
-/* --- shared section heading ----------------------------------------------- */
+.chapter-h {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+  color: var(--color-desk-ink);
+  overflow-wrap: anywhere;
+}
 
-.home-section-heading {
-  margin: 0 0 var(--space-sm);
-  font-family: var(--font-print);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-print-label);
-  text-transform: uppercase;
+.chapter-h:focus {
+  outline: none;
+}
+
+.chapter-h:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+.chapter--counter .chapter-h {
+  color: var(--color-counter-text);
+}
+
+.chapter-h--quiet {
+  font-size: var(--text-xl);
+}
+
+.chapter-lede {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-md);
+  line-height: var(--leading-body);
+  color: var(--color-desk-ink-2);
+}
+
+.chapter-lede--second {
+  font-size: var(--text-sm);
+  color: var(--color-desk-muted);
+}
+
+.chapter--counter .chapter-lede {
+  color: var(--color-counter-text-2);
+}
+
+.chapter--counter .chapter-lede--second {
   color: var(--color-counter-muted);
 }
 
-/* --- 2. the three ways, and the fourth option ------------------------------ */
-
-.home-ways {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
+.chapter-payoff {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: 1.2;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-desk-ink);
 }
+
+.chapter-close {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-sm);
+  line-height: var(--leading-body);
+  color: var(--color-desk-muted);
+}
+
+.chapter--counter .chapter-close {
+  color: var(--color-counter-muted);
+}
+
+/* The §9 text link on the desk: ink, 1px underline offset 3px. */
+.chapter-linkrow {
+  margin: 0;
+}
+
+.chapter-link {
+  color: var(--color-desk-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.chapter-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.chapter-link:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* --- the dead ends (chapter 01) ------------------------------------------- */
 
 .home-way-row {
   list-style: none;
@@ -95,103 +309,13 @@
   color: var(--color-receipt-ink);
 }
 
-/* The fourth option is the only thing on the page with a solid edge. */
-.home-fourth {
-  padding: var(--space-sm) var(--space-md);
-  background: var(--color-receipt);
-  border: 1px solid var(--color-receipt-ink);
-  border-left: 3px solid var(--color-you);
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-  max-width: var(--measure-prose);
-}
-
-.home-fourth-kicker {
-  font-family: var(--font-print);
-  font-size: var(--text-xs);
-  letter-spacing: var(--tracking-print-label);
-  text-transform: uppercase;
-  color: var(--color-you-print);
-}
-
-.home-fourth-line {
-  margin: 0;
-  font-size: var(--text-md);
-  line-height: var(--leading-body);
-  color: var(--color-receipt-ink);
-}
-
-.home-fourth-payoff {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  line-height: 1.2;
-  letter-spacing: var(--tracking-display);
-  color: var(--color-receipt-ink);
-}
-
-.home-fourth-close {
-  margin: 0;
-  font-size: var(--text-sm);
-  line-height: var(--leading-body);
-  color: var(--color-receipt-faded);
-}
-
-/* --- 3. the plate --------------------------------------------------------- */
-
-.home-plate {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-/* --- 4. the mechanism, and the first issuer ------------------------------- */
-
-.home-mechanic,
-.home-issuer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-  max-width: var(--measure-prose);
-}
-
-.home-mechanic-line,
-.home-issuer-line {
-  margin: 0;
-  font-size: var(--text-md);
-  line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
-}
-
-.home-mechanic-line--second,
-.home-issuer-line--second {
-  font-size: var(--text-sm);
-  color: var(--color-counter-muted);
-}
-
-/* --- 5. the plates -------------------------------------------------------- */
-
-.home-plates {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
-
-/* --- 6. where it goes ----------------------------------------------------- */
-
-.home-directions {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-}
+/* --- the directions (chapter 04) ------------------------------------------- */
 
 .home-direction-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--color-counter-rule);
+  border-top: 1px solid var(--color-desk-rule);
 }
 
 .home-direction {
@@ -200,21 +324,23 @@
   align-items: baseline;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-2xs);
-  border-bottom: 1px solid var(--color-counter-rule);
+  border-bottom: 1px solid var(--color-desk-rule);
 }
 
 .home-direction-title {
   font-family: var(--font-display);
   font-size: var(--text-md);
   letter-spacing: var(--tracking-display);
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
 }
 
 .home-direction-line {
   font-size: var(--text-sm);
   line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
 }
+
+/* --- honest scope (chapter 05) --------------------------------------------- */
 
 .home-scope {
   display: flex;
@@ -227,21 +353,20 @@
   margin: 0;
   font-size: var(--text-sm);
   line-height: var(--leading-body);
-  color: var(--color-counter-muted);
+  color: var(--color-desk-muted);
 }
 
-/* --- where next ----------------------------------------------------------- */
+/* --- where next ------------------------------------------------------------ */
 
-.home-next {
-  display: flex;
-  flex-direction: column;
+.home-next .chapter-inner {
+  gap: var(--space-sm);
 }
 
 .home-next-list {
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--color-counter-rule);
+  border-top: 1px solid var(--color-desk-rule);
 }
 
 .home-next-row {
@@ -251,13 +376,13 @@
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-2xs);
   text-decoration: none;
-  color: var(--color-counter-text);
-  border-bottom: 1px solid var(--color-counter-rule);
+  color: var(--color-desk-ink);
+  border-bottom: 1px solid var(--color-desk-rule);
   transition: background var(--dur-short) var(--ease-out);
 }
 
 .home-next-row:hover {
-  background: var(--color-counter-2);
+  background: var(--color-desk-2);
 }
 
 .home-next-row:focus-visible {
@@ -268,17 +393,17 @@
 .home-next-title {
   font-family: var(--font-display);
   font-size: var(--text-lg);
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
 }
 
 .home-next-line {
   font-size: var(--text-sm);
   line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
 }
 
 .home-next-go {
-  color: var(--color-you);
+  color: var(--color-desk-ink);
 }
 
 /* --- the nudge, the optional actions, the credit ------------------------- */
@@ -294,7 +419,7 @@
   margin: 0;
   font-size: var(--text-sm);
   line-height: var(--leading-body);
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
 }
 
 .home-optional {
@@ -308,7 +433,7 @@
   padding: var(--space-3xs) 0;
   border: none;
   background: transparent;
-  color: var(--color-counter-text-2);
+  color: var(--color-desk-ink-2);
   font-family: var(--font-body);
   font-size: var(--text-sm);
   text-decoration: underline;
@@ -318,7 +443,7 @@
 }
 
 .home-quiet-button:hover {
-  color: var(--color-counter-text);
+  color: var(--color-desk-ink);
 }
 
 .home-quiet-button:focus-visible {
@@ -328,11 +453,11 @@
 
 .home-profile {
   font-size: var(--text-sm);
-  color: var(--color-counter-muted);
+  color: var(--color-desk-muted);
 }
 
 .home-profile strong {
-  color: var(--color-you);
+  color: var(--color-you-print);
 }
 
 .home-fineprint,
@@ -340,7 +465,7 @@
   margin: 0;
   font-size: var(--text-xs);
   line-height: var(--leading-body);
-  color: var(--color-counter-muted);
+  color: var(--color-desk-muted);
 }
 
 .home-credit {
@@ -350,11 +475,6 @@
 /* --- narrow --------------------------------------------------------------- */
 
 @media (max-width: 700px) {
-  .home {
-    padding-top: var(--space-lg);
-    gap: var(--space-lg);
-  }
-
   .home-title {
     font-size: var(--text-2xl);
   }

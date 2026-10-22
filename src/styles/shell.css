@@ -89,6 +89,26 @@
   display: flex;
   align-items: center;
   gap: var(--space-2xs);
+  min-width: 0;
+}
+
+/* The wallet cluster is a row: connect button, fund button, network pill.
+   Without this it is a plain div whose children measure against the whole
+   actions strip, and the pill runs past the viewport under ~900px. */
+.connect-account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3xs);
+  min-width: 0;
+}
+
+/* Under ~900px the strip cannot afford the pill alongside the links, chip
+   and buttons — at 768 the nav alone takes most of the row. The badge is a
+   hint of context, not a control; the wallet flow itself names the network. */
+@media (max-width: 900px) {
+  .ui-network-pill {
+    display: none;
+  }
 }
 
 .shell-audio {
@@ -205,11 +225,132 @@
   min-height: 0;
 }
 
+/* --- the desk surface (design.md §13.2) ----------------------------------- */
+
+/* Story pages (/, /record, /real-life) sit on the desk: light warm paper,
+   ink text. The strip takes the surface of the page it sits on — raised
+   desk strip, desk hairline, desk ink — and the page ground follows.
+   Modals are unaffected; the stamps and the Testnet pill keep stamp red. */
+
+.shell[data-surface="desk"] .shell-content {
+  background: var(--color-desk);
+  color: var(--color-desk-ink);
+}
+
+.shell[data-surface="desk"] .shell-header {
+  background: var(--color-desk-2);
+  border-bottom-color: var(--color-desk-rule);
+}
+
+.shell[data-surface="desk"] .shell-wordmark {
+  color: var(--color-desk-ink);
+}
+
+.shell[data-surface="desk"] .shell-nav-link {
+  color: var(--color-desk-ink-2);
+}
+
+.shell[data-surface="desk"] .shell-nav-link:hover {
+  color: var(--color-desk-ink);
+  border-bottom-color: var(--color-desk-rule);
+}
+
+.shell[data-surface="desk"] .shell-nav-link.is-active {
+  color: var(--color-desk-ink);
+  border-bottom-color: var(--color-desk-ink);
+}
+
+.shell[data-surface="desk"] .shell-icon-button,
+.shell[data-surface="desk"] .shell-menu-button {
+  background: var(--color-desk);
+  border-color: var(--color-desk-rule);
+  color: var(--color-desk-ink-2);
+}
+
+.shell[data-surface="desk"] .shell-icon-button:hover,
+.shell[data-surface="desk"] .shell-menu-button:hover {
+  background: var(--color-desk-rule);
+  color: var(--color-desk-ink);
+}
+
+.shell[data-surface="desk"] .shell-record-chip {
+  border-color: var(--color-desk-rule);
+  color: var(--color-desk-ink-2);
+}
+
+.shell[data-surface="desk"] .shell-record-chip:hover {
+  color: var(--color-desk-ink);
+  border-color: var(--color-desk-muted);
+}
+
+/* The mobile sheet and the audio panel on the desk. */
+.shell[data-surface="desk"] .shell-menu-panel,
+.shell[data-surface="desk"] .shell-sheet {
+  background: var(--color-desk-2);
+  border-color: var(--color-desk-rule);
+}
+
+.shell[data-surface="desk"] .shell-menu-item {
+  color: var(--color-desk-ink);
+}
+
+.shell[data-surface="desk"] .shell-menu-item:hover {
+  background: var(--color-desk-rule);
+}
+
+.shell[data-surface="desk"] .shell-sheet-link {
+  color: var(--color-desk-ink-2);
+}
+
+.shell[data-surface="desk"] .shell-sheet-link.is-active {
+  color: var(--color-desk-ink);
+  border-left-color: var(--color-desk-ink);
+}
+
+/* The wallet cluster. The design-system button and profile read their
+   colours from component tokens, so the desk overrides those tokens; the
+   Testnet pill keeps stamp red text and takes the desk hairline. */
+.shell[data-surface="desk"] .connect-account .Button {
+  --Button-color-background-default: var(--color-desk-ink);
+  --Button-color-background-hover: var(--color-desk-ink-2);
+  --Button-color-background-active: var(--color-desk-ink-2);
+  --Button-color-border-default: var(--color-desk-ink);
+  --Button-color-border-hover: var(--color-desk-ink-2);
+  --Button-color-border-active: var(--color-desk-ink-2);
+  --Button-color-text-default: var(--color-desk);
+  --Button-color-text-hover: var(--color-desk);
+  --Button-color-text-active: var(--color-desk);
+}
+
+.shell[data-surface="desk"] .connect-account .Profile {
+  --Profile-color-background-default: var(--color-desk);
+  --Profile-color-background-hover: var(--color-desk-2);
+  --Profile-color-background-active: var(--color-desk-2);
+  --Profile-color-border-default: var(--color-desk-rule);
+  --Profile-color-border-hover: var(--color-desk-muted);
+  --Profile-color-border-active: var(--color-desk-muted);
+  color: var(--color-desk-ink);
+}
+
+.shell[data-surface="desk"] .connect-account .wallet-status {
+  color: var(--color-desk-ink-2);
+}
+
+.shell[data-surface="desk"] .ui-network-pill {
+  border-color: var(--color-desk-rule);
+  color: var(--color-desk-ink-2);
+}
+
+.shell[data-surface="desk"] .ui-network-pill--mismatch {
+  border-color: var(--color-stamp);
+  color: var(--color-stamp);
+}
+
 /* --- the record chip ------------------------------------------------------ */
 
 /* A small printed counter before the wallet (design.md §10, §13.7). One line
-   always — the chip never wraps, and under 768px it leaves the strip for the
-   sheet, where "Your record" is a menu item like the rest. */
+   always — the chip never wraps, and where the strip cannot afford it, it
+   lives in the sheet as a menu item like the rest. */
 .shell-record-chip {
   display: none;
   align-items: center;
@@ -237,9 +378,20 @@
   font-variant-numeric: tabular-nums;
 }
 
-@media (min-width: 768px) {
+/* Shown where the strip can afford it: at 768–859px the four nav links plus
+   the wallet already fill the row, so the chip joins the sheet instead. */
+@media (min-width: 860px) {
   .shell-record-chip {
     display: inline-flex;
+  }
+}
+
+/* At 320–420 the strip is wordmark + menu + audio + wallet; it only fits
+   once the header's side padding steps down a notch. */
+@media (max-width: 420px) {
+  .shell-header {
+    padding-inline: var(--space-sm);
+    gap: var(--space-2xs);
   }
 }
 

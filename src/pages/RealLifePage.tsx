@@ -1,24 +1,31 @@
 /**
- * Everyday — the collection of everything you've already met.
+ * Where it goes — /real-life (design.md §13.7).
  *
- * Four receipts, one per primitive, feeding out of the till one after
- * another: mark, situation, the problem as it happens in life, and what the
- * mathematics adds. Rebuilt from `content/primitives.ts` (ticket B5): the
- * primitive list is the single source of truth, so this page can never drift
- * from the marks or the wording used on Home and in the epilogue.
+ * The game is the first place a record is earned; this page is where it gets
+ * spent. Three illustrated scenarios — credit, escrow, agent payments — each
+ * stamped ILLUSTRATIVE, each naming the primitives it uses, the Record among
+ * them, and each ending at the claim demo. Below them the four primitive
+ * receipts that exist today stay, under "Live today".
+ *
+ * A story page, so it sits on the desk. The four receipts are the same ones
+ * this page has always printed — content and links unchanged, only the
+ * surface under them is new.
  */
 import React from "react";
 import { Link } from "react-router-dom";
-import { Receipt } from "../components/receipt";
-import { Thread } from "../components/receipt/Thread";
+import { Receipt, Stamp } from "../components/receipt";
 import { TrustFallCharacter } from "../components/TrustFallCharacter";
+import { Thread } from "../components/receipt/Thread";
 import { MARKS } from "../components/marks";
 import { PRIMITIVES, type PrimitiveId } from "../content/primitives";
+import { STAMPS } from "../content/vocabulary";
+import { SCENARIOS, WHERE_IT_GOES } from "../content/story";
 import "../styles/everyday.css";
 
 /**
- * The everyday story attached to each primitive. The copy here is the
- * page's own; the names, marks and one-liners come from `primitives.ts`.
+ * The four primitives as they turn up in everyday life — the "Live today"
+ * strip. Each entry names where you have already felt the primitive and
+ * where to meet it in the app.
  */
 interface Everyday {
   id: PrimitiveId;
@@ -75,14 +82,17 @@ const EVERYDAY: Everyday[] = [
 /* Story-page tilt, within the ±0.8° rule. */
 const TILTS = [-0.6, 0.5, -0.4, 0.7];
 
+/** The wash each scenario lies on: desk, clay, desk (§13.7). */
+const SCENARIO_GROUND = ["desk", "clay", "desk"] as const;
+
 export const RealLifePage: React.FC = () => (
   <div className="everyday">
     <header className="everyday-opening">
-      <h1 className="everyday-title">That wasn&rsquo;t just a game</h1>
-      <p className="everyday-situation">
-        Lean in, hold back, held, toppled — each is a trust problem you already
-        have. Here are the four, as you meet them in life.
-      </p>
+      <h1 className="everyday-title">
+        {WHERE_IT_GOES.title}{" "}
+        <span className="everyday-tint">{WHERE_IT_GOES.tint}</span>
+      </h1>
+      <p className="everyday-situation">{WHERE_IT_GOES.lede}</p>
       <div className="everyday-scene" aria-hidden="true">
         <TrustFallCharacter color="you" state="leaning" size="xl" />
         <Thread state="twisted" twists={4} width={160} height={40} />
@@ -95,44 +105,107 @@ export const RealLifePage: React.FC = () => (
       </div>
     </header>
 
-    <ul className="everyday-list">
-      {EVERYDAY.map((item, i) => {
-        const primitive = PRIMITIVES.find((p) => p.id === item.id);
-        if (!primitive) return null;
-        const Mark = MARKS[primitive.mark];
-        return (
-          <li key={item.id}>
-            <Receipt
-              wide
-              tilt={TILTS[i]}
-              feeding
-              className="everyday-receipt"
-              title={primitive.name}
-              footer={
-                <p className="everyday-try">
-                  {primitive.everyday}.{" "}
-                  <Link to={item.tryHref}>{item.tryLabel} &rarr;</Link>
-                </p>
-              }
-            >
-              <div className="everyday-head">
-                <span className="everyday-mark">
-                  <Mark size={40} />
-                </span>
-                <div>
-                  <h3 className="everyday-situation-title">{item.situation}</h3>
-                  <p className="everyday-oneline">{primitive.oneLine}</p>
-                </div>
+    {/* The three scenarios, numbered like the chapters on Home. */}
+    {SCENARIOS.map((scenario, i) => (
+      <section
+        key={scenario.id}
+        className={`scenario scenario--${SCENARIO_GROUND[i]}`}
+        aria-labelledby={`scenario-${scenario.id}-h`}
+      >
+        <div className="scenario-inner">
+          <p className="chapter-label">
+            <span className="chapter-number">0{i + 1}</span>
+            <span className="chapter-name">{scenario.kicker}</span>
+          </p>
+          <h2 className="chapter-h" id={`scenario-${scenario.id}-h`}>
+            {scenario.title}
+          </h2>
+          <div className="scenario-body">
+            <div className="scenario-text">
+              <p className="scenario-line">
+                <strong>{WHERE_IT_GOES.todayLabel}.</strong> {scenario.today}
+              </p>
+              <p className="scenario-line">
+                <strong>{WHERE_IT_GOES.withLabel}.</strong> {scenario.withLatep}
+              </p>
+              <p className="scenario-line">
+                <Link to="/#fourth" className="everyday-link">
+                  {WHERE_IT_GOES.demoLink}
+                </Link>
+              </p>
+            </div>
+            <Receipt title={WHERE_IT_GOES.usesLabel} className="scenario-uses">
+              {scenario.uses.map((id) => {
+                const primitive = PRIMITIVES.find((p) => p.id === id);
+                if (!primitive) return null;
+                const Mark = MARKS[primitive.mark];
+                return (
+                  <div key={id} className="scenario-use">
+                    <Mark size={24} />
+                    <span>{primitive.name}</span>
+                  </div>
+                );
+              })}
+              <div className="scenario-uses__stamp">
+                <Stamp text={STAMPS.illustrative} />
               </div>
-              <p className="everyday-problem">{item.problem}</p>
-              <p className="everyday-adds">{item.adds}</p>
             </Receipt>
-          </li>
-        );
-      })}
-    </ul>
+          </div>
+        </div>
+      </section>
+    ))}
 
-    {/* The honest scope, as a small receipt footer. */}
+    {/* Live today — the four receipts that already exist. */}
+    <section className="everyday-live" aria-labelledby="everyday-live-h">
+      <div className="scenario-inner">
+        <h2 className="chapter-h" id="everyday-live-h">
+          {WHERE_IT_GOES.liveToday}
+        </h2>
+        <p className="everyday-live-line">{WHERE_IT_GOES.liveTodayLine}</p>
+
+        <ul className="everyday-list">
+          {EVERYDAY.map((item, i) => {
+            const primitive = PRIMITIVES.find((p) => p.id === item.id);
+            if (!primitive) return null;
+            const Mark = MARKS[primitive.mark];
+            return (
+              <li key={item.id}>
+                <Receipt
+                  wide
+                  tilt={TILTS[i]}
+                  feeding
+                  className="everyday-receipt"
+                  title={primitive.name}
+                  footer={
+                    <p className="everyday-try">
+                      {primitive.everyday}.{" "}
+                      <Link to={item.tryHref}>{item.tryLabel} &rarr;</Link>
+                    </p>
+                  }
+                >
+                  <div className="everyday-head">
+                    <span className="everyday-mark">
+                      <Mark size={40} />
+                    </span>
+                    <div>
+                      <h3 className="everyday-situation-title">
+                        {item.situation}
+                      </h3>
+                      <p className="everyday-oneline">{primitive.oneLine}</p>
+                    </div>
+                  </div>
+                  <p className="everyday-problem">{item.problem}</p>
+                  <p className="everyday-adds">{item.adds}</p>
+                </Receipt>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+
+    {/* The honest scope stays at the bottom — it says what the page's claims
+        do NOT cover, which SCOPE on Home does not duplicate. */}
     <div className="everyday-scope">
       <Receipt
         full
@@ -149,15 +222,6 @@ export const RealLifePage: React.FC = () => (
           Every claim on this page is one the app can show you.
         </p>
       </Receipt>
-    </div>
-
-    <div className="everyday-actions">
-      <Link to="/play" className="everyday-primary">
-        Play it with a friend
-      </Link>
-      <Link to="/learn" className="everyday-secondary">
-        Learn the mechanics
-      </Link>
     </div>
   </div>
 );

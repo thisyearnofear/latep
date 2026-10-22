@@ -10,6 +10,7 @@ import { RoundReceipt } from "./receipt/RoundReceipt";
 import { primitiveForRound } from "./receipt/helpers";
 import { usePracticeRecord } from "../hooks/usePracticeRecord";
 import { MOVE_HELPER, MOVE_LABEL } from "../content/vocabulary";
+import { EARN } from "../content/story";
 import { calculatePayoff, NC_DEFAULT, type GameMove } from "../util/strategies";
 import "../styles/trust-experiment.css";
 
@@ -106,7 +107,7 @@ const points = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-export function TrustExperiment() {
+export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
   const [state, dispatch] = useReducer(roundReducer, initialState);
   const { recordRound } = usePracticeRecord();
   const [soundOn, setSoundOn] = useState(false);
@@ -362,6 +363,11 @@ export function TrustExperiment() {
             >
               Play another round
             </button>
+            {recordLink && (
+              <Link to="/record" className="trust-btn trust-btn-secondary">
+                {EARN.addToRecord}
+              </Link>
+            )}
           </div>
         )}
       </div>

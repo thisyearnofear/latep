@@ -10,8 +10,10 @@
   max-width: var(--receipt-col-max);
 }
 
+/* No explicit width: .receipt is content-box, and width:100% would push the
+   padding and the torn border past the column at narrow widths. */
 .claim-demo__receipt {
-  width: 100%;
+  max-width: 100%;
 }
 
 /* The toggle: a segmented control built on real radios, so arrow keys move
@@ -60,8 +62,10 @@
   outline-offset: 2px;
 }
 
+/* Disabled reads as faded ink, never as lowered opacity — text contrast on
+   receipt stock stays ≥ 4.5:1 (design.md §3). */
 .claim-demo__option--disabled {
-  opacity: 0.55;
+  color: var(--color-receipt-faded);
   cursor: not-allowed;
 }
 
