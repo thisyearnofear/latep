@@ -29,6 +29,7 @@ import { useFirstRun } from "../hooks/useFirstRun";
 import { useMascot } from "../components/MascotContext";
 import { prefetchRoute } from "../App";
 import { DeskHero } from "../components/hero/DeskHero";
+import { useEdgeDissolve } from "../components/transitions/useEdgeDissolve";
 import { FigureGallery } from "../components/figures/FigureGallery";
 import { GALLERY_PLATES } from "../components/figures/figures";
 import { ClaimDemo } from "../components/claim/ClaimDemo";
@@ -103,6 +104,7 @@ function ChapterLabel({
 }
 
 const Home: React.FC = () => {
+  const rootRef = useEdgeDissolve<HTMLDivElement>();
   const { address } = useWallet();
   const { unlock, milestones, stage } = useFirstRun();
   const profile = getStoredProfile();
@@ -139,7 +141,7 @@ const Home: React.FC = () => {
   }, [location.hash]);
 
   return (
-    <div className="home">
+    <div className="home" ref={rootRef}>
       {intro === "welcome" && (
         <FirstRunWizard manual onClose={() => setIntro(null)} />
       )}
@@ -159,7 +161,7 @@ const Home: React.FC = () => {
         </figure>
       </section>
 
-      <header className="home-opening">
+      <header className="home-opening band" data-edge>
         <h1 className="home-title">
           {HERO.title}
           <br />
@@ -178,7 +180,7 @@ const Home: React.FC = () => {
 
       {/* 01 — the problem */}
       <section
-        className="chapter chapter--desk"
+        className="chapter chapter--desk band"
         id={CHAPTERS[0].id}
         aria-labelledby={`${CHAPTERS[0].id}-h`}
       >
@@ -205,7 +207,8 @@ const Home: React.FC = () => {
 
       {/* 02 — the fourth option */}
       <section
-        className="chapter chapter--sand"
+        className="chapter chapter--sand band"
+        data-edge
         id={CHAPTERS[1].id}
         aria-labelledby={`${CHAPTERS[1].id}-h`}
       >
@@ -228,7 +231,8 @@ const Home: React.FC = () => {
       {/* 03 — earn a record. The counter band: the stage lives here, so it
           keeps its own dark surface and reads as the workbench it is. */}
       <section
-        className="chapter chapter--counter"
+        className="chapter chapter--counter band"
+        data-edge
         id={CHAPTERS[2].id}
         aria-labelledby={`${CHAPTERS[2].id}-h`}
       >
@@ -252,7 +256,8 @@ const Home: React.FC = () => {
 
       {/* 04 — where it goes */}
       <section
-        className="chapter chapter--sage"
+        className="chapter chapter--sage band"
+        data-edge
         id={CHAPTERS[3].id}
         aria-labelledby={`${CHAPTERS[3].id}-h`}
       >
@@ -283,7 +288,8 @@ const Home: React.FC = () => {
 
       {/* 05 — underneath */}
       <section
-        className="chapter chapter--desk"
+        className="chapter chapter--desk band"
+        data-edge
         id={CHAPTERS[4].id}
         aria-labelledby={`${CHAPTERS[4].id}-h`}
       >

@@ -6,6 +6,7 @@ import "./index.css";
 import App from "./App.tsx";
 import "@stellar/design-system/build/styles.min.css";
 import { bakePaper } from "./components/paper/bakePaper";
+import { bakeDitherEdge } from "./components/transitions/dither";
 import { WalletProvider } from "./providers/WalletProvider.tsx";
 import { NotificationProvider } from "./providers/NotificationProvider.tsx";
 import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
@@ -22,6 +23,7 @@ const queryClient = new QueryClient({
 });
 
 bakePaper();
+bakeDitherEdge();
 
 createRoot(document.getElementById("root") as HTMLElement).render(
   <StrictMode>

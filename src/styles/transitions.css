@@ -1,0 +1,86 @@
+/* ============================================================================
+ * Route transitions + chapter-edge dissolves (design.md §13.6)
+ * ========================================================================== */
+
+/* --- route layers --------------------------------------------------------- */
+
+/* The outgoing route lives in a fixed layer cloned from the old main,
+   pinned at its scroll offset, inert and hidden from AT. GSAP animates
+   .route-layer--out (settle 16px + fade) and .shell-content (clip reveal). */
+.route-layer {
+  position: fixed;
+  inset: 0 auto auto 0;
+  width: 100%;
+  z-index: 40;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.route-layer--out {
+  background: var(--color-counter);
+}
+
+.route-layer[data-surface="desk"] {
+  background: var(--color-desk);
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
+}
+
+.shell-content--incoming {
+  clip-path: inset(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-layer--out {
+    transition: opacity 150ms linear;
+  }
+}
+
+/* --- chapter edge dissolves ------------------------------------------------ */
+
+/* A full-bleed band whose ground differs from the band above gets a dither
+   edge: a 48px pseudo-element in THIS band's ground, masked by the Bayer
+   dither (opaque bottom → dissolving top) and overlapped upward into the
+   band above. ScrollTrigger scrubs --edge-shift so the mask settles in. */
+.band {
+  position: relative;
+}
+
+.band[data-edge]::before {
+  content: "";
+  position: absolute;
+  top: -48px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: inherit;
+  background-image: inherit;
+  background-blend-mode: inherit;
+  /* The tile is 64×48px (16×12 Bayer cells at 4px): repeat-x, no vertical
+     repeat — sliding it down (--edge-shift) dissolves the whole edge. */
+  mask-image: var(--dither-edge);
+  mask-size: 64px 48px;
+  mask-repeat: repeat-x;
+  mask-position: 0 var(--edge-shift, 48px);
+  image-rendering: pixelated;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Reduced motion: the settled edge, static. */
+@media (prefers-reduced-motion: reduce) {
+  .band[data-edge]::before {
+    mask-position: 0 0;
+  }
+}
+
+/* A band directly above a band edge keeps its bottom 56px clear of content,
+   so the dissolving edge never paints over cards or text (design.md §13.6). */
+.band:has(+ .band[data-edge]),
+.band:has(+ header.band[data-edge]) {
+  padding-bottom: 56px;
+}
+
+[data-clone-hidden] {
+  visibility: hidden;
+}

@@ -70,6 +70,9 @@
   margin-bottom: var(--space-md);
   padding: var(--space-sm) var(--space-md) var(--space-md);
   background: var(--color-receipt);
+  /* Paper texture, same as .receipt (background shorthand would wipe it) */
+  background-image: var(--paper-texture);
+  background-blend-mode: multiply;
   color: var(--color-receipt-ink);
   box-shadow: var(--shadow-receipt);
   border-radius: 0;

@@ -46,13 +46,15 @@ function saveEntries(entries: PracticeEntry[]): void {
 export function usePracticeRecord(): {
   recordRound: (
     round: Omit<PracticeEntry, "id" | "timestamp" | "height">,
-  ) => void;
+  ) => string | null;
   getEntries: () => PracticeEntry[];
 } {
   const getEntries = useCallback((): PracticeEntry[] => loadEntries(), []);
 
   const recordRound = useCallback(
-    (round: Omit<PracticeEntry, "id" | "timestamp" | "height">): void => {
+    (
+      round: Omit<PracticeEntry, "id" | "timestamp" | "height">,
+    ): string | null => {
       try {
         const current = loadEntries();
         // Height is the trust height this round leaves behind: one more turn
@@ -69,8 +71,10 @@ export function usePracticeRecord(): {
           timestamp: Date.now(),
         };
         saveEntries([entry, ...current].slice(0, MAX_ENTRIES));
+        return entry.id;
       } catch {
         /* never let the record crash the game flow */
+        return null;
       }
     },
     [],

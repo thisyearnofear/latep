@@ -607,6 +607,9 @@ Rules:
   same wash, fully drawn. The hero is decoration around the headline. The
   headline is the page's largest text, renders before three.js loads, and
   carries the meaning without the drawing.
+- The hero's figures are a simplified silhouette (head, torso, legs, arms in
+  fixed proportions) rather than the game rig, because the rig's proportions
+  don't survive the hero's scale. The game rig is untouched.
 - The 2D stage's rig figures lose the smiley faces: a figure is a head, a
   body and two hands holding a thread. The rig's joints don't change.
 
@@ -627,8 +630,11 @@ collapse to a 150 ms crossfade under reduced motion.
   route change into its place in the `/record` strip (GSAP Flip). If the
   receipt isn't on screen, the generic transition runs instead.
 - **Chapter dissolves** (after atelier-north). Where one chapter's wash meets
-  the next, the edge is a 4×4 Bayer dither, baked once with
-  `@paper-design/shaders` (`dithering`) into a mask image. As a chapter enters
+  the next, the edge is a 4×4 Bayer dither at 4 px cells, generated once with
+  Canvas2D into a mask image (`--dither-edge`, with a static fallback in
+  `public/assets/dither/`). Canvas2D replaced the shader bake: it is
+  deterministic and needs no GL context. The edge sits under the content of
+  the band above it, never over it. As a chapter enters
   the viewport, ScrollTrigger moves the mask so the new ground dissolves in
   pixel by pixel. Scroll stays native: no smooth-scroll library, no scroll
   hijacking, no pinning longer than one viewport.

@@ -391,7 +391,8 @@ function buildHeroFigure(options: {
   );
 
   group.position.set(x, 0, z);
-  group.rotation.y = facing > 0 ? 0 : Math.PI;
+  // No group flip: the raised arm's joints already use `facing` in local x,
+  // so the counter-facing hand lands on the counter side for both figures.
 
   const hand = new THREE.Vector3(x + facing * 0.17, 0.66, z);
   return { group, hand };
@@ -723,12 +724,15 @@ export function createHeroScene(width: number, height: number): HeroScene {
         to.clone().add(new THREE.Vector3(0, 0, dz)),
       ),
       40,
-      0.011,
+      0.013,
       5,
       false,
     );
     geometries.push(geo);
-    const strand = new THREE.Mesh(geo, sketch(col === you ? 30 : 31, col));
+    // Solid print colour, unhatched — the thread reads as two drawn cords.
+    const strandMat = new THREE.MeshBasicMaterial({ color: col });
+    materials.push(strandMat);
+    const strand = new THREE.Mesh(geo, strandMat);
     strand.castShadow = false;
     group.add(strand);
   }

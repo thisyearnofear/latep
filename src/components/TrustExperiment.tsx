@@ -9,6 +9,7 @@ import type { TrustStageState } from "./visual/TrustStage";
 import { RoundReceipt } from "./receipt/RoundReceipt";
 import { primitiveForRound } from "./receipt/helpers";
 import { usePracticeRecord } from "../hooks/usePracticeRecord";
+import { stashFlip } from "./transitions/flipHandoff";
 import { MOVE_HELPER, MOVE_LABEL } from "../content/vocabulary";
 import { EARN } from "../content/story";
 import { calculatePayoff, NC_DEFAULT, type GameMove } from "../util/strategies";
@@ -109,7 +110,7 @@ const points = new Intl.NumberFormat("en-US", {
 
 export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
   const [state, dispatch] = useReducer(roundReducer, initialState);
-  const { recordRound } = usePracticeRecord();
+  const { recordRound, getEntries } = usePracticeRecord();
   const [soundOn, setSoundOn] = useState(false);
   const outcomeRef = useRef<HTMLHeadingElement>(null);
   const cooperateRef = useRef<HTMLButtonElement>(null);
@@ -364,7 +365,19 @@ export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
               Play another round
             </button>
             {recordLink && (
-              <Link to="/record" className="trust-btn trust-btn-secondary">
+              <Link
+                to="/record"
+                className="trust-btn trust-btn-secondary"
+                onClick={() => {
+                  // The receipt carries you to your record (design.md §13.6):
+                  // its Flip state travels to /record with the entry id.
+                  const receipt = document.querySelector(
+                    ".trust-experiment .receipt",
+                  );
+                  const id = getEntries()[0]?.id;
+                  if (receipt && id) stashFlip(receipt, id);
+                }}
+              >
                 {EARN.addToRecord}
               </Link>
             )}

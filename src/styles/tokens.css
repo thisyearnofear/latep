@@ -87,6 +87,10 @@
    * ----------------------------------------------------------------------- */
   --paper-texture: url(/assets/paper/paper.png);
 
+  /* The chapter-edge dither mask (design.md §13.6): runtime-baked by
+     components/transitions/dither.ts; this static file is the fallback. */
+  --dither-edge: url(/assets/dither/edge.png);
+
   /* The modal scrim. An overlay must not erase the page behind it — losing
      context is what makes a wizard feel like a wall — but a translucent
      black is the only translucency allowed outside the shadow tokens, so it

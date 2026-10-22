@@ -12,6 +12,9 @@
 
 import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useLayoutEffect } from "react";
+import gsap from "gsap";
+import { takeFlip } from "../components/transitions/flipHandoff";
 import { Receipt, ReceiptLine, Stamp } from "../components/receipt";
 import { Thread } from "../components/receipt/Thread";
 import { ClaimDemo } from "../components/claim/ClaimDemo";
@@ -36,6 +39,42 @@ interface RecordRound {
 }
 
 const RecordPage: React.FC = () => {
+  // The receipt carries you here (design.md §13.6): if a Flip stash is
+  // waiting and its receipt is on screen, play it into its slot.
+  useLayoutEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const stash = takeFlip();
+    if (!stash) return;
+    const target = document.querySelector<HTMLElement>(
+      `[data-flip-id="${stash.entryId}"]`,
+    );
+    if (!target) return;
+    const box = target.getBoundingClientRect();
+    if (box.bottom < 0 || box.top > window.innerHeight) return;
+    const dur =
+      parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "--dur-print",
+        ),
+      ) / 1000 || 0.7;
+    // The recorded rect lives in page coordinates; the target is measured
+    // after the route change, so the same scroll frame applies.
+    const now = target.getBoundingClientRect();
+    const dx = stash.rect.left - (now.left + window.scrollX);
+    const dy = stash.rect.top - (now.top + window.scrollY);
+    gsap.fromTo(
+      target,
+      {
+        x: dx,
+        y: dy,
+        scaleX: stash.rect.width / now.width,
+        scaleY: stash.rect.height / now.height,
+        transformOrigin: "0 0",
+      },
+      { x: 0, y: 0, scaleX: 1, scaleY: 1, duration: dur, ease: "power2.out" },
+    );
+  }, []);
+
   const { getStats } = useGameStats();
   const { getEntries } = usePracticeRecord();
 
@@ -179,6 +218,7 @@ const RecordPage: React.FC = () => {
                 <Receipt
                   title={`Round ${practice.length - i}`}
                   className="record-slip"
+                  data-flip-id={p.id}
                 >
                   <ReceiptLine label="You" value={MOVE_LABEL[p.yourMove]} />
                   <ReceiptLine

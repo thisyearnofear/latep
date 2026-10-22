@@ -7,8 +7,11 @@
  * without the labels wrapping.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Outlet, NavLink, useLocation } from "react-router-dom";
+import gsap from "gsap";
+import { peekFlipId } from "./transitions/flipHandoff";
+import "../styles/transitions.css";
 import { Volume2, VolumeX } from "lucide-react";
 import ConnectAccount from "./ConnectAccount.tsx";
 import { useAudioSettings } from "../hooks/useAudioSettings";
@@ -38,10 +41,57 @@ const NAV_ITEMS = [
  */
 const DESK_ROUTES = new Set(["/", "/record", "/real-life"]);
 
+/* Read a CSS timing/easing token — the transition's motion comes from the
+   tokens, not literals. */
+function cssToken(name: string): string {
+  return getComputedStyle(document.documentElement)
+    .getPropertyValue(name)
+    .trim();
+}
+
+function ms(v: string): number {
+  const n = parseFloat(v);
+  return v.trim().endsWith("ms") ? n : n * 1000;
+}
+
+/** cubic-bezier(...) → a GSAP ease function (tokens are authored as CSS). */
+function cubicBezier(spec: string): (t: number) => number {
+  const m = spec.match(/cubic-bezier\(([^)]+)\)/);
+  if (!m) return (t) => t;
+  const [x1, y1, x2, y2] = m[1].split(",").map(Number);
+  const cx = (t: number) =>
+    3 * x1 * t * (1 - t) * (1 - t) + 3 * x2 * t * t * (1 - t) + t * t * t;
+  const cy = (t: number) =>
+    3 * y1 * t * (1 - t) * (1 - t) + 3 * y2 * t * t * (1 - t) + t * t * t;
+  return (t: number) => {
+    let lo = 0,
+      hi = 1,
+      mid = t;
+    for (let i = 0; i < 8; i++) {
+      mid = (lo + hi) / 2;
+      if (cx(mid) < t) lo = mid;
+      else hi = mid;
+    }
+    return cy(mid);
+  };
+}
+
+const samePage = (a: string, b: string) => {
+  if (a === b) return true;
+  // /play and /play/:gameId are one screen — no transition between them.
+  return a.startsWith("/play") && b.startsWith("/play");
+};
+
 const AppShell: React.FC = () => {
-  const pathname = useLocation().pathname;
+  const location = useLocation();
+  const pathname = location.pathname;
   const isLesson = pathname === "/learn";
   const surface = DESK_ROUTES.has(pathname) ? "desk" : "counter";
+  const mainRef = useRef<HTMLElement>(null);
+  const layerRef = useRef<HTMLDivElement | null>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const scrollMap = useRef(new Map<string, number>());
+  const prevRef = useRef(location);
   const audioManager = useAudioSettings();
   const [audioOpen, setAudioOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,6 +108,115 @@ const AppShell: React.FC = () => {
     setAudioOpen(false);
     setMenuOpen(false);
   };
+
+  // --- route transition (design.md §13.6) -----------------------------------
+  //
+  // The outgoing route is a static DOM CLONE of the old main, not the live
+  // element: a live mount would keep timers, audio and the record effect
+  // running under the reader — a clone can't record a round twice or start a
+  // sound, and it paints identically.
+  useEffect(() => {
+    const prev = prevRef.current;
+    prevRef.current = location;
+    const main = mainRef.current;
+    if (!main) return;
+
+    // Save the outgoing scroll position under its location key.
+    scrollMap.current.set(prev.key, window.scrollY);
+
+    // Skip: same pathname (hash/search change), /play <-> /play/:gameId.
+    if (samePage(prev.pathname, location.pathname)) return;
+
+    // Interrupting: kill any running transition and drop its layer.
+    tlRef.current?.kill();
+    layerRef.current?.remove();
+    layerRef.current = null;
+
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const dur = ms(cssToken("--dur-long")) / 1000;
+    const easeIn = cubicBezier(cssToken("--ease-in"));
+    const easeOut = cubicBezier(cssToken("--ease-out"));
+
+    // Snapshot the OLD content: clone the previous main's DOM into a fixed,
+    // inert layer pinned at the current scroll offset.
+    const layer = document.createElement("div");
+    layer.className = "route-layer route-layer--out";
+    layer.dataset.surface = DESK_ROUTES.has(prev.pathname) ? "desk" : "counter";
+    layer.setAttribute("aria-hidden", "true");
+    layer.setAttribute("inert", "");
+    const scrollY = window.scrollY;
+    const clone = main.cloneNode(true) as HTMLElement;
+    clone.removeAttribute("id");
+    // The flying receipt must not ALSO appear in the outgoing snapshot.
+    const flipId = peekFlipId();
+    if (flipId) {
+      clone
+        .querySelector(`[data-flip-id="${flipId}"]`)
+        ?.setAttribute("data-clone-hidden", "");
+    }
+    clone.style.transform = `translateY(${-scrollY}px)`;
+    clone.style.margin = "0";
+    layer.appendChild(clone);
+    document.body.appendChild(layer);
+    layerRef.current = layer;
+
+    const incomingH1 = () => main.querySelector<HTMLElement>("h1");
+
+    if (reduced) {
+      // 150ms opacity crossfade only.
+      const tl = gsap.timeline({
+        onComplete: () => {
+          layer.remove();
+          if (layerRef.current === layer) layerRef.current = null;
+          finishFocus();
+        },
+      });
+      tl.fromTo(layer, { opacity: 1 }, { opacity: 0, duration: 0.15 });
+      return finishRestore();
+    }
+
+    window.scrollTo(0, 0);
+    const tl = gsap.timeline({
+      onComplete: () => {
+        layer.remove();
+        if (layerRef.current === layer) layerRef.current = null;
+        finishFocus();
+      },
+    });
+    tl.fromTo(
+      layer,
+      { y: 0, opacity: 1 },
+      { y: 16, opacity: 0, duration: dur, ease: easeIn },
+      0,
+    );
+    tl.fromTo(
+      main,
+      { clipPath: "inset(0 0 100% 0)" },
+      { clipPath: "inset(0 0 0% 0)", duration: dur, ease: easeOut },
+      0,
+    );
+
+    function finishRestore() {
+      // Back/forward: restore the incoming key's scroll position.
+      const saved = scrollMap.current.get(location.key);
+      if (saved !== undefined) window.scrollTo(0, saved);
+    }
+
+    function finishFocus() {
+      finishRestore();
+      // Hash navigation keeps Home's own focus logic.
+      if (location.hash) return;
+      const h1 = incomingH1();
+      if (h1) {
+        if (!h1.hasAttribute("tabindex")) h1.setAttribute("tabindex", "-1");
+        h1.focus({ preventScroll: true });
+      }
+    }
+    return () => {};
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   return (
     <div className="shell" data-surface={surface}>
@@ -222,6 +381,7 @@ const AppShell: React.FC = () => {
       )}
 
       <main
+        ref={mainRef}
         className={`shell-content${isLesson ? " shell-content-lesson" : ""}`}
       >
         <Outlet />
