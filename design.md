@@ -128,14 +128,27 @@ Load fonts once, self-hosted: woff2 files (Fontsource, latin subset) live in
 with display + body preloaded in `index.html`. No Google Fonts request, no
 CSS `@import`, no npm font imports.
 
-| Role    | Face                                                  | Weights  | Token            |
-| ------- | ----------------------------------------------------- | -------- | ---------------- |
-| Display | Bricolage Grotesque (variable, `wdth` 75–100, `opsz`) | 700, 800 | `--font-display` |
-| Body    | Atkinson Hyperlegible Next                            | 400, 700 | `--font-body`    |
-| Print   | Martian Mono (variable width)                         | 400, 600 | `--font-print`   |
+| Role    | Face                                                                        | Weights       | Token            |
+| ------- | --------------------------------------------------------------------------- | ------------- | ---------------- |
+| Display | Bricolage Grotesque (variable: `wght` 500–800, `wdth` 80–100, `opsz` 12–96) | 600, 700, 780 | `--font-display` |
+| Body    | Atkinson Hyperlegible Next                                                  | 400, 700      | `--font-body`    |
+| Print   | Martian Mono (variable width)                                               | 400, 600      | `--font-print`   |
 
-- **Display** is for page headings on the counter. Use the condensed width
-  (`font-stretch: 80%`) for the story hero.
+- **Display** is for page headings and the data figures. It is one variable
+  file (`public/fonts/bricolage-variable.woff2`, instanced from Fontsource to
+  the ranges above). Every rule that uses it sets its weight explicitly, and
+  `font-optical-sizing: auto` lets the face draw itself for its size. Amended
+  2026-10-21: the site previously shipped a single static 700 file, so the
+  condensed width never applied and heavier weights were synthesised by the
+  browser. That is why the old headings looked heavy.
+- **Headlines are sentences, not slogans** (amended 2026-10-21). The story
+  copy is narrative, so headings sit at reading-plus size: the hero headline at
+  most 3.25rem, chapter headings 1.6–2.25rem at weight 600 with
+  `text-wrap: balance`. Hierarchy comes from space and the chapter numbers.
+- **Numbers carry the display size.** Where the content is a number (the
+  collateral figure `100% → 40%`, the chapter numeral in the rail), the number
+  is set large, at weight 780, `wdth` 85 and `tabular-nums`. Sentences around it
+  stay modest.
 - **Body** is for every sentence you read: lessons, explanations, buttons.
 - **Print** is what the receipt printer prints: line items, scores, times,
   hashes, nonces, tx ids, stamps, labels. Never use it for paragraphs.
@@ -149,7 +162,10 @@ Scale (fluid, defined in `tokens.css`):
 --text-lg   1.3125rem   lead paragraph
 --text-xl   clamp(1.5rem, 1.2rem + 1vw, 2rem)       section heading
 --text-2xl  clamp(2rem, 1.5rem + 2vw, 3rem)         page heading
---text-3xl  clamp(2.5rem, 1.6rem + 4vw, 4.75rem)    story hero only
+--text-3xl  clamp(2.5rem, 1.6rem + 4vw, 4.75rem)    retired on story pages (see above)
+hero h1     clamp(2.25rem, 1.6rem + 2.4vw, 3.25rem)
+chapter h2  clamp(1.6rem, 1.3rem + 1.1vw, 2.25rem)
+data figure clamp(3.5rem, 2rem + 6vw, 7rem)
 ```
 
 Rules:
@@ -615,35 +631,78 @@ Rules:
 
 ### 13.6 Motion (amends section 8)
 
-Two kinds of quiet motion are added. Neither decides anything, and both
-collapse to a 150 ms crossfade under reduced motion.
+Quiet motion that never decides anything. Everything here collapses to a
+150 ms crossfade, or to no motion at all, under reduced motion. Scroll stays
+native everywhere: no smooth-scroll library and no scroll hijacking.
 
-- **Route transitions** (after amber). The outgoing and incoming pages share
-  one GSAP timeline: the old page settles down 16 px and fades out
-  (`--dur-long`, `--ease-in`), while the new page feeds in from the top with a
-  `clip-path` reveal (`--dur-long`, `--ease-out`). Focus moves to the new page's
-  `h1` when the timeline completes. Back and forward navigation run the same
-  timeline. A transition never delays data loading, and it is skipped when the
-  same route re-renders.
-- **The receipt carries you to your record.** Finishing a practice round offers
-  "Add to your record". Following it carries the round's receipt across the
-  route change into its place in the `/record` strip (GSAP Flip). If the
-  receipt isn't on screen, the generic transition runs instead.
-- **Chapter dissolves** (after atelier-north). Where one chapter's wash meets
-  the next, the edge is a 4×4 Bayer dither at 4 px cells, generated once with
-  Canvas2D into a mask image (`--dither-edge`, with a static fallback in
-  `public/assets/dither/`). Canvas2D replaced the shader bake: it is
-  deterministic and needs no GL context. The edge sits under the content of
-  the band above it, never over it. As a chapter enters
-  the viewport, ScrollTrigger moves the mask so the new ground dissolves in
-  pixel by pixel. Scroll stays native: no smooth-scroll library, no scroll
-  hijacking, no pinning longer than one viewport.
+**Between pages.**
+
+- **View Transitions first.** Internal link clicks run through
+  `document.startViewTransition`. The app uses declarative `<Routes>`, so
+  `AppShell` intercepts same-origin link clicks in the capture phase, and
+  programmatic navigation goes through `navigateWithTransition`. The old page
+  clears in 180 ms. The new page fades in from 120 ms over `--dur-long`: one
+  after the other, not both at once.
+- **The title morphs.** Every page's `h1` carries
+  `view-transition-name: page-title`, so the old title becomes the new one.
+  When a nav link is clicked, its label takes the name instead and becomes the
+  new page's title. `/learn` and `/play` have no `h1`, so they skip the morph.
+- **Changing surface feeds like a receipt.** Desk ↔ counter navigations reveal
+  the new page top-down with `--ease-feed` over `--dur-print`, with no title
+  morph.
+- **The receipt carries you to your record.** "Add to your record" gives the
+  round's receipt and its slot in the `/record` strip a shared name
+  (`receipt-flight`), so the receipt travels into place.
+- **Fallback.** Back/forward, and browsers without View Transitions, use the
+  clone transition: a static copy of the old page settles and fades while the
+  new page clips in, and the receipt flight is a GSAP tween from the stashed
+  position. Focus moves to the new `h1` when either path finishes.
+
+**Within Home: chapters are sheets of paper** (after the Codrops sticky-section
+studies).
+
+- Each chapter is a full-bleed sheet with its own opaque ground, the receipt's
+  torn edge on top and `--shadow-sheet` cast upward. Later sheets slide over
+  earlier ones.
+- **A sheet that holds operable content is never covered.** Sheets are marked
+  `data-sheet="stack"` or `data-sheet="flow"`. Stack sheets (hero, opening,
+  chapters 01 and 04) are `position: sticky` with
+  `top: min(0px, calc(100svh - var(--sheet-h)))`, so a tall sheet scrolls in
+  full before it holds. As the next sheet arrives they scale to 0.97 and darken
+  to `--color-scrim` at 0.45. Flow sheets (chapter 02's claim demo, chapter
+  03's practice round, chapter 05's plates and everything after) stay in normal
+  flow, so nothing can slide over a control. This rule was found the hard way:
+  when the practice round was a stack sheet, the receipt that prints at the end
+  of a round pushed "Play another round" under the next sheet, and no scroll
+  position could reach it.
+- When focus moves into a covered sheet, it is scrolled back into view (WCAG
+  2.4.11).
+- **The chapter rail** (≥ 1100 px) is a `nav` of the five chapters in the left
+  margin, in print font and sentence case. The current chapter carries
+  `aria-current`, and its numeral rolls over like a till. The rail appears only
+  while a chapter is on screen, not over the hero, and switches to counter
+  colours over chapter 03.
+- **Lines rise into place.** Chapter headings and ledes reveal line by line
+  through a mask (GSAP SplitText, `aria: "auto"`), starting when the chapter's
+  top reaches 90 % of the viewport. Anything already on screen reveals at once,
+  so a reader never sees a gap where text will appear. The hero headline never
+  animates, because it is the page's largest paint.
+- All of this sets up in an idle callback after first paint and
+  `document.fonts.ready`, and measures again only on a real resize.
+
+**On `/real-life`: dithered edges.** Where one scenario's ground meets the next,
+the edge is a 4×4 Bayer dither at 4 px cells, generated once with Canvas2D into
+`--dither-edge` (static fallback in `public/assets/dither/`). The edge sits
+under the content of the band above it, and ScrollTrigger dissolves it in as
+the band enters.
 
 ### 13.7 Narrative surfaces
 
 **Home (`/`), told in chapters.** The hero (13.5), then a headline with a tinted
-phrase and a one-sentence lede. Then five numbered chapters, each on its own
-wash, each opening with a print-font number ("01") and a short title:
+phrase and a one-sentence lede. Then five numbered chapters, each a sheet of
+paper on its own ground (13.6), each opening with a print-font number ("01")
+and a short title. Chapter 02 opens on the collateral figure, `100% → 40%`,
+with the 40 % in moss. The numbers come from `CLAIM_DEMO`, never retyped:
 
 | #   | Chapter           | Holds                                                                                   |
 | --- | ----------------- | --------------------------------------------------------------------------------------- |
@@ -722,13 +781,15 @@ once it is confirmed.
 
 ### 13.9 What we take from each reference, and what we leave
 
-| Reference                         | We take                                                                                                                                      | We leave                                                                     |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| kylon.io                          | One human illustration that depicts the product; warm grained paper; a muted earth palette; numbered chapters; one tinted phrase per heading | Logo walls, testimonials and metrics we don't have; rounded cards everywhere |
-| twotwentytwo-studio/codrops-paper | Paper as a material, rendered once from Paper Shaders and shared by every surface                                                            | WebGPU, WGSL, domgl, Nuxt                                                    |
-| abhishekmill/R3FSketchMaterial    | Light-following hatching, overshooting pen outlines, hatched shadows, the wash/reveal: pencil and ink                                        | R3F, the leva panel, the camera tour                                         |
-| codrops/atelier-north             | Dithered pixel edges between sections, driven by native scroll                                                                               | Lenis, the architecture-portfolio tone, its fonts                            |
-| ismamz/amber                      | Parallel route transitions on one GSAP timeline                                                                                              | Its layouts                                                                  |
+| Reference                                                      | We take                                                                                                                                      | We leave                                                                     |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| kylon.io                                                       | One human illustration that depicts the product; warm grained paper; a muted earth palette; numbered chapters; one tinted phrase per heading | Logo walls, testimonials and metrics we don't have; rounded cards everywhere |
+| twotwentytwo-studio/codrops-paper                              | Paper as a material, rendered once from Paper Shaders and shared by every surface                                                            | WebGPU, WGSL, domgl, Nuxt                                                    |
+| abhishekmill/R3FSketchMaterial                                 | Light-following hatching, overshooting pen outlines, hatched shadows, the wash/reveal: pencil and ink                                        | R3F, the leva panel, the camera tour                                         |
+| codrops/atelier-north                                          | Dithered pixel edges between sections, driven by native scroll                                                                               | Lenis, the architecture-portfolio tone, its fonts                            |
+| ismamz/amber                                                   | Parallel route transitions on one GSAP timeline                                                                                              | Its layouts                                                                  |
+| Codrops: sticky sections, SplitText reveals, Scrolling Letters | Chapters as stacking sheets; a persistent chapter rail that changes per section; masked line reveals with one ease and a small stagger       | Pinning, scroll hijacking, per-character effects on body copy                |
+| Codrops: View Transitions articles                             | Browser-captured page snapshots with one named element (the title) morphing between pages                                                    | Animating every element; transitions that delay loading                      |
 
 ### 13.10 Budgets and gates
 
@@ -739,6 +800,19 @@ once it is confirmed.
 - `@paper-design/shaders` is pinned to an exact version that was at least seven
   days old when added.
 - Every existing gate still runs (`design:check`, `check:hidden-moves`,
-  `check:stage-parity`, `shots`), plus `/record` in the shot list.
+  `check:stage-parity`, `shots`), plus `/record` in the shot list. `shots`
+  also fails on any element that overflows the viewport behind
+  `overflow-x: clip`.
+- Three more checks run against the dev server:
+  - `node e2e/sheets-check.cjs`: no covered sheet can be hit through the one
+    above it, focus is never hidden, no on-screen line is left unrevealed, and
+    three practice rounds complete with real clicks at 1440 and 390.
+  - `node e2e/transition-check.cjs`: View Transitions are used when supported,
+    focus lands on the new `h1`, back/forward restores scroll, and reduced
+    motion animates opacity only.
+  - `node e2e/hero-check.cjs`: the hero draws in, freezes and releases its GL
+    context.
+- Headline paint stays under 900 ms on the 4× CPU phone-class profile
+  (`scripts/measure-hero.cjs`).
 - The comprehension test (`docs/COMPREHENSION_TEST.md`) gains one question:
   "What could you do with your record?"

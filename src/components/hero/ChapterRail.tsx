@@ -1,10 +1,10 @@
 /**
- * Chapter rail (the prototype): a fixed nav in the left margin listing the
+ * Chapter rail: a fixed nav in the left margin listing the
  * five chapters. The current chapter is the topmost sheet covering ≥50% of
  * the viewport (tracked in homeMotion.useCurrentChapter). Its number rolls
  * up like a till counter; the link gets aria-current + a thread tick.
  * Over the counter sheet (chapter 03) the rail flips to the dark surface
- * colours. Hidden below 1100px and in variant 3 (margin titles instead).
+ * colours. Hidden below 1100px.
  */
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
@@ -15,10 +15,7 @@ interface RailApi {
   subscribe: (fn: (id: string | null) => void) => () => void;
 }
 
-export const ChapterRail: React.FC<{ rail: RailApi; variant: string }> = ({
-  rail,
-  variant,
-}) => {
+export const ChapterRail: React.FC<{ rail: RailApi }> = ({ rail }) => {
   const [current, setCurrent] = useState<string | null>(rail.current.current);
   const [rolling, setRolling] = useState<string | null>(null);
   const prevRef = useRef<string | null>(current);
@@ -42,12 +39,13 @@ export const ChapterRail: React.FC<{ rail: RailApi; variant: string }> = ({
       data-current={current ?? undefined}
       aria-label="Chapters"
     >
-      <span className="chapter-rail-num" data-variant={variant}>
+      <span className="chapter-rail-num">
         <span className="chapter-rail-num-mask">
           {rolling !== null && rolling !== current && (
             <span
               key={rolling}
               className="chapter-rail-digit chapter-rail-digit--out"
+              onAnimationEnd={() => setRolling(null)}
             >
               {String(CHAPTERS.findIndex((c) => c.id === rolling) + 1).padStart(
                 2,

@@ -5,6 +5,13 @@
 > [`REDESIGN_PLAN.md`](REDESIGN_PLAN.md) for phases and tickets. `main` is
 > frozen until the Oct 14 submission; all redesign work lands on `redesign`.
 >
+> **2026-10-21: the story redesign** (`design.md` §13), on branch
+> `story-redesign`. The site now tells the product story, a private reputation
+> whose first issuer is the game, across chaptered story pages, `/record`, and a
+> claim demo that runs through a `ReputationClaimer` seam (simulated until
+> Pattern 3 ships). Not merged yet: the 5-person comprehension test in
+> [`COMPREHENSION_TEST.md`](COMPREHENSION_TEST.md) still has to pass.
+>
 > **Next after the redesign:** Pattern 3 — Private Reputation. The claim and
 > product story are in [`HACKMERIDIAN.md`](HACKMERIDIAN.md); the Stellar ×
 > Midnight decision, data path, and gate are in

@@ -555,7 +555,7 @@
 }
 
 /* ============================================================================
- * Prototype: stacking sheets, title variants, chapter rail, line reveals
+ * Stacking sheets, chapter rail, line reveals
  * (replaces the dither edges on Home; /real-life keeps its own)
  * ========================================================================== */
 
@@ -594,7 +594,7 @@
   box-shadow: var(--shadow-sheet);
 }
 
-/* The scrim as a sheet is covered (--sheet-dim scrubbed 0 → 0.25). */
+/* The scrim as a sheet is covered (--sheet-dim scrubbed 0 → 0.45). */
 .sheet::after {
   content: "";
   position: absolute;
@@ -612,9 +612,9 @@
   }
 }
 
-/* --- title variants -------------------------------------------------------- */
+/* --- chapter titles ---------------------------------------------------- */
 
-/* Shared across all variants: hero h1 — no synthetic stretch, real opsz. */
+/* Hero h1 — no synthetic stretch, real optical sizing. */
 .home-title {
   font-stretch: normal;
   font-weight: 700;
@@ -629,9 +629,8 @@
   text-wrap: pretty;
 }
 
-/* Variant 1 "sentence scale" (default) + variant 2 base */
-.home[data-type="1"] .chapter-h,
-.home[data-type="2"] .chapter-h {
+/* Chapter titles at sentence scale — hierarchy from space, not size. */
+.home .chapter-h {
   font-size: clamp(1.6rem, 1.3rem + 1.1vw, 2.25rem);
   font-weight: 600;
   line-height: 1.15;
@@ -641,7 +640,7 @@
   margin-top: var(--space-lg);
 }
 
-/* Variant 2 — the data figure above the claim demo */
+/* The data figure above the claim demo (100% → 40%) */
 .chapter-figure {
   display: flex;
   align-items: baseline;
@@ -678,46 +677,10 @@
   color: var(--color-desk-ink-2);
 }
 
-/* Variant 3 — titles in the margin */
+/* The inline label row is visually hidden at ≥1100px — the rail carries
+   the number/title there. The h2 association is aria-labelledby. */
 @media (min-width: 1100px) {
-  .home[data-type="3"] .home-opening {
-    padding-left: max(
-      var(--space-md),
-      calc((100vw - var(--layout-max)) / 2 + var(--space-md))
-    );
-  }
-
-  .home[data-type="3"] .chapter .chapter-inner {
-    display: grid;
-    grid-template-columns: 3fr 7fr;
-    column-gap: var(--space-lg);
-  }
-
-  .home[data-type="3"] .chapter .chapter-inner > * {
-    grid-column: 2;
-  }
-
-  .home[data-type="3"] .chapter .chapter-label,
-  .home[data-type="3"] .chapter .chapter-h {
-    grid-column: 1;
-    position: sticky;
-    top: calc(64px + var(--space-lg));
-    align-self: start;
-  }
-
-  .home[data-type="3"] .chapter .chapter-h {
-    margin-top: var(--space-sm);
-    font-size: var(--text-xl);
-    font-weight: 600;
-    text-wrap: balance;
-  }
-}
-
-/* The inline label row is visually hidden on wide variants 1/2 — the rail
-   carries the number/title there. The h2 association is aria-labelledby. */
-@media (min-width: 1100px) {
-  .home[data-type="1"] .chapter-label,
-  .home[data-type="2"] .chapter-label {
+  .home .chapter-label {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -763,8 +726,11 @@
     margin-bottom: var(--space-sm);
   }
 
-  .chapter-rail-num[data-variant="2"] {
+  .chapter-rail-num {
     font-size: 4rem;
+    font-weight: 780;
+    font-stretch: 85%;
+    font-variant-numeric: tabular-nums;
   }
 
   .chapter-rail-num-mask {
@@ -780,6 +746,34 @@
 
   .chapter-rail-digit--in {
     animation: rail-roll-in var(--dur-short) var(--ease-feed);
+  }
+
+  /* The old digit leaves on top of the new one rather than above it in flow,
+     otherwise it holds the mask and the new digit sits outside it. */
+  .chapter-rail-digit--out {
+    position: absolute;
+    inset: 0 auto auto 0;
+    animation: rail-roll-out var(--dur-short) var(--ease-feed) forwards;
+  }
+
+  /* Reduced motion: no roll, and the old digit (whose animationend never
+     fires without an animation) simply isn't drawn. */
+  @media (prefers-reduced-motion: reduce) {
+    .chapter-rail-digit--in {
+      animation: none;
+    }
+    .chapter-rail-digit--out {
+      display: none;
+    }
+  }
+
+  @keyframes rail-roll-out {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-100%);
+    }
   }
 
   @keyframes rail-roll-in {
@@ -835,19 +829,16 @@
   }
 }
 
-/* When the chapter rail shows (variants 1/2, ≥1100px) the prose column
-   keeps a left margin for it inside the centered column — the rail then
-   overlays padding, never content. */
+/* When the chapter rail shows (≥1100px) the prose column keeps a left
+   margin for it inside the centered column — the rail overlays padding,
+   never content. */
 @media (min-width: 1100px) {
-  .home[data-type="1"] .chapter-inner,
-  .home[data-type="2"] .chapter-inner {
+  .home .chapter-inner {
     padding-left: 210px;
   }
 
-  /* Opening h1 shares the chapter column's left edge (the rail reserves
-     ~210px inside chapter-inner). */
-  .home[data-type="1"] .home-opening,
-  .home[data-type="2"] .home-opening {
+  /* Opening h1 shares the chapter column's left edge. */
+  .home .home-opening {
     padding-left: calc(210px + var(--space-md));
   }
 }

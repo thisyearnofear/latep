@@ -44,7 +44,7 @@ Entered as the education + games story: playable wallet-free tutorial/tournament
 
 ## Docs
 
-- `design.md` — the design system and the reveal-room direction (the source of truth for look and motion)
+- `design.md` — the design system (the source of truth for look and motion). Section 13 covers the story redesign: the desk surface, paper and pencil/ink materials, chapters as sheets, page transitions, the type scale, and the reputation seam
 - `docs/REDESIGN_PLAN.md` — redesign phases, tickets and review rules
 - `docs/HACKMERIDIAN.md` — the three-pattern story, Pattern 3 (private reputation) spec, HackMeridian plan
 - `docs/VISION.md` — product position: the problem, the gap, the use cases, the reputation primitive, the market analysis, the "canonical or bust" answer, and the convergence plan

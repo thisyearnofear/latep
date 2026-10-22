@@ -111,11 +111,6 @@ function ChapterLabel({
 
 const Home: React.FC = () => {
   const rootRef = useRef<HTMLDivElement>(null);
-  // The title variant is read once — ?type=1|2|3, default 1 (no switcher).
-  const typeRef = useRef(
-    new URLSearchParams(window.location.search).get("type") ?? "1",
-  );
-  const type = typeRef.current;
   const chapterIds = CHAPTERS.map((c) => c.id);
   const rail = useCurrentChapter(rootRef, chapterIds);
   useSheetStack(rootRef);
@@ -157,7 +152,7 @@ const Home: React.FC = () => {
   }, [location.hash]);
 
   return (
-    <div className="home" data-type={type} ref={rootRef}>
+    <div className="home" ref={rootRef}>
       {intro === "welcome" && (
         <FirstRunWizard manual onClose={() => setIntro(null)} />
       )}
@@ -245,7 +240,7 @@ const Home: React.FC = () => {
           <p className="chapter-lede">{FOURTH.line}</p>
           <p className="chapter-payoff">{FOURTH.payoff}</p>
           <p className="chapter-close">{FOURTH.close}</p>
-          {type === "2" && (
+          {
             <p
               className="chapter-figure"
               aria-label={`${CLAIM_DEMO.collateralLabel}`}
@@ -263,7 +258,7 @@ const Home: React.FC = () => {
                 {CLAIM_DEMO.collateralLabel}
               </span>
             </p>
-          )}
+          }
           <ClaimDemo />
         </div>
       </section>
@@ -436,7 +431,7 @@ const Home: React.FC = () => {
           enhanced with ZK proofs on Stellar.
         </p>
       </div>
-      {type !== "3" && <ChapterRail rail={rail} variant={type} />}
+      <ChapterRail rail={rail} />
     </div>
   );
 };
