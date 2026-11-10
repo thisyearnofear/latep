@@ -10,8 +10,8 @@
  * need both paths on one device, and the design-system gate asks for a
  * keyboard run with the room on and off.
  *
- * The S1 sign-off is still open (REDESIGN_PLAN.md), so the room is opt-in:
- * the default route uses the 2D stage until `?room=on` asks for the room.
+ * The room is the default since the S1 review (2026-11-10): "auto" follows
+ * the capability probe, and `?room=off` remains the comparison path.
  */
 
 export type RevealRoomReason =
@@ -89,10 +89,9 @@ export function shouldUseRevealRoom(): boolean {
   const mode = revealRoomMode();
   if (mode === "off") return false;
   if (mode === "on") return true;
-  // S1 sign-off is still open (REDESIGN_PLAN.md). Keep the room opt-in until
-  // the owner reviews the recording; `revealRoomSupport()` is the switch to
-  // flip back to `=== "ok"` when the gate closes.
-  return false;
+  // The room is the default (design.md §12, amended 2026-11-10): "auto" is
+  // the capability probe. `?room=off` forces the 2D stage for comparison.
+  return revealRoomSupport() === "ok";
 }
 
 /**

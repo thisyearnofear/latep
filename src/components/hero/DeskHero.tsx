@@ -13,6 +13,10 @@
  * `?hero=off` override says no. `?hero=on` forces it for shots and
  * comparison. A chunk-load or render error also lands on the plate.
  *
+ * The room is the default wherever its probe passes, so the hero yields to
+ * `shouldUseRevealRoom()` — the reveal takes the shader budget later in the
+ * same view (§13.4: at most one live shader per view).
+ *
  * The headline never waits for it: this component mounts the plate first
  * and upgrades in place.
  */
@@ -21,6 +25,7 @@ import { useEffect, useRef, useState } from "react";
 import { Plate } from "../figures/Plate";
 import { STORY_PLATE } from "../figures/figures";
 import {
+  revealRoomMode,
   revealRoomSupport,
   type RevealRoomReason,
 } from "../reveal-room/capability";
@@ -45,10 +50,15 @@ export function DeskHero() {
   useEffect(() => {
     const mode = heroMode();
     // The reveal room and the hero never share a view: §13.4 budgets one
-    // live shader, and `?room=on` means the round's reveal takes it.
-    const roomOn = new URLSearchParams(window.location.search).get("room");
+    // live shader, and a room-enabled device gives the shader budget to the
+    // round's reveal instead. `?room=on` beats `?hero=on`; an auto room does
+    // not, so shots can still force the hero on a capable device.
+    const roomMode = revealRoomMode();
+    const roomWillRun =
+      roomMode === "on" ||
+      (roomMode === "auto" && revealRoomSupport() === "ok");
     const support: RevealRoomReason =
-      mode === "off" || roomOn === "on"
+      mode === "off" || roomMode === "on" || (mode !== "on" && roomWillRun)
         ? "disabled"
         : mode === "on"
           ? "ok"

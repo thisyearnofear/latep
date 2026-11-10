@@ -103,11 +103,6 @@ const RESULT_TITLE: Record<string, string> = {
   DD: "Nobody leaned in.",
 };
 
-const points = new Intl.NumberFormat("en-US", {
-  signDisplay: "exceptZero",
-  maximumFractionDigits: 0,
-});
-
 export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
   const [state, dispatch] = useReducer(roundReducer, initialState);
   const { recordRound, getEntries } = usePracticeRecord();
@@ -307,14 +302,21 @@ export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
               </div>
             </div>
             {state.phase === "sealed" && (
-              <button
-                type="button"
-                ref={revealRef}
-                className="trust-btn trust-btn-primary trust-reveal"
-                onClick={() => dispatch({ type: "reveal" })}
-              >
-                Reveal both choices
-              </button>
+              <>
+                <button
+                  type="button"
+                  ref={revealRef}
+                  className="trust-btn trust-btn-primary trust-reveal"
+                  onClick={() => dispatch({ type: "reveal" })}
+                >
+                  Reveal both choices
+                </button>
+                {state.round === 1 && (
+                  <p className="trust-reveal-note">
+                    This is where your record gets written.
+                  </p>
+                )}
+              </>
             )}
             {state.phase === "revealing" && (
               <p className="trust-revealing" role="status">
@@ -341,14 +343,9 @@ export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
             <h3 ref={outcomeRef} tabIndex={-1} className="trust-result-title">
               {resultKey ? RESULT_TITLE[resultKey] : ""}
             </h3>
-            {payoff && state.move && (
-              <p className="trust-result-line">
-                You <strong>{MOVE_LABEL[state.move]}</strong> · Partner{" "}
-                <strong>{MOVE_LABEL[state.opponent]}</strong> —{" "}
-                {points.format(payoff.playerPayout)} :{" "}
-                {points.format(payoff.aiPayout)}
-              </p>
-            )}
+            {/* No result line here: the receipt directly above already prints
+                both moves and both payouts — repeating them was the density
+                complaint, not information. */}
             <details className="trust-details">
               <summary>About this partner</summary>
               <p>
@@ -367,7 +364,7 @@ export function TrustExperiment({ recordLink }: { recordLink?: boolean }) {
             {recordLink && (
               <Link
                 to="/record"
-                className="trust-btn trust-btn-secondary"
+                className="trust-record-link"
                 onClick={() => {
                   // The receipt carries you to your record (design.md §13.6):
                   // its Flip state travels to /record with the entry id.

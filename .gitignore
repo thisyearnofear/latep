@@ -104,3 +104,11 @@ e2e/shots/
 # Reveal-room performance traces (scripts/measure-reveal-room.cjs) — regenerate,
 # never commit them (AGENTS.md)
 e2e/perf/
+
+# Meshy generation lab — source GLBs/textures are multi-MB regenerable
+# downloads (Meshy task IDs in tools/meshy-lab/README.md); only the optimized
+# copies under public/assets/reveal/ ship.
+tools/meshy-lab/*.glb
+tools/meshy-lab/*.png
+tools/meshy-lab/images/
+tools/meshy-lab/reveal-check.png

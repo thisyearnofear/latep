@@ -386,11 +386,16 @@ amends sections 1, 3 and 8, which previously ruled out WebGL and shaders.
 sealed stub is a card on it. The thread is a rope between two hands. The commit
 ink lands on both cards together. The camera settles on a close framing.
 
-**Status.** Built and measured (spike S1). The S1 sign-off is still open, so
-the room is **opt-in**: `?room=on` enables it on a device that can render it,
-and the default route uses the 2D stage. Once the owner signs off, the default
-can return to the capability probe (`shouldUseRevealRoom()`); `?room=off`
-remains the comparison path.
+**Status.** Built, measured (spike S1) and reviewed. Since 2026-11-10 the
+room is the **default** wherever the capability probe passes; `?room=off`
+remains the comparison path and the 2D stage remains the fallback for every
+failure mode. Amended 2026-11-10: the figures are generated characters —
+two faceless ink-style GLBs (courier, shopkeeper) vendored under
+`public/assets/reveal/` with four pose clips each, generated offline via
+Meshy and merged by `tools/meshy-lab/merge-clips.mjs`. The procedural rig
+in `figure.ts` remains the fallback when a character fails to load. The
+first reveal of a session plays a slightly longer settle so the peak lands;
+later rounds run the standard timing.
 
 **Engine and loading.**
 
@@ -404,8 +409,10 @@ remains the comparison path.
   show it.
 - GLSL for the paper grain and the ink wipe. GSAP drives every animated value,
   as in section 8; no shader reads a clock.
-- Procedural geometry and shaders only. No new asset files at all: no
-  generated worlds, no third-party or AI-generated models in v1.
+- Procedural geometry and shaders, plus the two vendored character GLBs
+  named in the status note above — generated offline, optimized, and never
+  fetched at runtime from a generation service. No generated worlds and no
+  third-party models beyond those two characters.
 - The rig is the 2D rig. `trustFallRig.ts` is the single source of joint
   numbers; the room walks the same joints and interpolates between poses the
   way the 2D figure's CSS transitions do. The outcome pose table lives in
@@ -627,7 +634,14 @@ Rules:
   fixed proportions) rather than the game rig, because the rig's proportions
   don't survive the hero's scale. The game rig is untouched.
 - The 2D stage's rig figures lose the smiley faces: a figure is a head, a
-  body and two hands holding a thread. The rig's joints don't change.
+  body and two hands holding a thread. The rig's joints don't change. This is
+  deliberate, not an omission: a face tells the player who the character is,
+  and the product wants them to decide that. Faceless figures are the
+  blank-slate tradition (Journey, the Doomguy) — the avatar reflects the
+  player, and nobody reads a stereotype into dot eyes. Distinction between
+  figures comes from silhouette, clothing and the blue/amber thread colours,
+  never from facial features. Generated 3D figures follow the same rule:
+  featureless head, differentiated body. Amended 2026-11-09.
 
 ### 13.6 Motion (amends section 8)
 

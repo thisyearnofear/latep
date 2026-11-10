@@ -635,10 +635,10 @@ routing and fallback.
   (`e2e/capture-s1-reveal-room.spec.ts`, output under `e2e/demo-footage/`,
   gitignored): it plays all four outcomes in the room in one take and asserts,
   as it records, that the room — not the fallback — carried each reveal.
-- Decision gate: **still open.** The owner reviews the S1 recording and
-  measurements before any other screen adopts the room. The room is now
-  opt-in (`?room=on`) pending that review; the default route uses the 2D stage.
-  If the gate fails, the 2D stage ships unchanged.
+- Decision gate: **closed 2026-11-10.** The owner reviewed the room in the
+  app and signed off; the room is now the default wherever the capability
+  probe passes, with `?room=off` as the comparison path. The figures are
+  generated characters (design.md §12, amended same day).
 
 ### Phase 4 — Clean up and prove it
 
@@ -765,6 +765,8 @@ Locked by the project owner (2026-10-12):
   amended by the same change, not overridden silently. Conditions: a 2D fallback
   that ships with it, the budget in `design.md` §12, and the owner's sign-off on
   spike S1 before wider use. **S1 is built (2026-10-14)** and its numbers are in
-  the scorecard above; the sign-off is the one condition still outstanding. World Labs' Marble is **not** on the shipping path.
+  the scorecard above; **sign-off given 2026-11-10** — the room is now the
+  default wherever the capability probe passes (`?room=off` is the comparison
+  path). World Labs' Marble is **not** on the shipping path.
   Its beta terms restrict publishing outputs and allow training on inputs unless
   opted out, and the beta is time-limited.

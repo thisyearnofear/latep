@@ -31,7 +31,7 @@ redesign restyles. Two of them are superseded:
   — folded into **B3 · The trust lean scene** and **B7 · ZK reveal/result**,
   which render the sealed stub against the real multiplayer states.
 - Stylized Three.js reveal room — decided 2026-10-14 (`design.md` §12). Spike S1
-  in `REDESIGN_PLAN.md` gates it.
+  passed review 2026-11-10; the room is the default on capable devices.
 
 Ticket-by-ticket status lives in [`REDESIGN_PLAN.md`](REDESIGN_PLAN.md#6-phases-and-tickets).
 
@@ -50,7 +50,7 @@ First slice of the interactive trust stage (see [PRODUCT_REVIEW.md](PRODUCT_REVI
 - [x] Epilogue: map the journey to real Stellar primitives (reputation, commit-reveal, escrow, accreditation vs KYC)
 - [ ] Extend the vocabulary to tournament populations
 - [ ] Integrate the sealed-choice object with real on-chain multiplayer states
-- [ ] Reveal room prototype, spike S1 (`design.md` §12), gated on owner review
+- [x] Reveal room prototype, spike S1 (`design.md` §12) — signed off 2026-11-10, default-on
 
 ## 🎯 Current Status: ZK Multiplayer + Multi-Round Matches + Game Theory Sandbox
 

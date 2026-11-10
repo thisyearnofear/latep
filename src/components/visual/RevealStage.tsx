@@ -1,10 +1,10 @@
 /**
  * The stage, with a choice of two renderers — design.md §12.
  *
- * `RevealStage` is what the round screens render. It draws `TrustStage`, the 2D
- * stage, by default. The reveal room takes over only when `?room=on` asks for
- * it and the reveal is in progress. The S1 sign-off is still open, so the
- * default stays 2D until the owner reviews the room.
+ * `RevealStage` is what the round screens render. It draws `TrustStage`, the
+ * 2D stage, wherever the device cannot run the reveal room — the room is the
+ * default since the S1 review (design.md §12, amended 2026-11-10), gated by
+ * the capability probe. `?room=off` forces the 2D stage for comparison.
  *
  * The 2D stage is not a degraded version of the room — it is the same stage
  * that has always carried the scene, and every state, word, stamp and thread
@@ -19,9 +19,8 @@
  *   never arrives falls back to the 2D stage mid-round without losing state.
  *
  * `?room=on` and `?room=off` force one path or the other on one device, which
- * is how the room is reviewed and how the two are compared in a screenshot
- * pass. When S1 is signed off, `shouldUseRevealRoom()` can return to the
- * capability probe without touching this component.
+ * is how the two are compared in a screenshot pass and how the fallback is
+ * reviewed on a capable machine.
  */
 
 import {

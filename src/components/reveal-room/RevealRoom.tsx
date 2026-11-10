@@ -27,9 +27,11 @@ import { useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
 import {
   AmbientLight,
+  Box3,
   DirectionalLight,
   DoubleSide,
   Group,
+  Material,
   Mesh,
   MeshStandardMaterial,
   PerspectiveCamera,
@@ -40,6 +42,7 @@ import {
   Vector3,
   WebGLRenderer,
 } from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { POSES } from "../trustFallRig";
 import { posesFor } from "../visual/outcomePoses";
 import { Stamp } from "../receipt";
@@ -51,6 +54,7 @@ import {
   STAMPS,
 } from "../../content/vocabulary";
 import type { TrustStageProps } from "../visual/TrustStage";
+import { loadActor, type Actor } from "./actor";
 import { buildFigure, lerpPose } from "./figure";
 import { buildThread } from "./thread";
 import {
@@ -94,6 +98,37 @@ const PAPER_SIDE_MARGIN = 1.5;
 
 /** Grain cells per world unit. */
 const GRAIN_PER_UNIT = 40;
+
+/**
+ * Set dressing: the counter's clutter, kept to the edges so the two figures
+ * and the thread stay the composition. The GLBs are generated offline
+ * (tools/meshy-lab) and vendored pre-optimized — ~350 KB each, 1K WebP
+ * texture, a few thousand triangles — so they load inside the room's lazy
+ * chunk without a runtime generation call or a layout shift.
+ *
+ * `size` is the largest world-unit extent; `turn` is a yaw in radians. A prop
+ * that fails to fetch simply never appears: dressing is never load-bearing.
+ */
+const DRESSING = [
+  {
+    url: "/assets/reveal/stamp.glb",
+    position: [-1.14, 0, -0.52] as const,
+    turn: 0.45,
+    size: 0.2,
+  },
+  {
+    url: "/assets/reveal/wax-seal.glb",
+    position: [1.14, 0, -0.5] as const,
+    turn: -0.8,
+    size: 0.26,
+  },
+  {
+    url: "/assets/reveal/twine-spool.glb",
+    position: [-1.32, 0, 0.3] as const,
+    turn: 1.15,
+    size: 0.3,
+  },
+] as const;
 
 function setGroupOpacity(group: Group, value: number): void {
   group.traverse((child) => {
@@ -292,7 +327,7 @@ export function RevealRoom({
     // One thread, in the outcome state, anchored to where the hands end up. The
     // rope is the payoff, so it arrives last.
     applySettled(1);
-    const thread = buildThread({
+    let thread = buildThread({
       from: youFigure.handWorld(),
       to: partnerFigure.handWorld(),
       state: outcome.thread,
@@ -304,6 +339,123 @@ export function RevealRoom({
     const threadFade = { opacity: reduced ? 1 : 0 };
     setGroupOpacity(thread.group, threadFade.opacity);
     applySettled(0);
+
+    /* --- set dressing ------------------------------------------------------ */
+
+    // Loaded after the scene is already rendering: the props are ambience,
+    // not story, so a slow fetch must never hold up the reveal. Each model is
+    // normalised here rather than at build time — rest on the stock, centred
+    // on its mark, sized by its largest extent.
+    const dressing: Group[] = [];
+    let disposed = false;
+    const propLoader = new GLTFLoader();
+    for (const prop of DRESSING) {
+      propLoader.load(prop.url, (gltf) => {
+        if (disposed) return;
+        const model = gltf.scene;
+        model.rotation.y = prop.turn;
+        const bounds = new Box3().setFromObject(model);
+        const extent = bounds.getSize(new Vector3());
+        model.scale.setScalar(
+          prop.size / Math.max(extent.x, extent.y, extent.z),
+        );
+        const scaled = new Box3().setFromObject(model);
+        model.position.set(
+          prop.position[0] - (scaled.min.x + scaled.max.x) / 2,
+          prop.position[1] - scaled.min.y,
+          prop.position[2] - (scaled.min.z + scaled.max.z) / 2,
+        );
+        scene.add(model);
+        dressing.push(model);
+      });
+    }
+
+    /* --- the generated actors ---------------------------------------------- */
+
+    // The procedural figures above are the fallback. When the generated
+    // characters arrive — local GLBs, so usually within a few frames — they
+    // take the figures' places and the thread is re-anchored to a hand bone.
+    // A failed fetch leaves the procedural rig exactly as it was.
+    let youActor: Actor | null = null;
+    let partnerActor: Actor | null = null;
+    let settleBegan = false;
+    let lastFrame = performance.now();
+
+    const swapInActors = (you: Actor | null, partner: Actor | null): void => {
+      youActor = you;
+      partnerActor = partner;
+      if (!youActor && !partnerActor) return;
+
+      // Measure the hands where the round leaves them, exactly as the thread
+      // was first built — the procedural figures are posed at the end state
+      // for the measurement and returned to standing after.
+      applySettled(1);
+      youActor?.holdEnd(poses.you);
+      partnerActor?.holdEnd(poses.partner);
+      const from = youActor
+        ? youActor.handWorld(FIGURE_X)
+        : youFigure.handWorld();
+      const to = partnerActor
+        ? partnerActor.handWorld(-FIGURE_X)
+        : partnerFigure.handWorld();
+      const next = buildThread({
+        from,
+        to,
+        state: outcome.thread,
+        twists,
+        you: tokenColor("--color-you"),
+        partner: tokenColor("--color-partner"),
+      });
+      scene.add(next.group);
+      setGroupOpacity(next.group, threadFade.opacity);
+      scene.remove(thread.group);
+      thread.dispose();
+      thread = next;
+
+      if (youActor) {
+        youActor.group.position.x = -FIGURE_X;
+        scene.add(youActor.group);
+        scene.remove(youFigure.group);
+        youFigure.dispose();
+      }
+      if (partnerActor) {
+        partnerActor.group.position.x = FIGURE_X;
+        scene.add(partnerActor.group);
+        scene.remove(partnerFigure.group);
+        partnerFigure.dispose();
+      }
+
+      // Back to the ready pose — or straight to the outcome if the settle
+      // beat already fired while the files were in flight.
+      applySettled(0);
+      if (settleBegan) {
+        youActor?.holdEnd(poses.you);
+        partnerActor?.holdEnd(poses.partner);
+      } else {
+        youActor?.idle();
+        partnerActor?.idle();
+      }
+    };
+
+    const ACTOR_TIMEOUT = 1500;
+    const withTimeout = (promise: Promise<Actor | null>) =>
+      Promise.race([
+        promise,
+        new Promise<Actor | null>((resolve) =>
+          window.setTimeout(() => resolve(null), ACTOR_TIMEOUT),
+        ),
+      ]);
+    void Promise.all([
+      withTimeout(loadActor("/assets/reveal/courier.glb", "right")),
+      withTimeout(loadActor("/assets/reveal/shopkeeper.glb", "left")),
+    ]).then(([you, partner]) => {
+      if (disposed) {
+        you?.dispose();
+        partner?.dispose();
+        return;
+      }
+      swapInActors(you, partner);
+    });
 
     /* --- framing and the loop --------------------------------------------- */
 
@@ -363,6 +515,11 @@ export function RevealRoom({
     const render = () => {
       frame = window.requestAnimationFrame(render);
       if (document.hidden) return;
+      const now = performance.now();
+      const dt = Math.min((now - lastFrame) / 1000, 0.1);
+      lastFrame = now;
+      youActor?.update(dt);
+      partnerActor?.update(dt);
       const distance = view.distance + dolly.extra;
       camera.position.set(0, LOOK_AT.y + distance * Math.tan(PITCH), distance);
       camera.lookAt(LOOK_AT);
@@ -386,6 +543,16 @@ export function RevealRoom({
       dolly.extra = 0;
       onRevealCompleteRef.current?.();
     } else {
+      // The first reveal of a session gets a longer settle so the peak lands
+      // (design.md §12, amended 2026-11-10); later rounds run the standard
+      // timing. `roundKey` is the round number, so round 1 is the first one.
+      const emphasis = reveal.round === 1;
+      const settleAt = 0.2;
+      const settleDur = emphasis ? 0.95 : 0.6;
+      const threadAt = emphasis ? 1.05 : 0.6;
+      const stampAt = emphasis ? 1.25 : 0.8;
+      const stampDur = emphasis ? 0.2 : 0.15;
+
       const tween = { t: 0 };
       gsap.set(plate, { opacity: 0 });
       timeline = gsap.timeline({
@@ -403,18 +570,33 @@ export function RevealRoom({
           { value: 1, duration: 0.55, ease: "power1.inOut" },
           0.12,
         )
-        // The figures settle into the pose the round earned them.
+        // The figures settle into the pose the round earned them. The
+        // procedural rig eases joint-by-joint on the tween below; a generated
+        // actor plays its clip over the same window instead.
+        .call(
+          () => {
+            settleBegan = true;
+            youActor?.play(poses.you, settleDur);
+            partnerActor?.play(poses.partner, settleDur);
+          },
+          undefined,
+          settleAt,
+        )
         .to(
           tween,
           {
             t: 1,
-            duration: 0.6,
+            duration: settleDur,
             ease: "power2.out",
             onUpdate: () => applySettled(tween.t),
           },
-          0.2,
+          settleAt,
         )
-        .to(dolly, { extra: 0, duration: 0.6, ease: "power2.out" }, 0.2)
+        .to(
+          dolly,
+          { extra: 0, duration: settleDur, ease: "power2.out" },
+          settleAt,
+        )
         // The rope drops into their hands as they finish settling.
         .to(
           threadFade,
@@ -424,26 +606,49 @@ export function RevealRoom({
             ease: "power2.out",
             onUpdate: () => setGroupOpacity(thread.group, threadFade.opacity),
           },
-          0.6,
+          threadAt,
         )
-        // No bounce: the stamp is pressed, not dropped. 0.8 + 0.15 = 0.95s,
-        // which is the same beat the 2D stage finishes on.
+        // No bounce: the stamp is pressed, not dropped.
         .fromTo(
           plate,
           { opacity: 0, scale: 1.25, rotation: -9 },
-          { opacity: 1, scale: 1, rotation: -4, duration: 0.15, ease: "none" },
-          0.8,
+          {
+            opacity: 1,
+            scale: 1,
+            rotation: -4,
+            duration: stampDur,
+            ease: "none",
+          },
+          stampAt,
         );
     }
 
     return () => {
+      disposed = true;
       window.cancelAnimationFrame(frame);
       observer.disconnect();
       timeline?.kill();
       gsap.killTweensOf(plate);
       youFigure.dispose();
       partnerFigure.dispose();
+      youActor?.dispose();
+      partnerActor?.dispose();
       thread.dispose();
+      for (const prop of dressing) {
+        prop.traverse((child) => {
+          if (!(child instanceof Mesh)) return;
+          const mesh = child as Mesh & {
+            geometry: { dispose: () => void };
+            material: Material | Material[];
+          };
+          mesh.geometry.dispose();
+          for (const m of Array.isArray(mesh.material)
+            ? mesh.material
+            : [mesh.material]) {
+            m.dispose();
+          }
+        });
+      }
       for (const disposable of disposables) disposable.dispose();
       scene.clear();
       renderer.dispose();

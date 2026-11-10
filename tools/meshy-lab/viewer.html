@@ -1,0 +1,355 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Latep — Meshy asset lab</title>
+    <style>
+      body {
+        margin: 0;
+        background: #f5efe2;
+        font-family: Georgia, serif;
+      }
+      #hud {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        background: rgba(255, 252, 244, 0.85);
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.5;
+        max-width: 320px;
+        box-shadow: 0 1px 4px rgba(60, 40, 10, 0.15);
+      }
+      #hud b {
+        font-size: 15px;
+      }
+      #hud button {
+        font: inherit;
+        margin: 2px 4px 2px 0;
+        padding: 3px 10px;
+        border: 1px solid #8a7a55;
+        background: #fffdf6;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      #hud button.on {
+        background: #2b3a67;
+        color: #f5efe2;
+        border-color: #2b3a67;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.185.1/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="hud">
+      <b>Meshy lab — reveal room props</b><br />
+      <span id="info"></span><br />
+      <div id="btns"></div>
+      cream = --color-receipt approx · drag to orbit
+    </div>
+    <script type="module">
+      import * as THREE from "three";
+      import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+      const MODELS = [
+        {
+          id: "courier",
+          file: "courier-sa-f-v2-rigged.glb",
+          label: "You — courier (rigged)",
+        },
+        {
+          id: "shopkeeper",
+          file: "shopkeeper-af-m-rigged.glb",
+          label: "Partner — shopkeeper (rigged)",
+        },
+        {
+          id: "courier-held",
+          file: "courier-held.glb",
+          label: "Courier · held",
+        },
+        {
+          id: "courier-holdback",
+          file: "courier-holdback.glb",
+          label: "Courier · holding-back",
+        },
+        {
+          id: "courier-toppled",
+          file: "courier-toppled.glb",
+          label: "Courier · toppled",
+        },
+        {
+          id: "courier-standing",
+          file: "courier-standing.glb",
+          label: "Courier · standing",
+        },
+        {
+          id: "shopkeeper-held",
+          file: "shopkeeper-held.glb",
+          label: "Shopkeeper · held",
+        },
+        {
+          id: "shopkeeper-holdback",
+          file: "shopkeeper-holdback.glb",
+          label: "Shopkeeper · holding-back",
+        },
+        {
+          id: "shopkeeper-toppled",
+          file: "shopkeeper-toppled.glb",
+          label: "Shopkeeper · toppled",
+        },
+        {
+          id: "shopkeeper-standing",
+          file: "shopkeeper-standing.glb",
+          label: "Shopkeeper · standing",
+        },
+        {
+          id: "m-courier-held",
+          file: "courier.glb",
+          clip: "held",
+          label: "Merged courier · held",
+        },
+        {
+          id: "m-courier-holdback",
+          file: "courier.glb",
+          clip: "holding-back",
+          label: "Merged courier · holding-back",
+        },
+        {
+          id: "m-courier-toppled",
+          file: "courier.glb",
+          clip: "toppled",
+          label: "Merged courier · toppled",
+        },
+        {
+          id: "m-courier-standing",
+          file: "courier.glb",
+          clip: "standing",
+          label: "Merged courier · standing",
+        },
+        {
+          id: "m-shopkeeper-held",
+          file: "shopkeeper.glb",
+          clip: "held",
+          label: "Merged shopkeeper · held",
+        },
+        {
+          id: "m-shopkeeper-holdback",
+          file: "shopkeeper.glb",
+          clip: "holding-back",
+          label: "Merged shopkeeper · holding-back",
+        },
+        {
+          id: "m-shopkeeper-toppled",
+          file: "shopkeeper.glb",
+          clip: "toppled",
+          label: "Merged shopkeeper · toppled",
+        },
+        {
+          id: "m-shopkeeper-standing",
+          file: "shopkeeper.glb",
+          clip: "standing",
+          label: "Merged shopkeeper · standing",
+        },
+        {
+          id: "ink-figure-rigged",
+          file: "ink-figure-rigged.glb",
+          label: "Ink figure (rigged)",
+        },
+        {
+          id: "ink-figure",
+          file: "ink-figure-opt.glb",
+          label: "Ink figure (t-pose)",
+        },
+        { id: "stamp", file: "stamp.glb", label: "Rubber stamp" },
+        { id: "wax-seal", file: "wax-seal.glb", label: "Wax seal stamp" },
+        { id: "twine-spool", file: "twine-spool.glb", label: "Twine spool" },
+      ];
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0xf5efe2, 1);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf5efe2);
+
+      const camera = new THREE.PerspectiveCamera(
+        35,
+        innerWidth / innerHeight,
+        0.01,
+        50,
+      );
+      camera.position.set(0.9, 0.8, 1.4);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.target.set(0, 0.12, 0);
+      controls.enableDamping = true;
+
+      scene.add(new THREE.AmbientLight(0xfff6e6, 0.9));
+      const key = new THREE.DirectionalLight(0xfff1d6, 1.6);
+      key.position.set(1.4, 3.2, 2.2);
+      key.castShadow = true;
+      scene.add(key);
+      const fill = new THREE.DirectionalLight(0xdde4ff, 0.35);
+      fill.position.set(-2, 1.5, -1);
+      scene.add(fill);
+
+      // ground: the "paper" the props would sit on in the reveal room
+      const ground = new THREE.Mesh(
+        new THREE.PlaneGeometry(6, 6),
+        new THREE.MeshStandardMaterial({ color: 0xf3ecdc, roughness: 0.95 }),
+      );
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      scene.add(ground);
+
+      const grid = new THREE.GridHelper(6, 24, 0xc9bb98, 0xdccfb2);
+      grid.position.y = 0.001;
+      scene.add(grid);
+
+      const loader = new GLTFLoader();
+      const group = new THREE.Group();
+      scene.add(group);
+
+      let current = null;
+      const info = document.getElementById("info");
+      const btns = document.getElementById("btns");
+
+      function statsOf(root) {
+        let tris = 0,
+          meshes = 0;
+        root.traverse((o) => {
+          if (o.isMesh) {
+            meshes++;
+            const g = o.geometry;
+            const idx = g.index;
+            tris += (idx ? idx.count : g.attributes.position.count) / 3;
+          }
+        });
+        const box = new THREE.Box3().setFromObject(root);
+        const size = box.getSize(new THREE.Vector3());
+        return { tris: Math.round(tris), meshes, size };
+      }
+
+      let mixer = null;
+      let currentAction = null;
+      let needsFit = false;
+      let fitFrames = 0;
+
+      function fitModel(model) {
+        const box = new THREE.Box3().setFromObject(model);
+        const size = box.getSize(new THREE.Vector3());
+        const s = 0.35 / Math.max(size.x, size.y, size.z);
+        model.scale.setScalar(s);
+        const box2 = new THREE.Box3().setFromObject(model);
+        model.position.sub(
+          new THREE.Vector3(
+            (box2.min.x + box2.max.x) / 2,
+            box2.min.y,
+            (box2.min.z + box2.max.z) / 2,
+          ),
+        );
+      }
+
+      function show(m) {
+        group.clear();
+        if (mixer) {
+          mixer.stopAllAction();
+          mixer = null;
+          currentAction = null;
+        }
+        needsFit = false;
+        fitFrames = 0;
+        current = m;
+        loader.load(m.file, (g) => {
+          const model = g.scene;
+          model.traverse((o) => {
+            if (o.isMesh) {
+              o.castShadow = true;
+              o.receiveShadow = true;
+            }
+          });
+          group.add(model);
+
+          if (g.animations.length) {
+            // Pose clips: play once and clamp on the end pose (the reveal holds it);
+            // the idle loops. Fit after the first update so the box reflects the
+            // animated pose, not the bind pose.
+            mixer = new THREE.AnimationMixer(model);
+            const clip = m.clip
+              ? g.animations.find((a) => a.name === m.clip) || g.animations[0]
+              : g.animations[0];
+            const action = mixer.clipAction(clip);
+            action.setLoop(
+              m.id.endsWith("standing") ? THREE.LoopRepeat : THREE.LoopOnce,
+              m.id.endsWith("standing") ? Infinity : 1,
+            );
+            action.clampWhenFinished = true;
+            action.play();
+            currentAction = action;
+            needsFit = true;
+            mixer.update(0);
+          } else {
+            fitModel(model);
+          }
+
+          const st = statsOf(model);
+          info.innerHTML = `<b>${m.label}</b><br>${st.tris} tris · ${st.meshes} mesh(es)${g.animations.length ? " · clip " + g.animations[0].name : ""}`;
+        });
+        [...btns.children].forEach((b) =>
+          b.classList.toggle("on", b.dataset.id === m.id),
+        );
+      }
+
+      for (const m of MODELS) {
+        const b = document.createElement("button");
+        b.textContent = m.label;
+        b.dataset.id = m.id;
+        b.onclick = () => show(m);
+        btns.appendChild(b);
+      }
+      show(MODELS[0]);
+
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+      });
+
+      renderer.setAnimationLoop((t, dt) => {
+        controls.update();
+        if (mixer) {
+          mixer.update(Math.min(dt, 0.1));
+          // Pose clips fit once they clamp on the end pose; the looping idle fits
+          // after a few frames so the box reflects the animated stance.
+          if (needsFit) {
+            fitFrames++;
+            const done = currentAction && currentAction.paused;
+            const idleSettled = /standing/.test(current.id) && fitFrames > 30;
+            if (done || idleSettled) {
+              const model = group.children[0];
+              if (model) fitModel(model);
+              needsFit = false;
+            }
+          }
+        }
+        renderer.render(scene, camera);
+      });
+    </script>
+  </body>
+</html>
